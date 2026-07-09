@@ -6,18 +6,11 @@ from pydantic import BaseModel, ConfigDict, model_validator, field_serializer
 from pydantic.alias_generators import to_camel
 
 """
-ENHANCED MODEL CLASS WITH UNIFIED FIELD PROCESSING
-
-This Model class provides unified field processing capabilities including automatic
-container extraction, auto-wrapping, auto-unwrapping, and Union type processing.
-
-FEATURES:
-    1. Container extraction: Automatically extracts data from container structures
-    2. Auto-wrapping: Wraps lists in expected container structures
-    3. Auto-unwrapping: Unwraps formats arrays and item-wrapped fields
-    4. Union type processing: Handles Union types with container classes
-    5. Type resolution: Resolves string-based type hints to actual types
-    6. Debug logging: Centralized debug logging for troubleshooting
+`Model` is the Pydantic base class every congressgov entity subclasses. It
+handles the API's inconsistent shapes: string dates get parsed to
+datetime/date automatically, `model_validate` will unwrap a single-key dict
+if the direct validation comes back empty, and `pretty_print`/`__repr__` give
+readable output for nested models without needing custom overrides per class.
 """
 
 
@@ -37,134 +30,82 @@ class Model(BaseModel):
     @model_validator(mode="before")
     @classmethod
     def _parse_datetime_fields(cls, values: Any) -> Any:
-        """
-        === [DATETIME/DATE STRING PARSING] ===
-        Automatically converts string representations of datetime and date fields
-        to their proper Python types before validation.
-        
-        Supports the following formats:
-        - ISO 8601: YYYY-MM-DDTHH:MM:SSZ or YYYY-MM-DDTHH:MM:SS.ffffffZ
-        - Date only: YYYY-MM-DD
-        
-        NOTE: This validator runs before Pydantic's validation, ensuring that
-        datetime/date strings are properly converted to Python datetime/date objects.
+        """Parse ISO 8601 datetime/date strings into real `datetime`/`date`
+        objects before Pydantic validates, for any field annotated as one of
+        those types (checking both the field name and its camelCase alias).
         """
         if not isinstance(values, dict):
             return values
-        
-        # Get the model's field annotations to determine which fields are datetime/date
+
         if not hasattr(cls, '__annotations__'):
             return values
-        
-        # Process each field that's annotated as datetime or date
+
         for field_name, field_type in cls.__annotations__.items():
-            # Extract the actual type from Optional, Union, etc.
             actual_types = cls._extract_types(field_type)
-            
-            # Check if datetime or date is in the actual types
+
             if not (datetime in actual_types or date in actual_types):
                 continue
-            
-            # Check both the field name and its camelCase alias
+
             field_value = None
             key_used = None
-            
-            # Try the original field name
+
             if field_name in values:
                 field_value = values[field_name]
                 key_used = field_name
             else:
-                # Try the camelCase alias
                 camel_name = to_camel(field_name)
                 if camel_name in values:
                     field_value = values[camel_name]
                     key_used = camel_name
-            
-            # If we found a value and it's a string, parse it
+
             if key_used and isinstance(field_value, str):
                 try:
                     if datetime in actual_types:
-                        # Parse as datetime
-                        # Handle both with and without timezone suffix
                         parsed = cls._parse_datetime_string(field_value)
                         values[key_used] = parsed
                     elif date in actual_types:
-                        # Parse as date
                         parsed = cls._parse_date_string(field_value)
                         values[key_used] = parsed
                 except (ValueError, AttributeError):
-                    # If parsing fails, leave it as-is and let Pydantic handle the error
-                    pass
-        
+                    pass  # leave the raw string for Pydantic to reject with its own error
+
         return values
     
     @staticmethod
     def _extract_types(field_type: Any) -> set:
-        """
-        === [TYPE EXTRACTION HELPER] ===
-        Extracts all actual types from a type annotation, handling:
-        - Optional[T] (which is Union[T, None])
-        - Union[T1, T2, ...]
-        - Direct types like datetime, date, str, etc.
-        
-        Returns:
-            set: A set of all actual types found in the annotation
-        """
+        """Return the non-`None` types inside an annotation, unwrapping `Optional`/`Union`."""
         types = set()
         origin = get_origin(field_type)
-        
-        # Handle Union and Optional (Optional[T] is Union[T, None])
+
         if origin is Union:
             for arg in get_args(field_type):
-                if arg is not type(None):  # Skip None
+                if arg is not type(None):
                     types.add(arg)
-        # Handle direct type annotations
         elif field_type is not None and field_type is not type(None):
             types.add(field_type)
-        
+
         return types
     
     @staticmethod
     def _parse_datetime_string(value: str) -> datetime:
-        """
-        === [DATETIME STRING PARSER] ===
-        Parses datetime strings in ISO 8601 format.
-        
-        Handles:
-        - YYYY-MM-DDTHH:MM:SSZ
-        - YYYY-MM-DDTHH:MM:SS.ffffffZ
-        - YYYY-MM-DDTHH:MM:SS
-        - YYYY-MM-DD (assumes midnight)
-        
-        NOTE: The 'Z' suffix indicates UTC time and is properly handled.
-        """
-        # Remove 'Z' suffix if present (indicates UTC)
+        """Parse an ISO 8601 datetime string, stripping a trailing 'Z' (UTC) first."""
         if value.endswith('Z'):
             value = value[:-1]
-        
-        # Try parsing with microseconds
+
         try:
             return datetime.fromisoformat(value)
         except ValueError:
-            # Try with just date (will add time as 00:00:00)
             try:
                 return datetime.fromisoformat(value)
             except ValueError:
-                # Last resort: try strptime with common format
                 return datetime.strptime(value, "%Y-%m-%dT%H:%M:%S")
     
     @staticmethod
     def _parse_date_string(value: str) -> date:
-        """
-        === [DATE STRING PARSER] ===
-        Parses date strings in ISO 8601 format (YYYY-MM-DD).
-        
-        NOTE: If a full datetime string is provided, extracts just the date portion.
-        """
-        # If it's a datetime string, extract just the date part
+        """Parse an ISO 8601 date string, taking just the date part if given a full datetime."""
         if 'T' in value:
             value = value.split('T')[0]
-        
+
         return date.fromisoformat(value)
 
     def pretty_print(self, indent: int = 0, max_width: int = 120) -> str:
@@ -255,10 +196,9 @@ class Model(BaseModel):
 
     @classmethod
     def model_validate(cls, obj, debug: bool = False, **kwargs):
-        """
-        Debug-enabled model_validate: outputs comprehensive debugging statements
-        only if debug=True, then calls BaseModel.model_validate to perform actual validation.
-        If validation fails or all attributes are None, tries unwrapping single top-level key.
+        """`BaseModel.model_validate`, plus: pass `debug=True` to print field-by-field
+        diagnostics, and if validation fails (or succeeds with every field `None`),
+        retry by unwrapping a single top-level key before giving up.
         """
         if debug:
             aliases = cls.get_aliases()
@@ -341,18 +281,16 @@ class Pagination(Model):
 
 
 class ApiEnvelope(Model, Generic[T]):
-    """
-    === [API ENVELOPE MODEL] ===
-    This class wraps API responses, extracting the main data payload and supporting optional pagination/request info.
-    Data validation is intentionally minimal and only processes the envelope structure as in _traverse_keys.
+    """Unwraps a raw API response into its main data payload, tracking which
+    top-level key it came from. Deliberately does no validation beyond that
+    unwrapping - see `_traverse_keys`.
     """
 
-    data: T | None = None              # The main data payload, now typed as T
-    data_key: str | None = None        # The top-level key for the data payload
+    data: T | None = None
+    data_key: str | None = None
     pagination: Pagination | None = None
     request: dict | None = None
 
-    # === [ALLOW EXTRA FIELDS] ===
     model_config = ConfigDict(extra="allow")
 
     @model_validator(mode="before")
@@ -361,13 +299,11 @@ class ApiEnvelope(Model, Generic[T]):
         values: dict[str, Any], 
         debug_check_dict: bool = False
     ) -> dict[str, Any]:
-        """
-        === [ENVELOPE UNWRAPPING LOGIC] ===
-        This validator only unwraps the envelope to extract the main data payload.
-        No additional validation or coercion is performed.
-        Also sets the data_key attribute to the top-level key used for the data payload.
+        """Strip `request`/`pagination` keys, then if exactly one key remains,
+        treat its value as `data` and record the key as `data_key`; otherwise
+        treat everything else as `data` with `data_key=None`.
 
-        The dict check can be disabled for debugging purposes by setting debug_check_dict=False.
+        Pass `debug_check_dict=True` to print diagnostics along the way.
         """
         if debug_check_dict:
             print("\n[DEBUG] ApiEnvelope._traverse_keys called")

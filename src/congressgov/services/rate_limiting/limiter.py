@@ -1,9 +1,4 @@
-"""
-Rate limiter implementation with adaptive strategies.
-
-This module provides sophisticated rate limiting with backoff strategies,
-burst handling, and adaptive rate adjustment.
-"""
+"""Rate limiter with token-bucket bursting, exponential backoff, and adaptive rate adjustment."""
 
 from __future__ import annotations
 
@@ -34,16 +29,10 @@ class RateLimitState:
 
 
 class RateLimiter:
-    """
-    Intelligent rate limiter with adaptive strategies.
-    
-    Features:
-    - Token bucket algorithm for burst handling
-    - Exponential backoff on rate limit errors
-    - Adaptive rate adjustment based on success/failure
-    - Per-endpoint rate limiting
-    - Async and sync support
-    
+    """Per-endpoint rate limiter: token bucket for bursts, exponential backoff
+    on errors, and rate adjustment based on recent success/failure. Works from
+    both sync and async code.
+
     Example:
         limiter = RateLimiter(
             requests_per_second=10,

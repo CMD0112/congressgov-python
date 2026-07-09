@@ -1,9 +1,4 @@
-"""
-Resilient batch processor with comprehensive error handling.
-
-This module provides the ResilientBatchProcessor class for handling batch
-operations with robust error recovery, retry logic, and failure isolation.
-"""
+"""Batch processing with error recovery, retry logic, and failure isolation."""
 
 from __future__ import annotations
 
@@ -20,12 +15,8 @@ logger = logging.getLogger(__name__)
 
 
 class ResilientBatchProcessor(BaseBatchProcessor):
-    """
-    Resilient batch processor with comprehensive error handling.
-    
-    This class provides robust batch processing with retry logic, error isolation,
-    and comprehensive error recovery mechanisms.
-    
+    """Batch processing with retry logic, error isolation, and recovery.
+
     Example:
         processor = ResilientBatchProcessor(
             max_retries=3,

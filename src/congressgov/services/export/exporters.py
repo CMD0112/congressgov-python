@@ -1,9 +1,5 @@
-"""
-Format-specific data exporters.
-
-This module provides specialized exporters for different file formats:
-CSV, Excel, JSON, and Parquet. Each exporter handles format-specific
-requirements and optimizations.
+"""Format-specific exporters (CSV, Excel, JSON, Parquet, XML), each handling
+its own formatting quirks and optimizations.
 """
 
 from __future__ import annotations
@@ -48,14 +44,8 @@ except ImportError:
 
 
 class CSVExporter(BaseExporter):
-    """
-    CSV data exporter with customizable delimiters and formatting.
-    
-    Features:
-    - Customizable delimiters and quote characters
-    - Header row support
-    - Chunked writing for large datasets
-    - Encoding support
+    """CSV exporter with configurable delimiter/quoting, encoding, optional
+    header row, and chunked writing for large datasets.
     """
     
     def __init__(self, config: Optional[ExportConfig] = None):
@@ -118,15 +108,7 @@ class CSVExporter(BaseExporter):
 
 
 class ExcelExporter(BaseExporter):
-    """
-    Excel data exporter with multi-sheet support.
-    
-    Features:
-    - Multiple sheets support
-    - Custom sheet names
-    - Formatting options
-    - Large dataset handling
-    """
+    """Excel exporter with multi-sheet support, custom sheet names, and formatting options."""
     
     def __init__(self, config: Optional[ExportConfig] = None):
         super().__init__(config)
@@ -225,15 +207,7 @@ class ExcelExporter(BaseExporter):
 
 
 class JSONExporter(BaseExporter):
-    """
-    JSON data exporter with formatting options.
-    
-    Features:
-    - Pretty printing with indentation
-    - Key sorting
-    - Custom separators
-    - Streaming support for large datasets
-    """
+    """JSON exporter with pretty-printing, key sorting, and custom separators."""
     
     def __init__(self, config: Optional[ExportConfig] = None):
         super().__init__(config)
@@ -286,15 +260,7 @@ class JSONExporter(BaseExporter):
 
 
 class ParquetExporter(BaseExporter):
-    """
-    Parquet data exporter for big data scenarios.
-    
-    Features:
-    - Columnar storage format
-    - Compression support
-    - Schema preservation
-    - Fast read/write performance
-    """
+    """Parquet exporter with columnar storage, compression, and schema preservation."""
     
     def __init__(self, config: Optional[ExportConfig] = None):
         super().__init__(config)
@@ -367,15 +333,7 @@ class TSVExporter(CSVExporter):
 
 
 class XMLExporter(BaseExporter):
-    """
-    XML data exporter with customizable structure.
-    
-    Features:
-    - Custom root and item element names
-    - Attribute support
-    - Pretty printing
-    - Schema validation
-    """
+    """XML exporter with configurable root/item element names, attributes, and pretty printing."""
     
     def __init__(self, config: Optional[ExportConfig] = None):
         super().__init__(config)

@@ -1,14 +1,6 @@
 """
-Async API Service module for congressgov.services functionality.
-
-This module provides async versions of the core service functionality:
-- AsyncApiService: Base class for async API services with client resolution and expansion
-- Mirrors the sync ApiService class with async methods
-
-Best Practices:
-- Async client resolution with fallback logic
-- Async attribute expansion by fetching additional data from API
-- Deep copying with Pydantic model awareness
+`AsyncApiService` mirrors `ApiService` (client resolution, deep copying,
+attribute expansion) with async methods for async service classes.
 """
 
 from __future__ import annotations
@@ -24,7 +16,6 @@ from congressgov.services.api_format import resolve_response_format
 from congressgov.services.config import MAX_EXPANSION_ATTRIBUTES
 from congressgov.services.core.expansion_helpers import extract_parameters_from_target
 
-# NOTE: Configure module-level logger
 logger = logging.getLogger(__name__)
 
 

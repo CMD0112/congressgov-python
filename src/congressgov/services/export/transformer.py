@@ -1,9 +1,4 @@
-"""
-Data transformation pipeline for export operations.
-
-This module provides a flexible data transformation system that allows
-users to create complex data processing pipelines with chainable operations.
-"""
+"""Chainable data transformation pipelines for cleaning and shaping export data."""
 
 from __future__ import annotations
 
@@ -55,13 +50,8 @@ class FunctionTransformationStep(TransformationStep):
 
 
 class DataTransformer:
-    """
-    Data transformation pipeline builder.
-    
-    This class provides a flexible way to create data transformation
-    pipelines with chainable operations for cleaning, processing,
-    and preparing data for export.
-    
+    """Builds chainable transformation pipelines for cleaning and preparing data before export.
+
     Example:
         transformer = DataTransformer()
         
@@ -399,12 +389,7 @@ class TransformationPipeline:
 
 
 class DataCleaner:
-    """
-    Specialized data cleaning utilities.
-    
-    This class provides common data cleaning operations that can be
-    used in transformation pipelines or standalone.
-    """
+    """Common data cleaning operations, usable inside a pipeline or standalone."""
     
     def __init__(self, config: Optional[ExportConfig] = None):
         """

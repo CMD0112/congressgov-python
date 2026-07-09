@@ -1,8 +1,4 @@
-"""
-Core entity classes for congressgov models
-
-This module contains the main business entities like bills, members, committees, etc.
-"""
+"""Core entities: bills, members, sponsors, amendments, treaties, and Congress sessions."""
 
 from .bill import Bill, Bills, Law, Subject, CBOCostEstimate, ConstitutionalAuthorityStatement, TextVersionFormat, TextVersionFormats, TextVersionItem, TextVersions, Summary, Summaries
 from .member import Member, Members, Term, Depiction

@@ -1,9 +1,4 @@
-"""
-Batch analytics and performance analysis.
-
-This module provides the BatchAnalytics class for analyzing batch processing
-performance, identifying bottlenecks, and providing optimization recommendations.
-"""
+"""Analyzes batch processing performance: bottleneck identification and optimization recommendations."""
 
 from __future__ import annotations
 
@@ -66,13 +61,9 @@ class OptimizationRecommendation:
 
 
 class BatchAnalytics:
-    """
-    Batch analytics for performance analysis and optimization.
-    
-    This class provides comprehensive analytics for batch processing operations
-    including performance tracking, bottleneck identification, and optimization
-    recommendations.
-    
+    """Analyzes batch processing performance: tracking, bottleneck
+    identification, and optimization recommendations.
+
     Example:
         analytics = BatchAnalytics()
         

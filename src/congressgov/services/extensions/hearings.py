@@ -1,12 +1,7 @@
 """
 Query and convenience methods for the Hearings model.
 
-These methods are dynamically registered on the Hearings class,
-keeping the model file clean and focused on data validation.
-
-The query builder (HearingsQuery) is created using the generic
-CollectionQuery class from _query_builder.py, eliminating the
-need for custom query class implementations.
+Registered dynamically via ``_registry`` so Hearings stay plain data models.
 
 Methods registered:
 - Query methods: filter(), query(), group_by()
@@ -31,121 +26,50 @@ import congressgov.models.documents.hearing as hearing_module
 # Import Hearing class for validation
 from congressgov.models.documents.hearing import Hearing
 
-# ========================================
-# CREATE QUERY BUILDER WITH FIELD MAPPINGS
-# ========================================
 
-# NOTE: Create the HearingsQuery class using the generic query builder
-# NOTE: item_class enables field validation to catch typos early
 HearingsQuery = create_query_builder(
     collection_class=Hearings,
     items_field="hearings",
     item_class=Hearing,
     field_mappings={
-        # NOTE: Add field mappings here as enums become available
     }
 )
 
-# NOTE: Set it on the module so it can be imported
+# Expose the query class from both the model module and this module's
+# globals, since callers import it from either location.
 hearing_module.HearingsQuery = HearingsQuery
 
-# NOTE: Make it available for use in this module
 if not TYPE_CHECKING:
     globals()['HearingsQuery'] = HearingsQuery
 
-# ========================================
-# QUERY BUILDER ACCESS
-# ========================================
 
 @register_method(Hearings)
 def query(self):
-    """
-    Get query builder for chaining operations.
-    
-    Example:
-        hearings.query().filter(chamber="House", lazy=True).order_by("date").execute()
-    
-    Returns:
-        HearingsQuery instance for chaining operations
-    """
+    """Return a query builder for chained filtering."""
     return HearingsQuery(self.hearings or [])
 
 
-# ========================================
-# CONVENIENCE METHODS (Eager by default)
-# ========================================
-
 @register_method(Hearings)
 def filter(self, *, lazy: bool = False, **kwargs):
-    """
-    Filter hearings by field values.
-    
-    Args:
-        lazy: If True, return HearingsQuery for chaining. If False, return Hearings object (keyword-only).
-        **kwargs: Field-value pairs to filter by.
-    
-    Examples:
-        # Eager (default) - returns Hearings object
-        house_hearings = hearings.filter(chamber="House")
-        
-        # Lazy - returns builder for chaining
-        query = hearings.filter(chamber="House", lazy=True).order_by("date")
-        results = query.execute()
-    
-    Returns:
-        Hearings object (if eager) or HearingsQuery (if lazy)
-    """
+    """Filter by field values; pass lazy=True to keep chaining."""
     return self.query().filter(lazy=lazy, **kwargs)
 
 
 @register_method(Hearings)
 def by_congress(self, congress: int) -> Hearings:
-    """
-    Get hearings from a specific Congress (always eager, returns Hearings).
-    
-    Args:
-        congress: Congress number (e.g., 118 for 118th Congress)
-    
-    Returns:
-        Filtered Hearings object
-    
-    Example:
-        congress_118 = hearings.by_congress(118)
-    """
+    """Get hearings from a specific Congress."""
     return self.query().filter(congress=congress)
 
 
 @register_method(Hearings)
 def by_chamber(self, chamber: str) -> Hearings:
-    """
-    Get hearings from a specific chamber (always eager, returns Hearings).
-    
-    Args:
-        chamber: Chamber name ("House", "Senate")
-    
-    Returns:
-        Filtered Hearings object
-    
-    Example:
-        house_hearings = hearings.by_chamber("House")
-    """
+    """Get hearings from a specific chamber."""
     return self.query().filter(chamber=chamber)
 
 
 @register_method(Hearings)
 def recent(self, days: int = 30) -> Hearings:
-    """
-    Get hearings from the last N days (always eager, returns Hearings).
-    
-    Args:
-        days: Number of days to look back (default: 30)
-    
-    Returns:
-        Filtered Hearings object
-    
-    Example:
-        last_week = hearings.recent(days=7)
-    """
+    """Get hearings from the last N days."""
     def is_recent(h: Hearing) -> bool:
         if not hasattr(h, 'date') or not h.date:
             return False
@@ -173,18 +97,7 @@ def recent(self, days: int = 30) -> Hearings:
 
 @register_method(Hearings)
 def by_committee(self, committee_name: str) -> Hearings:
-    """
-    Get hearings by committee name (partial match, case-insensitive) (always eager, returns Hearings).
-    
-    Args:
-        committee_name: Committee name or partial name to search for
-    
-    Returns:
-        Filtered Hearings object
-    
-    Example:
-        judiciary = hearings.by_committee("Judiciary")
-    """
+    """Get hearings by committee name (partial match, case-insensitive)."""
     def committee_matches(h: Hearing) -> bool:
         # Check committees list
         if hasattr(h, 'committees') and h.committees:
@@ -200,19 +113,6 @@ def by_committee(self, committee_name: str) -> Hearings:
 
 @register_method(Hearings)
 def group_by(self, field: str):
-    """
-    Group hearings by field.
-    Returns dict mapping field values to Hearings objects.
-    
-    Args:
-        field: Field name to group by
-    
-    Returns:
-        Dictionary mapping field values to Hearings objects
-    
-    Example:
-        by_chamber = hearings.group_by("chamber")
-        # Returns: {"House": Hearings(...), "Senate": Hearings(...)}
-    """
+    """Group items into a dict keyed by field value."""
     return self.query().group_by(field)
 

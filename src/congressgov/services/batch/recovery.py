@@ -1,9 +1,4 @@
-"""
-Error recovery manager for batch operations.
-
-This module provides the ErrorRecoveryManager class for managing failed items,
-retry scheduling, and recovery statistics.
-"""
+"""Tracks failed batch items, schedules retries, and reports recovery statistics."""
 
 from __future__ import annotations
 

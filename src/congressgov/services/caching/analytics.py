@@ -1,9 +1,4 @@
-"""
-Cache analytics and performance monitoring.
-
-This module provides comprehensive analytics for cache performance,
-including hit rates, response times, and usage patterns.
-"""
+"""Cache performance analytics: hit rates, response times, usage patterns."""
 
 from __future__ import annotations
 
@@ -98,12 +93,7 @@ class CacheMetrics:
 
 
 class CacheAnalytics:
-    """
-    Comprehensive cache analytics and monitoring.
-    
-    This class provides detailed analytics for cache performance,
-    including real-time metrics, historical data, and performance insights.
-    """
+    """Tracks cache performance in real time: hit rates, latency, and historical trends."""
     
     def __init__(self, max_history: int = 10000):
         """
@@ -250,12 +240,7 @@ class CacheAnalytics:
         self.metrics.max_size = max_size
     
     def get_stats(self) -> Dict[str, Any]:
-        """
-        Get comprehensive cache statistics.
-        
-        Returns:
-            Dictionary with detailed statistics
-        """
+        """Return a dict of cache statistics (hit rate, size, timing, etc.)."""
         return {
             'overall': {
                 'hits': self.metrics.hits,

@@ -1,13 +1,7 @@
 """
-Database module for SQLAlchemy session management.
-
-This module provides:
-- SQLAlchemyHelper: Convenient database session management with proper lifecycle
-
-Best Practices:
-- Thread-safe session management using scoped_session
-- Proper resource cleanup with context managers
-- Base registry to prevent metadata conflicts
+`SQLAlchemyHelper` manages database session lifecycle: thread-safe sessions
+via `scoped_session`, context-manager cleanup, and a base registry that
+keeps ORM metadata from colliding across storage backends.
 """
 
 from __future__ import annotations
@@ -15,7 +9,7 @@ from __future__ import annotations
 from typing import Any
 from contextlib import contextmanager
 
-# NOTE: SQLAlchemy is optional - only required for storage features
+# SQLAlchemy is optional - only required for storage features
 try:
     from sqlalchemy import create_engine
     from sqlalchemy.orm import sessionmaker, declarative_base, scoped_session
@@ -23,20 +17,15 @@ try:
 except ImportError:
     SQLALCHEMY_AVAILABLE = False
 
-# NOTE: Global registry to prevent proliferation and ensure consistency
+# Global registry to prevent proliferation and ensure consistency
 _base_registry: dict[str, Any] = {}
 
 
 class SQLAlchemyHelper:
-    """
-    Convenience helper for SQLAlchemy setup with proper session management.
-    
-    Features:
-    - Thread-safe session management using scoped_session
-    - Context manager for automatic transaction handling
-    - Proper resource cleanup
-    - Base registry to prevent metadata conflicts
-    
+    """Sets up a SQLAlchemy engine/session with proper lifecycle management:
+    thread-safe sessions via ``scoped_session``, and a context manager that
+    commits on success and rolls back on exception.
+
     Example:
         helper = SQLAlchemyHelper("sqlite:///mydb.sqlite")
         
@@ -71,17 +60,17 @@ class SQLAlchemyHelper:
                 "Install it with: pip install sqlalchemy"
             )
         
-        # NOTE: Store db_url for Base registry key
+        # Store db_url for Base registry key
         self.db_url = db_url
         
-        # NOTE: Create engine with connection pooling
+        # Create engine with connection pooling
         self.engine = create_engine(db_url, **engine_kwargs)
         
-        # NOTE: Use scoped_session for thread-safety
+        # Use scoped_session for thread-safety
         # Each thread gets its own session instance
         self.Session = scoped_session(sessionmaker(bind=self.engine))
         
-        # NOTE: Reuse Base from registry to avoid metadata conflicts
+        # Reuse Base from registry to avoid metadata conflicts
         # Each unique db_url gets exactly one declarative_base instance
         if db_url not in _base_registry:
             _base_registry[db_url] = declarative_base()
@@ -92,7 +81,7 @@ class SQLAlchemyHelper:
         """
         Provide a transactional scope around a series of operations.
         
-        NOTE: Automatically commits on success, rolls back on exception,
+        Automatically commits on success, rolls back on exception,
         and closes session in finally block. This is the recommended way
         to use sessions.
         
@@ -118,7 +107,7 @@ class SQLAlchemyHelper:
         """
         Get a new session instance.
         
-        NOTE: Caller is responsible for closing the session.
+        Caller is responsible for closing the session.
         Prefer using session_scope() context manager instead.
         
         Returns:
@@ -138,7 +127,7 @@ class SQLAlchemyHelper:
         """
         Close all sessions and dispose of the engine.
         
-        NOTE: Call this when completely done with the helper to free resources.
+        Call this when completely done with the helper to free resources.
         This frees all database connections and cleans up thread-local sessions.
         
         Example:
@@ -158,8 +147,8 @@ def get_base_registry() -> dict[str, Any]:
     """
     Get the global base registry.
     
-    NOTE: This is an advanced feature for users working directly with SQLAlchemy.
-    NOTE: Most users should use StorageManager or SQLAlchemyHelper instead.
+    This is an advanced feature for users working directly with SQLAlchemy.
+    Most users should use StorageManager or SQLAlchemyHelper instead.
     
     The base registry ensures that each unique database URL gets exactly one
     declarative_base instance, preventing metadata conflicts when working with

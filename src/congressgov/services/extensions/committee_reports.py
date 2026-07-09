@@ -1,12 +1,7 @@
 """
 Query and convenience methods for the CommitteeReports model.
 
-These methods are dynamically registered on the CommitteeReports class,
-keeping the model file clean and focused on data validation.
-
-The query builder (CommitteeReportsQuery) is created using the generic
-CollectionQuery class from _query_builder.py, eliminating the
-need for custom query class implementations.
+Registered dynamically via ``_registry`` so CommitteeReports stay plain data models.
 
 Methods registered:
 - Query methods: filter(), query(), group_by()
@@ -30,49 +25,28 @@ import congressgov.models.documents.reports as reports_module
 # Import CommitteeReport class for validation
 from congressgov.models.documents.reports import CommitteeReport
 
-# ========================================
-# CREATE QUERY BUILDER WITH FIELD MAPPINGS
-# ========================================
 
-# NOTE: Create the CommitteeReportsQuery class using the generic query builder
-# NOTE: item_class enables field validation to catch typos early
 CommitteeReportsQuery = create_query_builder(
     collection_class=CommitteeReports,
     items_field="reports",
     item_class=CommitteeReport,
     field_mappings={
-        # NOTE: Add field mappings here as enums become available
     }
 )
 
-# NOTE: Set it on the module so it can be imported
+# Expose the query class from both the model module and this module's
+# globals, since callers import it from either location.
 reports_module.CommitteeReportsQuery = CommitteeReportsQuery
 
-# NOTE: Make it available for use in this module
 if not TYPE_CHECKING:
     globals()['CommitteeReportsQuery'] = CommitteeReportsQuery
 
-# ========================================
-# QUERY BUILDER ACCESS
-# ========================================
 
 @register_method(CommitteeReports)
 def query(self):
-    """
-    Get query builder for chaining operations.
-    
-    Example:
-        reports.query().filter(type="HRPT", lazy=True).order_by("number").execute()
-    
-    Returns:
-        CommitteeReportsQuery instance for chaining operations
-    """
+    """Return a query builder for chained filtering."""
     return CommitteeReportsQuery(self.reports or [])
 
-
-# ========================================
-# CONVENIENCE METHODS (Eager by default)
-# ========================================
 
 @register_method(CommitteeReports)
 def filter(self, *, lazy: bool = False, **kwargs):
@@ -99,49 +73,19 @@ def filter(self, *, lazy: bool = False, **kwargs):
 
 @register_method(CommitteeReports)
 def by_congress(self, congress: int) -> CommitteeReports:
-    """
-    Get reports from a specific Congress (always eager, returns CommitteeReports).
-    
-    Args:
-        congress: Congress number (e.g., 118 for 118th Congress)
-    
-    Returns:
-        Filtered CommitteeReports object
-    
-    Example:
-        congress_118 = reports.by_congress(118)
-    """
+    """Get reports from a specific Congress."""
     return self.query().filter(congress=congress)
 
 
 @register_method(CommitteeReports)
 def by_type(self, report_type: str) -> CommitteeReports:
-    """
-    Get reports of a specific type (always eager, returns CommitteeReports).
-    
-    Args:
-        report_type: Report type code (e.g., "HRPT", "SRPT", "ERPT")
-    
-    Returns:
-        Filtered CommitteeReports object
-    
-    Example:
-        house_reports = reports.by_type("HRPT")
-    """
+    """Get reports of a specific type."""
     return self.query().filter(type=report_type)
 
 
 @register_method(CommitteeReports)
 def house_reports(self) -> CommitteeReports:
-    """
-    Get all House reports (HRPT) (always eager, returns CommitteeReports).
-    
-    Returns:
-        Filtered CommitteeReports object containing only House reports
-    
-    Example:
-        house = reports.house_reports()
-    """
+    """Get all House reports (HRPT)."""
     def is_house_report(r: CommitteeReport) -> bool:
         if not hasattr(r, 'type') or not r.type:
             return False
@@ -153,15 +97,7 @@ def house_reports(self) -> CommitteeReports:
 
 @register_method(CommitteeReports)
 def senate_reports(self) -> CommitteeReports:
-    """
-    Get all Senate reports (SRPT) (always eager, returns CommitteeReports).
-    
-    Returns:
-        Filtered CommitteeReports object containing only Senate reports
-    
-    Example:
-        senate = reports.senate_reports()
-    """
+    """Get all Senate reports (SRPT)."""
     def is_senate_report(r: CommitteeReport) -> bool:
         if not hasattr(r, 'type') or not r.type:
             return False
@@ -173,18 +109,7 @@ def senate_reports(self) -> CommitteeReports:
 
 @register_method(CommitteeReports)
 def by_committee(self, committee_name: str) -> CommitteeReports:
-    """
-    Get reports by committee name (partial match, case-insensitive) (always eager, returns CommitteeReports).
-    
-    Args:
-        committee_name: Committee name or partial name to search for
-    
-    Returns:
-        Filtered CommitteeReports object
-    
-    Example:
-        judiciary = reports.by_committee("Judiciary")
-    """
+    """Get reports by committee name (partial match, case-insensitive)."""
     def committee_matches(r: CommitteeReport) -> bool:
         # Check committees list
         if hasattr(r, 'committees') and r.committees:
@@ -216,10 +141,6 @@ def group_by(self, field: str):
     """
     return self.query().group_by(field)
 
-
-# ========================================
-# COMMITTEE REPORT (SINGULAR) INSTANCE METHODS
-# ========================================
 
 from typing import Any, Optional
 

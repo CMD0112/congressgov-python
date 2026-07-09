@@ -1,9 +1,4 @@
-"""
-In-memory cache backend using OrderedDict with LRU eviction.
-
-This backend provides fast, thread-safe in-memory caching with automatic
-eviction of least recently used items when the cache reaches capacity.
-"""
+"""Thread-safe in-memory cache (OrderedDict) with LRU eviction at capacity."""
 
 from __future__ import annotations
 
@@ -19,16 +14,8 @@ logger = logging.getLogger(__name__)
 
 
 class MemoryCache(BaseCacheBackend):
-    """
-    In-memory cache with LRU eviction policy.
-    
-    Features:
-    - Thread-safe operations
-    - LRU eviction when capacity exceeded
-    - TTL support with automatic expiration
-    - Fast O(1) operations
-    - Memory-efficient storage
-    
+    """In-memory cache with O(1) operations, LRU eviction at capacity, and TTL expiration.
+
     Example:
         cache = MemoryCache(max_size=1000, default_ttl=300)
         cache.set("key", "value", ttl=60)

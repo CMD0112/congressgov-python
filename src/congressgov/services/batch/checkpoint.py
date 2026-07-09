@@ -1,9 +1,4 @@
-"""
-Checkpoint system for batch operations.
-
-This module provides checkpoint management for saving and resuming batch
-processing progress, enabling recovery from failures and interruptions.
-"""
+"""Save/resume batch processing progress so a run can recover from failures or interruptions."""
 
 from __future__ import annotations
 
@@ -20,12 +15,8 @@ logger = logging.getLogger(__name__)
 
 
 class CheckpointManager:
-    """
-    Checkpoint manager for batch operations.
-    
-    This class provides comprehensive checkpoint management including saving,
-    loading, and resuming batch processing progress.
-    
+    """Saves, loads, and resumes batch processing progress via checkpoint files.
+
     Example:
         manager = CheckpointManager(
             checkpoint_file="./checkpoints/bill_processing.json",

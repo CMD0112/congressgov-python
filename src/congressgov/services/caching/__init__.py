@@ -1,16 +1,6 @@
 """
-Caching system for congressgov.
-
-This module provides intelligent caching to reduce API calls by 70%+ and improve
-response times by 90%+ while maintaining full backward compatibility.
-
-Key Features:
-- Multiple cache backends (Memory, Redis, File)
-- Multi-level caching with cascading lookups
-- Smart cache key generation
-- Automatic cache invalidation
-- Rate limiting integration
-- Performance analytics
+Caching layer for congressgov: memory/Redis/file backends, multi-level
+cascading lookups, cache-key generation, invalidation rules, and analytics.
 
 Usage:
     # Basic caching

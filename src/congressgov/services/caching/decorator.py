@@ -1,9 +1,4 @@
-"""
-Cache decorators for automatic caching of method results.
-
-This module provides decorators that can be applied to service methods
-to automatically cache their results with configurable TTL and backends.
-"""
+"""Decorators that cache a service method's results with configurable TTL and backend."""
 
 from __future__ import annotations
 

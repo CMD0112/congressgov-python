@@ -6,23 +6,12 @@ from ..base.enums import Chamber, TitleTypeCode, SourceSystemCode
 from ..base.types import URL
 from ..base.model import Model
 
-# NOTE: ✅ Removed circular imports - Bill, Bills, TextVersionItem not needed here
-# These were causing circular dependency with entities.bill
-# Use forward references with strings instead for any Bill/Amendment references
-
-# Import action classes (no circular dependency)
+# Bill, Bills, and TextVersionItem live in entities.bill; importing them here
+# would create a circular dependency, so Bill/Amendment/Treaty references
+# elsewhere in this module use string forward references instead.
 from ..actions.action import LatestAction
 
-# Import sponsor classes (no circular dependency)
-
-# NOTE: Use string forward references for Bill, Amendment, Treaty to avoid circular imports
-# Models that need these will import them directly
-# Law, CBOCostEstimate, Subject classes moved here to avoid circular imports
-# Committee and CommitteeReport imported via forward references to avoid circular imports
-# Countries, IndexTerms, RelatedDocs, Parts imported via forward references to avoid circular imports
-
-
-# === [ENTITY CLASSES] Moved from entities.bill to avoid circular imports ===
+# Law, CBOCostEstimate, and Subject were moved here (from entities.bill) for the same reason.
 
 class Law(Model):
     type: str | None = None
@@ -107,9 +96,7 @@ class CBOCostEstimates(Model):
 # CBOCostEstimates.model_rebuild()  # Handled by centralized rebuild system
 
 
-# === [ACTION-RELATED CLASSES] Moved from generic.py to avoid circular imports ===
-
-class SourceSystem(Model):  # NOTE: May relocate
+class SourceSystem(Model):
     code: SourceSystemCode | None = None
     name: str | None = None
 
@@ -335,8 +322,3 @@ class Titles(Model):
     
 
 # Bill, Bills classes moved to entities/bill.py to avoid duplication
-
-
-# === [CROSS-MODULE FORWARD REFERENCES] These will be rebuilt in package __init__.py ===
-# Most classes have been moved to their respective modules to avoid duplication
-# CommitteeNominations.model_rebuild()  # Commented out due to forward reference issues

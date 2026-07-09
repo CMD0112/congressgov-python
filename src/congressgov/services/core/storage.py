@@ -1,16 +1,8 @@
 """
-Storage module for data persistence functionality.
-
-This module provides:
-- StorageManager: Efficient data persistence using SQLAlchemy ORM
-- Unified Storage System: Multi-backend support (SQL, File, Memory)
-- Storage adapters and factories for flexible persistence
-
-Best Practices:
-- Automatic ORM class generation from Python type annotations
-- ORM class caching for performance
-- Comprehensive error handling with transaction management
-- Thread-safe operations
+Two things live here: `StorageManager`, which persists data via a
+SQLAlchemy ORM class generated on the fly from a model's type annotations
+(and cached after first use), and a small unified storage layer (SQL, file,
+memory backends) with a shared adapter interface and factory.
 """
 
 from __future__ import annotations
@@ -22,10 +14,9 @@ from datetime import datetime, date, timezone
 from pathlib import Path
 from enum import Enum
 
-# NOTE: Import database helper and base registry
 from .database import SQLAlchemyHelper, get_base_registry
 
-# NOTE: SQLAlchemy is optional - only required for SQL storage features
+# SQLAlchemy is optional - only required for SQL storage features
 try:
     from sqlalchemy import Column, Integer, String, DateTime, Text, JSON, Float, Boolean, UniqueConstraint
     from sqlalchemy.orm import declarative_base
@@ -33,30 +24,16 @@ try:
 except ImportError:
     SQLALCHEMY_AVAILABLE = False
 
-# NOTE: Configure module-level logger
 logger = logging.getLogger(__name__)
 
-# NOTE: Global ORM class cache to prevent recreation
+# Global ORM class cache to prevent recreation
 _orm_class_cache: dict[tuple, Any] = {}
 
 
-# ============================================================================
-# STORAGE MANAGER - SQL/ORM PERSISTENCE
-# ============================================================================
-
-
 class StorageManager:
-    """
-    Efficient, readable manager for data persistence using SQLAlchemy.
-    
-    Features:
-    - Automatic ORM class generation from Python type annotations
-    - Intelligent type mapping (Optional, Union, List, etc.)
-    - ORM class caching for performance
-    - Optimized serialization
-    - Comprehensive error handling with transaction management
-    - Thread-safe operations
-    
+    """Persists data via SQLAlchemy, generating (and caching) an ORM class
+    from a model's type annotations rather than requiring hand-written models.
+
     Example:
         # Save data
         StorageManager.save(
@@ -74,23 +51,12 @@ class StorageManager:
 
     @staticmethod
     def _fields(model_class) -> dict[str, Any]:
-        """
-        Extract public annotated fields and types from a class.
-        
-        NOTE: Uses __annotations__ for type hints (Python 3.6+).
-        NOTE: Ignores private fields (starting with underscore).
-        
-        Args:
-            model_class: Class with type annotations
-            
-        Returns:
-            Dictionary mapping field names to type annotations
-        """
+        """Return the class's public (non-underscore) annotated fields as {name: type}."""
         annotations = getattr(model_class, '__annotations__', {})
         if annotations:
             return {k: v for k, v in annotations.items() if not k.startswith('_')}
         
-        # NOTE: Fallback for classes without annotations (rare for modern code)
+        # Fallback for classes without annotations (rare for modern code)
         # This is mainly for backward compatibility
         return {
             attr: type(getattr(model_class, attr))
@@ -129,8 +95,8 @@ class StorageManager:
         """
         Resolve a Python type annotation to a SQLAlchemy column type.
         
-        NOTE: Handles Optional, Union, List, and other typing constructs properly.
-        NOTE: Defaults to Text for unknown types (safer than String with length limits).
+        Handles Optional, Union, List, and other typing constructs properly.
+        Defaults to Text for unknown types (safer than String with length limits).
         
         Supported types:
         - Basic: int, str, float, bool, datetime, date
@@ -151,7 +117,7 @@ class StorageManager:
         if not SQLALCHEMY_AVAILABLE:
             raise ImportError("SQLAlchemy is required for type resolution")
         
-        # NOTE: Fast lookup for basic types (most common case)
+        # Fast lookup for basic types (most common case)
         basic_type_map = {
             int: Integer,
             str: String,
@@ -161,16 +127,16 @@ class StorageManager:
             date: DateTime,
         }
         
-        # NOTE: Check if it's a basic type first (fast path)
+        # Check if it's a basic type first (fast path)
         if typ in basic_type_map:
             return basic_type_map[typ]
         
-        # NOTE: Handle typing constructs (Optional, Union, List, etc.)
+        # Handle typing constructs (Optional, Union, List, etc.)
         origin = get_origin(typ)
         if origin is not None:
             args = get_args(typ)
             
-            # NOTE: Handle Optional[X] (which is Union[X, None])
+            # Handle Optional[X] (which is Union[X, None])
             # Extract the non-None type from the Union
             if origin is type(None) or (hasattr(origin, '__name__') and 'Union' in origin.__name__):
                 non_none_types = [arg for arg in args if arg is not type(None)]
@@ -178,16 +144,16 @@ class StorageManager:
                     # Recursively resolve the non-None type
                     return StorageManager._resolve_type(non_none_types[0])
             
-            # NOTE: Handle List, Tuple, Dict -> serialize as JSON column
+            # Handle List, Tuple, Dict -> serialize as JSON column
             if origin in (list, tuple, dict):
                 return JSON
         
-        # NOTE: Check for datetime/date in the type name (fallback for string annotations)
+        # Check for datetime/date in the type name (fallback for string annotations)
         type_name = getattr(typ, '__name__', str(typ))
         if 'datetime' in type_name.lower() or 'date' in type_name.lower():
             return DateTime
         
-        # NOTE: Default to Text for unknown types (safer than String with length limits)
+        # Default to Text for unknown types (safer than String with length limits)
         # Text can store unlimited length strings in most databases
         return Text
 
@@ -204,9 +170,9 @@ class StorageManager:
         """
         Dynamically build a SQLAlchemy ORM model from model_class.
         
-        NOTE: Uses caching to avoid recreating ORM classes for the same model.
-        NOTE: All columns are defined upfront, including saved_at if requested.
-        NOTE: Thread-safe due to cache key uniqueness.
+        Uses caching to avoid recreating ORM classes for the same model.
+        All columns are defined upfront, including saved_at if requested.
+        Thread-safe due to cache key uniqueness.
         
         Args:
             model_class: Python class with type annotations
@@ -229,10 +195,9 @@ class StorageManager:
         if not SQLALCHEMY_AVAILABLE:
             raise ImportError("SQLAlchemy is required for ORM class creation")
         
-        # NOTE: Get base registry
         _base_registry = get_base_registry()
         
-        # NOTE: Generate cache key for this ORM class configuration
+        # Generate cache key for this ORM class configuration
         # Different configurations (timestamp, unique key) get separate classes
         cache_key = (
             model_class.__name__,
@@ -242,56 +207,48 @@ class StorageManager:
             db_url or "default"
         )
         
-        # NOTE: Return cached ORM class if available (major performance improvement)
+        # Return cached ORM class if available (major performance improvement)
         if cache_key in _orm_class_cache:
             return _orm_class_cache[cache_key]
         
-        # NOTE: Get or create Base for this database
         if base is None:
             if db_url and db_url in _base_registry:
                 base = _base_registry[db_url]
             else:
-                # NOTE: Create new base if needed (prefer reusing from registry)
+                # Create new base if needed (prefer reusing from registry)
                 base = declarative_base()
                 if db_url:
                     _base_registry[db_url] = base
         
-        # NOTE: Extract type annotations from model class
         ann = getattr(model_class, '__annotations__', {})
         cols = {}
         
-        # NOTE: Add primary key if not present in annotations
         if "id" not in ann:
             cols["id"] = Column(Integer, primary_key=True, autoincrement=True)
         
-        # NOTE: Add unique key column upfront if specified and not in annotations
+        # Add unique key column upfront if specified and not in annotations
         if unique_key and unique_key not in ann:
             cols[unique_key] = Column(String, unique=True, nullable=False)
         
-        # NOTE: Process all annotated fields
         for attr, typ in ann.items():
             if attr in cols:
                 continue  # Skip if already defined
             
-            # NOTE: Resolve the SQLAlchemy column type from Python type annotation
             col_type = cls._resolve_type(typ)
             
-            # NOTE: Apply unique constraint if this is the unique_key field
             is_unique = (attr == unique_key)
             cols[attr] = Column(col_type, unique=is_unique)
         
-        # NOTE: Add saved_at timestamp column if requested (defined upfront)
         if add_timestamp and 'saved_at' not in cols:
             cols['saved_at'] = Column(DateTime, nullable=False)
         
-        # NOTE: Build table_args with unique constraint if needed
         table_args = ()
         if unique_key and unique_key in ann:
-            # NOTE: Add named unique constraint for better database clarity
+            # Add named unique constraint for better database clarity
             constraint_name = f'uq_{table_name or model_class.__name__.lower()}_{unique_key}'
             table_args = (UniqueConstraint(unique_key, name=constraint_name),)
         
-        # NOTE: Dynamically create ORM class using type()
+        # Dynamically create ORM class using type()
         # This creates a new class that inherits from Base
         orm_class = type(
             f"{model_class.__name__}ORM",
@@ -303,7 +260,7 @@ class StorageManager:
             },
         )
         
-        # NOTE: Cache the ORM class for reuse (100x+ speedup for repeated operations)
+        # Cache the ORM class for reuse (100x+ speedup for repeated operations)
         _orm_class_cache[cache_key] = orm_class
         
         return orm_class
@@ -313,9 +270,9 @@ class StorageManager:
         """
         Optimized serialization for SQLAlchemy insertion.
         
-        NOTE: Processes complex objects efficiently, minimizing recursive calls.
-        NOTE: Dates as ISO strings, complex objects as JSON strings.
-        NOTE: Fast path for simple types (None, str, int, float, bool).
+        Processes complex objects efficiently, minimizing recursive calls.
+        Dates as ISO strings, complex objects as JSON strings.
+        Fast path for simple types (None, str, int, float, bool).
         
         Args:
             data: Object to serialize (Pydantic model, dataclass, dict, or object)
@@ -329,7 +286,6 @@ class StorageManager:
         Example:
             serialized = StorageManager._serialize(my_pydantic_model)
         """
-        # NOTE: Fast extraction of record data (avoid repeated hasattr calls)
         if hasattr(data, 'dict') and callable(getattr(data, 'dict')):
             # Pydantic model - use built-in dict() method
             record = data.dict()
@@ -342,30 +298,25 @@ class StorageManager:
         else:
             raise TypeError(f"Unsupported serialization type: {type(data)}")
         
-        # NOTE: Optimized value serialization with minimal type checking
+        # Optimized value serialization with minimal type checking
         result = {}
         for k, v in record.items():
-            # NOTE: Fast path for None and simple types (most common case)
             if v is None or isinstance(v, (str, int, float, bool)):
                 result[k] = v
             
-            # NOTE: Handle datetime/date objects -> ISO format strings
             elif isinstance(v, (datetime, date)):
                 result[k] = v.isoformat()
             
-            # NOTE: Handle complex objects - serialize as JSON once
             elif isinstance(v, (list, tuple, dict)):
                 try:
                     result[k] = json.dumps(v)
                 except (TypeError, ValueError):
-                    # NOTE: Fallback for non-JSON-serializable contents
+                    # Fallback for non-JSON-serializable contents
                     result[k] = str(v)
             
-            # NOTE: Handle Pydantic models -> JSON string
             elif hasattr(v, 'dict') and callable(getattr(v, 'dict')):
                 result[k] = json.dumps(v.dict())
             
-            # NOTE: Handle dataclasses and other objects -> JSON string
             elif hasattr(v, '__dict__') and not isinstance(v, type):
                 obj_dict = {
                     key: val for key, val in vars(v).items()
@@ -376,7 +327,6 @@ class StorageManager:
                 except (TypeError, ValueError):
                     result[k] = str(v)
             
-            # NOTE: Fallback to string representation
             else:
                 result[k] = str(v)
         
@@ -397,18 +347,11 @@ class StorageManager:
         **engine_kwargs
     ):
         """
-        Save one or more items to a SQLAlchemy-backed table with proper error handling.
-        
-        NOTE: Automatically manages session lifecycle and transaction rollback on errors.
-        NOTE: If session and base are not provided but db_url is, everything is auto-configured.
-        
-        Features:
-        - Automatic session and transaction management
-        - Rollback on errors
-        - Resource cleanup in finally block
-        - Batch insertion support
-        - Thread-safe operations
-        
+        Save one or more items to a SQLAlchemy-backed table.
+
+        Manages the session lifecycle and rolls back on error. If ``session``
+        and ``base`` are omitted but ``db_url`` is given, both are auto-configured.
+
         Args:
             session: SQLAlchemy session (or leave None to auto-create using db_url)
             model_class: Data schema or class with type annotations
@@ -449,14 +392,12 @@ class StorageManager:
         if not SQLALCHEMY_AVAILABLE:
             raise ImportError("SQLAlchemy is required for save operations")
         
-        # NOTE: Get base registry
         _base_registry = get_base_registry()
         
         helper = None
         session_created = False
         
         try:
-            # NOTE: Auto-configure session and base if not provided
             if session is None:
                 if db_url is None:
                     db_url = "sqlite:///:memory:"
@@ -465,15 +406,13 @@ class StorageManager:
                 base = helper.Base
                 session_created = True
             else:
-                # NOTE: Use registry-managed base if available
                 if base is None:
                     if db_url and db_url in _base_registry:
                         base = _base_registry[db_url]
                     else:
-                        # NOTE: Create new base only if necessary
+                        # Create new base only if necessary
                         base = declarative_base()
             
-            # NOTE: Get or create ORM class with caching
             orm_class = cls._orm_class(
                 model_class=model_class,
                 table_name=table_name,
@@ -483,10 +422,8 @@ class StorageManager:
                 db_url=db_url
             )
             
-            # NOTE: Create tables if they don't exist
             orm_class.metadata.create_all(session.bind)
             
-            # NOTE: Prepare timestamp once for all records (efficiency)
             now = datetime.now(timezone.utc) if add_timestamp else None
             
             def prepare(item):
@@ -496,20 +433,16 @@ class StorageManager:
                     record['saved_at'] = now
                 return orm_class(**record)
             
-            # NOTE: Normalize input to list for consistent processing
             items = data if isinstance(data, list) else [data]
             
-            # NOTE: Prepare all ORM objects before committing (batch processing)
             orm_objs = [prepare(item) for item in items]
             
-            # NOTE: Add and commit all objects in one transaction
             session.add_all(orm_objs)
             session.commit()
             
             return orm_objs
             
         except Exception as e:
-            # NOTE: Rollback transaction on any error
             if session is not None:
                 try:
                     session.rollback()
@@ -517,11 +450,9 @@ class StorageManager:
                     # Rollback failure is secondary to the original error
                     pass
             
-            # NOTE: Re-raise with additional context
             raise type(e)(f"Failed to save data to database: {str(e)}") from e
             
         finally:
-            # NOTE: Clean up resources if we created them
             if session_created and session is not None:
                 try:
                     session.close()
@@ -552,8 +483,8 @@ class StorageManager:
         """
         Return all rows as ORM objects for a model/table with proper error handling.
 
-        NOTE: Automatically manages session lifecycle and resource cleanup.
-        NOTE: If session and base are not provided, but db_url is, everything is auto-configured.
+        Automatically manages session lifecycle and resource cleanup.
+        If session and base are not provided, but db_url is, everything is auto-configured.
         
         Args:
             session: SQLAlchemy session (or leave None to auto-create using db_url)
@@ -581,14 +512,12 @@ class StorageManager:
         if not SQLALCHEMY_AVAILABLE:
             raise ImportError("SQLAlchemy is required for select operations")
         
-        # NOTE: Get base registry
         _base_registry = get_base_registry()
         
         helper = None
         session_created = False
         
         try:
-            # NOTE: Auto-configure session and base if not provided
             if session is None:
                 if db_url is None:
                     db_url = "sqlite:///:memory:"
@@ -597,14 +526,12 @@ class StorageManager:
                 base = helper.Base
                 session_created = True
             else:
-                # NOTE: Use registry-managed base if available
                 if base is None:
                     if db_url and db_url in _base_registry:
                         base = _base_registry[db_url]
                     else:
                         base = declarative_base()
             
-            # NOTE: Get or create ORM class with caching
             orm_class = cls._orm_class(
                 model_class=model_class,
                 table_name=table_name,
@@ -614,20 +541,16 @@ class StorageManager:
                 db_url=db_url
             )
             
-            # NOTE: Ensure table exists before querying
             orm_class.metadata.create_all(session.bind)
             
-            # NOTE: Query all rows
             results = session.query(orm_class).all()
             
             return results
             
         except Exception as e:
-            # NOTE: Re-raise with additional context
             raise type(e)(f"Failed to select data from database: {str(e)}") from e
             
         finally:
-            # NOTE: Clean up resources if we created them
             if session_created and session is not None:
                 try:
                     session.close()
@@ -658,8 +581,8 @@ class StorageManager:
         """
         Like select_all, but returns list of dicts for easier inspection.
         
-        NOTE: More memory-efficient conversion from ORM objects to dicts.
-        NOTE: Leverages select_all with proper error handling.
+        More memory-efficient conversion from ORM objects to dicts.
+        Leverages select_all with proper error handling.
         
         Args:
             session: SQLAlchemy session (or leave None to auto-create using db_url)
@@ -686,7 +609,7 @@ class StorageManager:
             for row in results:
                 print(row['field_name'])
         """
-        # NOTE: Leverage select_all with proper error handling
+        # Leverage select_all with proper error handling
         results = cls.select_all(
             session=session,
             model_class=model_class,
@@ -699,7 +622,7 @@ class StorageManager:
             **engine_kwargs
         )
         
-        # NOTE: Efficiently convert ORM objects to dicts
+        # Efficiently convert ORM objects to dicts
         # Using list comprehension is faster than loop with append
         dict_list = [
             {
@@ -712,16 +635,11 @@ class StorageManager:
         return dict_list
 
 
-# ============================================================================
-# UNIFIED STORAGE SYSTEM - MULTI-BACKEND SUPPORT
-# ============================================================================
-
-
 class StorageBackendType(str, Enum):
     """
     Supported storage backend types.
     
-    NOTE: String enum allows easy serialization and comparison.
+    String enum allows easy serialization and comparison.
     """
     SQL = "sql"
     FILE = "file"
@@ -735,7 +653,7 @@ class StorageBackend(Protocol):
     """
     Protocol defining the interface for all storage backends.
     
-    NOTE: Using Protocol instead of ABC allows structural subtyping.
+    Using Protocol instead of ABC allows structural subtyping.
     All backends must implement these methods to be compatible.
     
     Example:
@@ -792,17 +710,9 @@ class StorageBackend(Protocol):
 
 class FileStorageBackend:
     """
-    File-based storage backend supporting multiple formats.
-    
-    Features:
-    - JSON (readable, widely supported)
-    - CSV (tabular data, Excel compatible)
-    - Parquet (columnar, high performance)
-    - Pickle (Python objects, fast)
-    - Automatic format detection from file extension
-    - Streaming support for large files
-    - Atomic writes with temp files
-    
+    File-based storage backend. Supports JSON, CSV, Parquet, and pickle,
+    auto-detected from the file extension; writes are atomic (temp file + rename).
+
     Example:
         # Simple usage
         backend = FileStorageBackend("data.json")
@@ -846,14 +756,12 @@ class FileStorageBackend:
         self.encoding = encoding
         self.format_options = format_options
         
-        # NOTE: Auto-detect format from file extension
         if format is None:
             suffix = self.file_path.suffix.lower()
             self.format = self.SUPPORTED_FORMATS.get(suffix, 'json')
         else:
             self.format = format
         
-        # NOTE: Ensure parent directory exists
         self.file_path.parent.mkdir(parents=True, exist_ok=True)
     
     def save(
@@ -865,8 +773,8 @@ class FileStorageBackend:
         """
         Save data to file.
         
-        NOTE: Uses atomic write with temporary file to prevent corruption.
-        NOTE: Normalizes data to list for consistent handling.
+        Uses atomic write with temporary file to prevent corruption.
+        Normalizes data to list for consistent handling.
         
         Args:
             data: Single object or list of objects to save
@@ -879,10 +787,8 @@ class FileStorageBackend:
         Example:
             backend.save(data, mode='append')  # Add to existing file
         """
-        # NOTE: Normalize to list
         items = data if isinstance(data, list) else [data]
         
-        # NOTE: Handle append mode by loading existing data first
         if mode == 'append' and self.file_path.exists():
             try:
                 existing = self.load()
@@ -890,7 +796,6 @@ class FileStorageBackend:
             except Exception as e:
                 logger.warning(f"Could not load existing data for append: {e}")
         
-        # NOTE: Serialize based on format
         try:
             if self.format == 'json':
                 self._save_json(items, **options)
@@ -910,7 +815,6 @@ class FileStorageBackend:
     
     def _save_json(self, items: list, **options):
         """Save as JSON with pretty printing by default."""
-        # NOTE: Serialize items (handle Pydantic models, dataclasses, etc.)
         serialized = []
         for item in items:
             if hasattr(item, 'dict') and callable(getattr(item, 'dict')):
@@ -922,7 +826,6 @@ class FileStorageBackend:
             else:
                 raise TypeError(f"Cannot serialize {type(item)} to JSON")
         
-        # NOTE: Write atomically using temp file
         temp_path = self.file_path.with_suffix('.tmp')
         try:
             with open(temp_path, 'w', encoding=self.encoding) as f:
@@ -933,10 +836,8 @@ class FileStorageBackend:
                     default=str,  # Fallback for non-serializable types
                     ensure_ascii=options.get('ensure_ascii', False)
                 )
-            # NOTE: Atomic rename
             temp_path.replace(self.file_path)
         except Exception:
-            # NOTE: Cleanup temp file on error
             if temp_path.exists():
                 temp_path.unlink()
             raise
@@ -948,7 +849,6 @@ class FileStorageBackend:
         if not items:
             return
         
-        # NOTE: Extract field names from first item
         first_item = items[0]
         if hasattr(first_item, 'dict'):
             fieldnames = list(first_item.dict().keys())
@@ -959,7 +859,6 @@ class FileStorageBackend:
         else:
             raise TypeError("CSV format requires dict-like objects")
         
-        # NOTE: Write CSV with headers
         temp_path = self.file_path.with_suffix('.tmp')
         try:
             with open(temp_path, 'w', newline='', encoding=self.encoding) as f:
@@ -979,7 +878,7 @@ class FileStorageBackend:
                     else:
                         row = item
                     
-                    # NOTE: Convert complex types to strings for CSV
+                    # Convert complex types to strings for CSV
                     row = {k: str(v) if not isinstance(v, (str, int, float, bool, type(None))) else v
                            for k, v in row.items()}
                     writer.writerow(row)
@@ -997,7 +896,6 @@ class FileStorageBackend:
         except ImportError:
             raise ImportError("pandas is required for Parquet format. Install: pip install pandas pyarrow")
         
-        # NOTE: Convert to list of dicts for DataFrame
         records = []
         for item in items:
             if hasattr(item, 'dict'):
@@ -1009,7 +907,6 @@ class FileStorageBackend:
             else:
                 raise TypeError("Parquet format requires dict-like objects")
         
-        # NOTE: Create DataFrame and save
         df = pd.DataFrame(records)
         df.to_parquet(
             self.file_path,
@@ -1064,13 +961,11 @@ class FileStorageBackend:
             else:
                 raise ValueError(f"Unsupported format: {self.format}")
             
-            # NOTE: Apply offset and limit
             if offset > 0:
                 data = data[offset:]
             if limit is not None:
                 data = data[:limit]
             
-            # NOTE: Validate with model_class if provided
             if self.model_class:
                 data = [self.model_class(**item) if isinstance(item, dict) else item
                         for item in data]
@@ -1118,7 +1013,7 @@ class FileStorageBackend:
         """
         Query data with simple filtering.
         
-        NOTE: Loads all data and filters in memory - not efficient for large files.
+        Loads all data and filters in memory - not efficient for large files.
         Consider using Parquet with pyarrow for better filtering performance.
         
         Args:
@@ -1137,10 +1032,8 @@ class FileStorageBackend:
         if not filters:
             return data
         
-        # NOTE: Simple exact-match filtering
         filtered = []
         for item in data:
-            # NOTE: Convert item to dict for filtering
             if hasattr(item, 'dict'):
                 item_dict = item.dict()
             elif hasattr(item, '__dict__'):
@@ -1150,7 +1043,6 @@ class FileStorageBackend:
             else:
                 continue
             
-            # NOTE: Check if all filter conditions match
             if all(item_dict.get(k) == v for k, v in filters.items()):
                 filtered.append(item)
         
@@ -1179,18 +1071,15 @@ class FileStorageBackend:
             count = backend.delete()
         """
         if filters is None:
-            # NOTE: Delete entire file
             if self.file_path.exists():
                 count = self.count()
                 self.file_path.unlink()
                 return count
             return 0
         
-        # NOTE: Load, filter, and save remaining
         data = self.load()
         original_count = len(data)
         
-        # NOTE: Keep records that don't match filters
         remaining = []
         for item in data:
             if hasattr(item, 'dict'):
@@ -1203,11 +1092,10 @@ class FileStorageBackend:
                 remaining.append(item)
                 continue
             
-            # NOTE: Keep if any filter condition doesn't match
+            # Keep if any filter condition doesn't match
             if not all(item_dict.get(k) == v for k, v in filters.items()):
                 remaining.append(item)
         
-        # NOTE: Save remaining data
         if remaining:
             self.save(remaining, mode='overwrite')
         elif self.file_path.exists():
@@ -1242,16 +1130,9 @@ class FileStorageBackend:
 
 
 class InMemoryStorageBackend:
-    """
-    In-memory storage backend for caching and testing.
-    
-    Features:
-    - Fast operations (no I/O)
-    - Thread-safe with lock
-    - Optional size limit with LRU eviction
-    - Automatic expiration support
-    - Perfect for caching and unit tests
-    
+    """In-memory storage backend for caching and tests: no I/O, thread-safe,
+    with optional size-bounded LRU eviction and TTL expiration.
+
     Example:
         # Simple cache
         cache = InMemoryStorageBackend()
@@ -1297,8 +1178,8 @@ class InMemoryStorageBackend:
         """
         Save data to memory.
         
-        NOTE: Thread-safe with lock.
-        NOTE: Implements LRU eviction if max_size specified.
+        Thread-safe with lock.
+        Implements LRU eviction if max_size specified.
         
         Args:
             data: Single object or list of objects
@@ -1311,17 +1192,14 @@ class InMemoryStorageBackend:
         
         with self.lock:
             for item in items:
-                # NOTE: Generate unique ID
                 self._id_counter += 1
                 item_id = self._id_counter
                 
-                # NOTE: Store with metadata
                 self.data[item_id] = {
                     'data': item,
                     'timestamp': datetime.now(timezone.utc) if self.ttl_seconds else None
                 }
                 
-                # NOTE: LRU eviction if size exceeded
                 if self.max_size and len(self.data) > self.max_size:
                     # Remove oldest item
                     self.data.popitem(last=False)
@@ -1337,7 +1215,7 @@ class InMemoryStorageBackend:
         """
         Load all data from memory.
         
-        NOTE: Automatically filters expired records if TTL is set.
+        Automatically filters expired records if TTL is set.
         
         Args:
             limit: Maximum number of records to return
@@ -1348,7 +1226,6 @@ class InMemoryStorageBackend:
             List of stored objects
         """
         with self.lock:
-            # NOTE: Filter expired records
             now = datetime.now(timezone.utc) if self.ttl_seconds else None
             valid_items = []
             
@@ -1356,13 +1233,11 @@ class InMemoryStorageBackend:
                 if self.ttl_seconds:
                     age = (now - entry['timestamp']).total_seconds()
                     if age > self.ttl_seconds:
-                        # NOTE: Remove expired item
                         del self.data[item_id]
                         continue
                 
                 valid_items.append(entry['data'])
             
-            # NOTE: Apply offset and limit
             if offset > 0:
                 valid_items = valid_items[offset:]
             if limit is not None:
@@ -1381,7 +1256,6 @@ class InMemoryStorageBackend:
         if not filters:
             return data
         
-        # NOTE: Filter by exact match
         filtered = []
         for item in data:
             if hasattr(item, 'dict'):
@@ -1411,7 +1285,6 @@ class InMemoryStorageBackend:
                 self.data.clear()
                 return count
             
-            # NOTE: Find and remove matching items
             to_delete = []
             for item_id, entry in self.data.items():
                 item = entry['data']
@@ -1428,7 +1301,6 @@ class InMemoryStorageBackend:
                 if all(item_dict.get(k) == v for k, v in filters.items()):
                     to_delete.append(item_id)
             
-            # NOTE: Delete matched items
             for item_id in to_delete:
                 del self.data[item_id]
             
@@ -1451,15 +1323,9 @@ class InMemoryStorageBackend:
 
 
 class StorageFactory:
-    """
-    Factory for creating storage backends with smart defaults.
-    
-    Features:
-    - Auto-detection from connection strings/paths
-    - Simple API for common use cases
-    - Sensible defaults
-    - Extensible for custom backends
-    
+    """Creates a storage backend from a connection string or path,
+    auto-detecting the backend type (SQL URL, file extension, or ``memory://``).
+
     Example:
         # Auto-detect from path/URL
         backend = StorageFactory.create("data.json")
@@ -1488,8 +1354,8 @@ class StorageFactory:
         """
         Create a storage backend from connection string.
         
-        NOTE: Auto-detects backend type from connection string format.
-        NOTE: Falls back to file storage if detection fails.
+        Auto-detects backend type from connection string format.
+        Falls back to file storage if detection fails.
         
         Args:
             connection: Connection string or file path
@@ -1514,15 +1380,12 @@ class StorageFactory:
             # In-memory cache
             backend = StorageFactory.create("memory://", max_size=1000)
         """
-        # NOTE: Auto-detect backend type if not specified
         if backend_type is None:
             backend_type = StorageFactory._detect_backend_type(connection)
         
-        # NOTE: Normalize backend type
         if isinstance(backend_type, str):
             backend_type = StorageBackendType(backend_type.lower())
         
-        # NOTE: Create appropriate backend
         if backend_type == StorageBackendType.FILE:
             return FileStorageBackend(connection, model_class=model_class, **options)
         
@@ -1530,7 +1393,7 @@ class StorageFactory:
             return InMemoryStorageBackend(model_class=model_class, **options)
         
         elif backend_type == StorageBackendType.SQL:
-            # NOTE: Return SQL-based backend (existing StorageManager)
+            # Return SQL-based backend (existing StorageManager)
             return SQLStorageAdapter(connection, model_class=model_class, **options)
         
         else:
@@ -1558,21 +1421,18 @@ class StorageFactory:
         """
         connection_lower = connection.lower()
         
-        # NOTE: Check for memory backend indicators
         if connection_lower in ('memory://', ':memory:', 'memory'):
             return StorageBackendType.MEMORY
         
-        # NOTE: Check for SQL database URLs
         sql_prefixes = ('sqlite://', 'postgresql://', 'mysql://', 'mariadb://', 'oracle://')
         if any(connection_lower.startswith(prefix) for prefix in sql_prefixes):
             return StorageBackendType.SQL
         
-        # NOTE: Check for file extensions
         path = Path(connection)
         if path.suffix.lower() in FileStorageBackend.SUPPORTED_FORMATS:
             return StorageBackendType.FILE
         
-        # NOTE: Default to file backend
+        # Default to file backend
         logger.info(f"Could not detect backend type for '{connection}', defaulting to file storage")
         return StorageBackendType.FILE
 
@@ -1581,8 +1441,8 @@ class SQLStorageAdapter:
     """
     Adapter to make StorageManager compatible with StorageBackend protocol.
     
-    NOTE: Wraps existing StorageManager functionality in the new interface.
-    NOTE: Provides consistent API across all storage backends.
+    Wraps existing StorageManager functionality in the new interface.
+    Provides consistent API across all storage backends.
     """
     
     def __init__(
@@ -1643,7 +1503,7 @@ class SQLStorageAdapter:
         """
         Query with filters.
         
-        NOTE: Currently loads all and filters in Python.
+        Currently loads all and filters in Python.
         TODO: Add SQL WHERE clause generation for better performance.
         """
         data = self.load(**options)
@@ -1651,7 +1511,7 @@ class SQLStorageAdapter:
         if not filters:
             return data
         
-        # NOTE: Simple Python filtering
+        # Simple Python filtering
         return [
             item for item in data
             if all(item.get(k) == v for k, v in filters.items())
@@ -1665,7 +1525,7 @@ class SQLStorageAdapter:
         """
         Delete records.
         
-        NOTE: Currently not implemented - requires SQL DELETE generation.
+        Currently not implemented - requires SQL DELETE generation.
         TODO: Add delete functionality to StorageManager.
         """
         raise NotImplementedError("Delete not yet implemented for SQL backend")
@@ -1685,21 +1545,13 @@ class SQLStorageAdapter:
 
 
 class UnifiedStorage:
-    """
-    Unified storage interface providing consistent API across all backends.
+    """One save/load API regardless of backend (SQL, file, or memory), with
+    context-manager support and batch operations.
 
     .. deprecated::
         Prefer workspace **record** or **artifact** lanes for new code. TABLE lane
         registry entries are reserved for future analytics use.
 
-    Features:
-    - One-line save/load operations
-    - Auto-detection of storage backend
-    - Consistent API across all storage types
-    - Context manager support
-    - Batch operations
-    - Streaming support for large datasets
-    
     Example:
         # Simple file storage
         storage = UnifiedStorage("data.json")
@@ -1746,7 +1598,7 @@ class UnifiedStorage:
         self.backend_type = backend_type
         self.options = options
         
-        # NOTE: Create backend using factory
+        # Create backend using factory
         self.backend = StorageFactory.create(
             connection=connection,
             backend_type=backend_type,
@@ -1875,7 +1727,7 @@ class UnifiedStorage:
         """
         Stream data in batches for memory-efficient processing.
         
-        NOTE: Ideal for processing large datasets that don't fit in memory.
+        Ideal for processing large datasets that don't fit in memory.
         
         Args:
             batch_size: Number of records per batch

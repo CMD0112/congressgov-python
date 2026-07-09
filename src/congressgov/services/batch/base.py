@@ -1,9 +1,4 @@
-"""
-Base batch processing infrastructure and configuration.
-
-This module provides the foundational classes and utilities for batch processing,
-including configuration, result tracking, and common batch processing utilities.
-"""
+"""Shared batch processing infrastructure: configuration, result tracking, and common utilities."""
 
 from __future__ import annotations
 
@@ -39,12 +34,7 @@ class RetryStrategy(Enum):
 
 @dataclass
 class BatchConfig:
-    """
-    Configuration for batch processing operations.
-    
-    This class provides comprehensive configuration options for all batch
-    processing operations, including concurrency, retry logic, and monitoring.
-    """
+    """Configuration for batch processing: concurrency, retry logic, and monitoring."""
     
     # Concurrency settings
     max_concurrent: int = 10
@@ -245,19 +235,12 @@ class BatchResult:
 
 class BaseBatchProcessor(ABC):
     """
-    Abstract base class for all batch processors.
-    
-    This class provides common functionality for batch processing operations,
-    including configuration management, progress tracking, and error handling.
+    Abstract base class for batch processors: config management, progress
+    tracking, and error handling shared by every concrete processor.
     """
-    
+
     def __init__(self, config: Optional[BatchConfig] = None):
-        """
-        Initialize the batch processor.
-        
-        Args:
-            config: Batch configuration (uses default if None)
-        """
+        """Initialize with `config`, or `BatchConfig()` defaults if omitted."""
         self.config = config or BatchConfig()
         self.logger = logging.getLogger(self.__class__.__name__)
         self._cancelled = False

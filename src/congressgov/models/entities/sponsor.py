@@ -62,10 +62,8 @@ class OnBehalfOfSponsor(Model):
 
 
 class OnBehalfOfSponsors(Model):
-    """
-    === OnBehalfOfSponsors Model ===
-    Represents a container for a list of OnBehalfOfSponsor objects.
-    """
+    """A container for a list of `OnBehalfOfSponsor` objects."""
+
     onBehalfOfSponsors: List[OnBehalfOfSponsor] | None = Field(None, alias="onBehalfOfSponsors")
 
 
@@ -73,12 +71,7 @@ class OnBehalfOfSponsors(Model):
 
 
 class Sponsor(Model):
-    """
-    === Sponsor Model ===
-    Represents a sponsor of a bill, with member-related fields grouped into a nested Member object.
-    All member-related fields from the JSON are loaded into the `member` attribute as a Member instance.
-    Other sponsor-specific fields remain at the top level.
-    """
+    """The primary sponsor of a bill or amendment."""
 
     bioguideId: str | None = None
     fullName: str | None = None
@@ -89,7 +82,6 @@ class Sponsor(Model):
     state: str | None = None    # ?: Enum?
     url: str | URL = None
     district: int | None = None
-    # === [SPONSOR-SPECIFIC FIELDS] Only fields unique to sponsors ===
     isByRequest: bool | None = None
 
     @property
@@ -139,11 +131,8 @@ class Sponsor(Model):
 
 
 class Sponsors(Model):
-    """
-    === Sponsors Model ===
-    Represents a container for a list of Sponsor objects.
-    When validated, Pydantic will convert a list of dicts to a list of Sponsor instances.
-    """
+    """A container for a list of `Sponsor` objects."""
+
     sponsors: "List[Sponsor] | None" = Field(None, alias="sponsors")
 
 
@@ -151,12 +140,7 @@ class Sponsors(Model):
 
 
 class Cosponsor(Model):
-    """
-    === Cosponsor Model ===
-    Represents a cosponsor of a bill, with member-related fields grouped into a nested Member object.
-    All member-related fields from the JSON are loaded into the `member` attribute as a Member instance.
-    Other cosponsorship-specific fields remain at the top level.
-    """
+    """A cosponsor of a bill, with sponsorship date and withdrawal status."""
 
     bioguideId: str | None = None
     fullName: str | None = None

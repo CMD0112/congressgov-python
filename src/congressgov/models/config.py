@@ -18,13 +18,9 @@ from typing import Any, Dict
 import logging
 
 
-# ============================================================================
-# VALIDATION CONFIGURATION
-# ============================================================================
+# --- Validation configuration ---
 
-# Enable strict validation mode
-# NOTE: In strict mode, all validation errors cause exceptions
-# In non-strict mode, validation warnings are logged but processing continues
+# In strict mode, validation errors raise; otherwise they're logged and processing continues.
 STRICT_VALIDATION = True
 
 # Validate congress numbers are in valid range
@@ -43,9 +39,7 @@ VALIDATE_URL_FORMATS = False  # Can be expensive, disabled by default
 VALIDATE_REQUIRED_FIELDS = True
 
 
-# ============================================================================
-# PARSING CONFIGURATION
-# ============================================================================
+# --- PARSING CONFIGURATION ---
 
 # Enable automatic datetime string parsing
 AUTO_PARSE_DATETIME = True
@@ -66,9 +60,7 @@ DEBUG_MODEL_VALIDATION = False
 DEBUG_ENVELOPE_UNWRAPPING = False
 
 
-# ============================================================================
-# DEFAULT VALUES CONFIGURATION
-# ============================================================================
+# --- DEFAULT VALUES CONFIGURATION ---
 
 # Default value for congress number when not specified
 DEFAULT_CONGRESS = None
@@ -80,9 +72,7 @@ DEFAULT_CHAMBER = None
 DEFAULT_MODEL_LIMIT = 20
 
 
-# ============================================================================
-# FIELD DOCUMENTATION CONFIGURATION
-# ============================================================================
+# --- FIELD DOCUMENTATION CONFIGURATION ---
 
 # Include field descriptions in model schema
 INCLUDE_FIELD_DESCRIPTIONS = True
@@ -94,9 +84,7 @@ INCLUDE_FIELD_EXAMPLES = True
 INCLUDE_FIELD_CONSTRAINTS = True
 
 
-# ============================================================================
-# SERIALIZATION CONFIGURATION
-# ============================================================================
+# --- SERIALIZATION CONFIGURATION ---
 
 # Use camelCase for field aliases (matches API response format)
 USE_CAMEL_CASE_ALIASES = True
@@ -117,9 +105,7 @@ USE_ENUM_VALUES = True
 VALIDATE_DEFAULT_VALUES = True
 
 
-# ============================================================================
-# MODEL BEHAVIOR CONFIGURATION
-# ============================================================================
+# --- MODEL BEHAVIOR CONFIGURATION ---
 
 # Allow extra fields not defined in model
 ALLOW_EXTRA_FIELDS = True  # API may add new fields
@@ -140,9 +126,7 @@ SMART_UNION = True
 ARBITRARY_TYPES_ALLOWED = False
 
 
-# ============================================================================
-# LOGGING CONFIGURATION
-# ============================================================================
+# --- LOGGING CONFIGURATION ---
 
 # Default logging level for model modules
 DEFAULT_LOG_LEVEL = logging.WARNING
@@ -160,9 +144,7 @@ LOG_PARSING_ERRORS = True
 LOG_MODEL_CREATION = False  # Can be verbose
 
 
-# ============================================================================
-# PERFORMANCE CONFIGURATION
-# ============================================================================
+# --- PERFORMANCE CONFIGURATION ---
 
 # Enable model caching
 ENABLE_MODEL_CACHING = False
@@ -177,9 +159,7 @@ ENABLE_LAZY_LOADING = False
 CACHE_VALIDATION_RESULTS = False
 
 
-# ============================================================================
-# CONSOLIDATED CONFIGURATION DICTIONARY
-# ============================================================================
+# --- CONSOLIDATED CONFIGURATION DICTIONARY ---
 
 MODELS_CONFIG: Dict[str, Any] = {
     "validation": {
@@ -240,9 +220,7 @@ MODELS_CONFIG: Dict[str, Any] = {
 }
 
 
-# ============================================================================
-# CONFIGURATION HELPERS
-# ============================================================================
+# --- CONFIGURATION HELPERS ---
 
 
 def is_validation_enabled(validation_type: str = "strict") -> bool:
@@ -306,9 +284,7 @@ def get_pydantic_config() -> Dict[str, Any]:
     }
 
 
-# ============================================================================
-# PUBLIC API
-# ============================================================================
+# --- PUBLIC API ---
 
 __all__ = [
     # Configuration dictionary

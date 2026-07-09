@@ -101,6 +101,8 @@ class TreatyCommittees(Model):
 
 
 class Treaty(Model):
+    """A treaty submitted to the Senate: parties, committee referrals, actions, and text."""
+
     congressReceived: int | None = None
     congressConsidered: int | None = None
     number: int | None = None

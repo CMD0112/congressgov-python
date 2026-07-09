@@ -20,18 +20,12 @@ class CommitteeActivity(Model):
 
 
 class CommitteeActivities(Model):
-    """
-    === CommitteeActivities Model ===
-    Represents a container for a list of CommitteeActivity objects.
-    """
+    """A container for a list of `CommitteeActivity` objects."""
     activities: list[CommitteeActivity] | None = Field(None, alias="activities")
 
 
 class CommitteeRef(Model):
-    """
-    === CommitteeRef Model ===
-    A reference to a committee with minimal information for linking purposes.
-    """
+    """A minimal committee reference for linking purposes."""
     systemCode: str | None = None
     name: str | None = None
     chamber: Chamber | None = None
@@ -40,10 +34,7 @@ class CommitteeRef(Model):
 
 
 class CommitteeShortRef(Model):
-    """
-    === CommitteeShortRef Model ===
-    A short reference to a committee with minimal information.
-    """
+    """An even more minimal committee reference (no url)."""
     systemCode: str | None = None
     name: str | None = None
     chamber: Chamber | None = None
@@ -51,14 +42,12 @@ class CommitteeShortRef(Model):
 
 
 class Committees(Model):
+    """A container for a list of `Committee` objects."""
     committees: list["Committee"] | None = Field(None, alias=AliasChoices("committees", "treatyCommittees"))
-    
+
 
 class Subcommittees(Model):
-    """
-    === Subcommittees Model ===
-    Represents a container for a list of Committee objects.
-    """
+    """A container for a list of `Committee` objects (as subcommittees)."""
     subcommittees: list["Committee"] | None = Field(None, alias="subcommittees") 
 
 
@@ -153,43 +142,35 @@ class CommitteeReport(Model):
 
 
 class CommitteeReports(Model):
-    """
-    === CommitteeReports Model ===
-    Represents a container for a list of CommitteeReport objects.
-    """
+    """A container for a list of `CommitteeReport` objects."""
     reports: list[CommitteeReport] | None = Field(None, alias="reports")
 
 
 class CommitteeBills(Model):
-    """
-    === CommitteeBills Model ===
-    Represents a container for a list of Bill references, with optional URL and count metadata.
-    
-    NOTE: ✅ Sprint 2 improvement - Uses BillRef to avoid circular imports.
+    """A container for a committee's bills, as `BillRef`s (to avoid a circular
+    import with the full `Bill` model), with optional url/count metadata.
     """
     url: str | None = None
     count: int | None = None
-    bills: list[BillRef] | None = Field(None, alias="committee-bills")  # ✅ Using BillRef
+    bills: list[BillRef] | None = Field(None, alias="committee-bills")
 
 
 class Committee(Model):
-    """
-    Committee model with properly typed references.
-    
-    NOTE: ✅ Sprint 2 improvement - Uses reference models to avoid circular imports:
-    - BillRef (via CommitteeBills) instead of Bill
-    - NominationRef instead of Nomination
-    - Uses lightweight dict for communications and reports
+    """A congressional committee or subcommittee: its parent/children, bills,
+    reports, communications, and nominations. Bills and nominations use
+    lightweight reference models (`BillRef`, `NominationRef`) to avoid
+    circular imports with the full `Bill`/`Nomination` models; reports and
+    communications are kept as plain dicts for the same reason.
     """
     systemCode: str | None = None
     parent: "Committee | None" = None  # Self-reference is fine
     updateDate: date | str | None = None
     isCurrent: bool | None = None
     subcommittees: list["Committee"] | CountRef | None = None  # Self-reference is fine
-    reports: list[dict] | CountRef | None = None  # Lightweight data (avoid circular import)
-    communications: list[dict] | CountRef | None = None  # Lightweight data (avoid circular import)
-    bills: CommitteeBills | None = None  # ✅ Uses BillRef internally
-    nominations: list[NominationRef] | CountRef | None = None  # ✅ Using NominationRef
+    reports: list[dict] | CountRef | None = None
+    communications: list[dict] | CountRef | None = None
+    bills: CommitteeBills | None = None
+    nominations: list[NominationRef] | CountRef | None = None
     history: list["History"] | CountRef | None = None  # Can be list or reference
     url: str | None = None
     name: str | None = None

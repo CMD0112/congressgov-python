@@ -1,12 +1,7 @@
 """
 Query and convenience methods for the Committees model.
 
-These methods are dynamically registered on the Committees class,
-keeping the model file clean and focused on data validation.
-
-The query builder (CommitteesQuery) is created using the generic
-CollectionQuery class from _query_builder.py, eliminating the
-need for custom query class implementations.
+Registered dynamically via ``_registry`` so Committees stay plain data models.
 
 Field Mappings:
 - chamber: Supports chamber variations ("House", "Senate", "H", "S")
@@ -41,12 +36,7 @@ try:
 except ImportError:
     CHAMBER_ENUM = None
 
-# ========================================
-# CREATE QUERY BUILDER WITH FIELD MAPPINGS
-# ========================================
 
-# NOTE: Create the CommitteesQuery class using the generic query builder
-# NOTE: item_class enables field validation to catch typos early
 field_mappings = {}
 if CHAMBER_ENUM:
     field_mappings["chamber"] = FieldMapping(enum_class=CHAMBER_ENUM)
@@ -58,86 +48,35 @@ CommitteesQuery = create_query_builder(
     field_mappings=field_mappings
 )
 
-# NOTE: Set it on the module so it can be imported
+# Expose the query class from both the model module and this module's
+# globals, since callers import it from either location.
 committee_module.CommitteesQuery = CommitteesQuery
 
-# NOTE: Make it available for use in this module
 if not TYPE_CHECKING:
     globals()['CommitteesQuery'] = CommitteesQuery
 
-# ========================================
-# QUERY BUILDER ACCESS
-# ========================================
 
 @register_method(Committees)
 def query(self):
-    """
-    Get query builder for chaining operations.
-    
-    Example:
-        committees.query().filter(chamber="House", lazy=True).order_by("name").execute()
-    
-    Returns:
-        CommitteesQuery instance for chaining operations
-    """
+    """Return a query builder for chained filtering."""
     return CommitteesQuery(self.committees or [])
 
 
-# ========================================
-# CONVENIENCE METHODS (Eager by default)
-# ========================================
-
 @register_method(Committees)
 def filter(self, *, lazy: bool = False, **kwargs):
-    """
-    Filter committees by field values.
-    
-    Args:
-        lazy: If True, return CommitteesQuery for chaining. If False, return Committees object (keyword-only).
-        **kwargs: Field-value pairs to filter by.
-    
-    Examples:
-        # Eager (default) - returns Committees object
-        house_committees = committees.filter(chamber="House")
-        
-        # Lazy - returns builder for chaining
-        query = committees.filter(chamber="House", lazy=True).order_by("name")
-        results = query.execute()
-    
-    Returns:
-        Committees object (if eager) or CommitteesQuery (if lazy)
-    """
+    """Filter by field values; pass lazy=True to keep chaining."""
     return self.query().filter(lazy=lazy, **kwargs)
 
 
 @register_method(Committees)
 def by_chamber(self, chamber: str) -> Committees:
-    """
-    Get committees from a specific chamber (always eager, returns Committees).
-    
-    Args:
-        chamber: Chamber name ("House", "Senate", "H", "S", "House of Representatives")
-    
-    Returns:
-        Filtered Committees object
-    
-    Example:
-        house_committees = committees.by_chamber("House")
-    """
+    """Get committees from a specific chamber."""
     return self.query().filter(chamber=chamber)
 
 
 @register_method(Committees)
 def house_committees(self) -> Committees:
-    """
-    Get all House committees (always eager, returns Committees).
-    
-    Returns:
-        Filtered Committees object containing only House committees
-    
-    Example:
-        house = committees.house_committees()
-    """
+    """Get all House committees."""
     def is_house_committee(c: Committee) -> bool:
         if not hasattr(c, 'chamber') or not c.chamber:
             return False
@@ -149,15 +88,7 @@ def house_committees(self) -> Committees:
 
 @register_method(Committees)
 def senate_committees(self) -> Committees:
-    """
-    Get all Senate committees (always eager, returns Committees).
-    
-    Returns:
-        Filtered Committees object containing only Senate committees
-    
-    Example:
-        senate = committees.senate_committees()
-    """
+    """Get all Senate committees."""
     def is_senate_committee(c: Committee) -> bool:
         if not hasattr(c, 'chamber') or not c.chamber:
             return False
@@ -169,18 +100,7 @@ def senate_committees(self) -> Committees:
 
 @register_method(Committees)
 def by_name(self, name: str) -> Committees:
-    """
-    Get committees by name (partial match, case-insensitive) (always eager, returns Committees).
-    
-    Args:
-        name: Committee name or partial name to search for
-    
-    Returns:
-        Filtered Committees object
-    
-    Example:
-        judiciary = committees.by_name("Judiciary")
-    """
+    """Get committees by name (partial match, case-insensitive)."""
     def name_matches(c: Committee) -> bool:
         if not hasattr(c, 'name') or not c.name:
             return False
@@ -191,15 +111,7 @@ def by_name(self, name: str) -> Committees:
 
 @register_method(Committees)
 def subcommittees(self) -> Committees:
-    """
-    Get only subcommittees (always eager, returns Committees).
-    
-    Returns:
-        Filtered Committees object containing only subcommittees
-    
-    Example:
-        subs = committees.subcommittees()
-    """
+    """Get only subcommittees."""
     def is_subcommittee(c: Committee) -> bool:
         # Check if isCurrent indicates it's a subcommittee
         if hasattr(c, 'committeeTypeCode') and c.committeeTypeCode:
@@ -215,15 +127,7 @@ def subcommittees(self) -> Committees:
 
 @register_method(Committees)
 def parent_committees(self) -> Committees:
-    """
-    Get only parent/standing committees (no subcommittees) (always eager, returns Committees).
-    
-    Returns:
-        Filtered Committees object containing only parent committees
-    
-    Example:
-        parents = committees.parent_committees()
-    """
+    """Get only parent/standing committees (no subcommittees)."""
     def is_parent_committee(c: Committee) -> bool:
         # Check if it's NOT a subcommittee
         if hasattr(c, 'committeeTypeCode') and c.committeeTypeCode:
@@ -239,26 +143,9 @@ def parent_committees(self) -> Committees:
 
 @register_method(Committees)
 def group_by(self, field: str):
-    """
-    Group committees by field.
-    Returns dict mapping field values to Committees objects.
-    
-    Args:
-        field: Field name to group by
-    
-    Returns:
-        Dictionary mapping field values to Committees objects
-    
-    Example:
-        by_chamber = committees.group_by("chamber")
-        # Returns: {"House": Committees(...), "Senate": Committees(...)}
-    """
+    """Group items into a dict keyed by field value."""
     return self.query().group_by(field)
 
-
-# ========================================
-# COMMITTEE (SINGULAR) INSTANCE METHODS
-# ========================================
 
 import json
 from typing import Any, Optional

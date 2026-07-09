@@ -1,9 +1,4 @@
-"""
-Rate limiting configuration and settings.
-
-This module provides configuration classes for rate limiting behavior,
-including retry logic, backoff strategies, and monitoring settings.
-"""
+"""Configuration for rate limiting: retry logic, backoff strategy, and monitoring settings."""
 
 from __future__ import annotations
 
@@ -22,12 +17,7 @@ class RateLimitStrategy(Enum):
 
 @dataclass
 class RateLimitConfig:
-    """
-    Configuration for rate limiting behavior.
-    
-    This class provides comprehensive configuration for rate limiting,
-    including retry logic, backoff strategies, and monitoring.
-    """
+    """Rate limiting settings: request caps, retry logic, backoff strategy, and monitoring."""
     
     # Basic rate limiting
     requests_per_second: float = 10.0

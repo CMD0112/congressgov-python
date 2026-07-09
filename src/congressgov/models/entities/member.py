@@ -103,6 +103,10 @@ class PreviousNames(Model):
 
 
 class Member(Model):
+    """A member of Congress: identity, current term info, leadership roles, and
+    counts of sponsored/cosponsored legislation.
+    """
+
     currentMember: bool | None = None
     birthYear: int | None = None
     deathYear: int | None = None
@@ -153,10 +157,9 @@ class Member(Model):
 
 # Member.model_rebuild()  # Handled by centralized rebuild system
 
-# NOTE: MembersQuery is now created using the generic query builder
-# This happens when congressgov.services.extensions is imported
-# The query builder is created in congressgov.services.extensions._query_builder
-MembersQuery = None  # Will be set by congressgov.services.extensions.members
+# Set by congressgov.services.extensions.members, which builds the query class
+# via the generic query builder in congressgov.services.extensions._query_builder.
+MembersQuery = None
 
 class Members(Model):
     """

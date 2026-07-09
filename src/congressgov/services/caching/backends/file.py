@@ -1,9 +1,4 @@
-"""
-File-based cache backend using diskcache.
-
-This backend provides persistent file-based caching that survives
-application restarts and provides large storage capacity.
-"""
+"""File-based cache backend (via diskcache) that survives application restarts."""
 
 from __future__ import annotations
 
@@ -26,16 +21,9 @@ except ImportError:
 
 
 class FileCache(BaseCacheBackend):
-    """
-    File-based cache using diskcache for persistent storage.
-    
-    Features:
-    - Persistent storage across application restarts
-    - Large storage capacity (limited by disk space)
-    - Automatic cleanup of expired entries
-    - Thread-safe operations
-    - Efficient disk-based storage
-    
+    """Disk-backed cache: persistent across restarts, thread-safe, with
+    automatic cleanup of expired entries.
+
     Example:
         cache = FileCache(path="./cache", max_size=10000)
         cache.set("key", "value", ttl=60)

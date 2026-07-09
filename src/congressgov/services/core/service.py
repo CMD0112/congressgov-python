@@ -26,10 +26,6 @@ from __future__ import annotations
 
 import warnings
 
-# ============================================================================
-# RE-EXPORTS FOR BACKWARD COMPATIBILITY
-# ============================================================================
-
 # API Service classes
 from .api_service import (
     ApiService,
@@ -60,10 +56,6 @@ from .storage import (
     UnifiedStorage,
 )
 
-# ============================================================================
-# PUBLIC API
-# ============================================================================
-
 __all__ = [
     # API Service
     'ApiService',
@@ -89,39 +81,13 @@ __all__ = [
 ]
 
 
-# ============================================================================
-# DEPRECATION HELPERS
-# ============================================================================
-# 
-# NOTE: Deprecation Path for congressgov.services.core.service
-# ====================================================
-# This module is a backward compatibility facade that will be maintained
-# for the foreseeable future. Direct imports from specific modules are
-# preferred for new code:
-#
-#   Preferred (new code):
-#     from congressgov.services.core.api_service import ApiService
-#     from congressgov.services.core.dispatch import Dispatch
-#     from congressgov.services.core.storage import StorageManager
-#
-#   Supported (backward compatibility):
-#     from congressgov.services.core.service import ApiService, Dispatch, StorageManager
-#
-# Future deprecation plan:
-#   1. Current state: Full backward compatibility, no warnings
-#   2. Version N+1: Add deprecation warnings (uncomment function below)
-#   3. Version N+2: Move to private module (_service.py) with import redirect
-#   4. Version N+3: Remove compatibility facade entirely
-#
-# To enable deprecation warnings in a future version, uncomment this function:
-
+# Not wired up yet - kept here so a future version can enable deprecation
+# warnings without redesigning the facade. Deprecation plan: (1) current
+# state, full compatibility, no warnings; (2) add warnings by uncommenting
+# the call below; (3) move to a private _service.py with an import
+# redirect; (4) remove the facade entirely.
 def _issue_deprecation_warning():
-    """
-    Issue deprecation warning for importing from service.py.
-    
-    NOTE: Currently disabled to maintain full backward compatibility.
-    Enable this in a future version to encourage migration to new imports.
-    """
+    """Warn that importing from service.py is deprecated (currently unused)."""
     warnings.warn(
         "Importing from congressgov.services.core.service is deprecated. "
         "Please import from specific modules:\n"

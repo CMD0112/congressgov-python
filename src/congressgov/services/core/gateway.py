@@ -1,15 +1,6 @@
 """
-API Gateway module for enhanced Congress.gov API client.
-
-This module provides an extended API client with rate limiting and
-authentication header management built on top of the auto-generated
-Congress.gov API client.
-
-Best Practices:
-- Automatic API key injection into headers
-- Rate limit tracking and enforcement
-- Clear error messages for rate limit violations
-- Flexible configuration through kwargs
+Extends the auto-generated Congress.gov API client with API-key header
+injection and rate-limit tracking/enforcement.
 """
 
 from __future__ import annotations
@@ -20,7 +11,6 @@ import logging
 from congressgov._client import Client
 from congressgov.services.exceptions import RateLimitError
 
-# NOTE: Configure module-level logger
 logger = logging.getLogger(__name__)
 
 
@@ -82,20 +72,20 @@ class ApiGateway(Client):
         """
         # === [HEADER HANDLING] ===
         # Extract headers from client_kwargs if present, else use empty dict
-        # NOTE: Use dict() to create a copy to avoid modifying caller's dict
+        # Use dict() to create a copy to avoid modifying caller's dict
         headers: Dict[str, str] = dict(client_kwargs.get('headers', {}))
 
         # === [API KEY INJECTION] ===
         # Priority order: explicit api_key parameter > existing header > None
         if api_key is not None:
-            # NOTE: Explicit api_key parameter takes precedence over existing header
+            # Explicit api_key parameter takes precedence over existing header
             headers['X-API-Key'] = api_key
             logger.debug(f"Injected API key into headers (first {len(api_key)//2} chars)")
         elif 'X-API-Key' in headers:
-            # NOTE: API key already present in headers, leave it unchanged
+            # API key already present in headers, leave it unchanged
             logger.debug("Using API key from existing headers")
         else:
-            # NOTE: No API key provided - API will likely require it on requests
+            # No API key provided - API will likely require it on requests
             logger.warning("No API key provided. API requests may fail authentication")
 
         # Update client_kwargs with the possibly-updated headers
@@ -112,7 +102,7 @@ class ApiGateway(Client):
 
         # === [RATE LIMIT TRACKING] ===
         # Initialize rate limit tracking headers
-        # NOTE: None indicates rate limiting is not active/configured
+        # None indicates rate limiting is not active/configured
         self.rate_limit_headers: Dict[str, Optional[int]] = {
             'x-ratelimit-limit': int(self.ratelimit_default) if self.ratelimit_default is not None else None,
             'x-ratelimit-remaining': int(self.ratelimit_default) if self.ratelimit_default is not None else None,
@@ -147,11 +137,11 @@ class ApiGateway(Client):
         remaining = self.rate_limit_headers.get('x-ratelimit-remaining')
         
         if remaining is not None and int(remaining) <= 0:
-            # NOTE: Raise custom exception with details instead of generic Exception
+            # Raise custom exception with details instead of generic Exception
             limit = self.rate_limit_headers.get('x-ratelimit-limit', 'unknown')
             logger.error(f"Rate limit exceeded: {remaining}/{limit} requests remaining")
             
-            # NOTE: Retry-After header parsing not implemented yet
+            # Retry-After header parsing not implemented yet
             # The Congress.gov API doesn't consistently provide Retry-After headers
             # If needed in the future, parse from response headers passed to this method
             raise RateLimitError(
@@ -161,7 +151,7 @@ class ApiGateway(Client):
                 retry_after=None
             )
         
-        # NOTE: Log remaining requests if rate limiting is active
+        # Log remaining requests if rate limiting is active
         if remaining is not None:
             logger.debug(f"Rate limit status: {remaining} requests remaining")
 
@@ -172,8 +162,8 @@ class ApiGateway(Client):
         """
         Update rate limit tracking from response headers.
         
-        NOTE: This is a public method intended for use by congressgov.services
-        NOTE: to keep rate limit tracking synchronized with API responses.
+        This is a public method intended for use by congressgov.services
+        to keep rate limit tracking synchronized with API responses.
         
         Call this method after receiving API responses to keep rate limit
         tracking synchronized with the server's actual limits.

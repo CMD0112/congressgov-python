@@ -1,9 +1,4 @@
-"""
-Streaming processor for memory-efficient batch operations.
-
-This module provides the StreamingProcessor class for processing large datasets
-without loading everything into memory at once.
-"""
+"""Processes large datasets in batches without loading everything into memory at once."""
 
 from __future__ import annotations
 

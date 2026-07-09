@@ -1,9 +1,4 @@
-"""
-Backoff strategies for rate limiting and retry logic.
-
-This module provides various backoff strategies for handling
-rate limits and retry scenarios.
-"""
+"""Backoff strategies for handling rate limits and retries."""
 
 from __future__ import annotations
 

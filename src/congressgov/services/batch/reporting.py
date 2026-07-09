@@ -1,9 +1,4 @@
-"""
-Batch reporting and report generation.
-
-This module provides the BatchReporter class for generating comprehensive
-reports on batch processing operations in various formats.
-"""
+"""Generates reports on batch processing operations in JSON, CSV, or HTML."""
 
 from __future__ import annotations
 
@@ -21,12 +16,8 @@ logger = logging.getLogger(__name__)
 
 
 class BatchReporter:
-    """
-    Batch reporter for generating comprehensive reports.
-    
-    This class provides functionality to generate reports on batch processing
-    operations in various formats including JSON, CSV, and HTML.
-    
+    """Generates reports on batch processing operations as JSON, CSV, or HTML.
+
     Example:
         reporter = BatchReporter()
         

@@ -1,9 +1,4 @@
-"""
-Parallel processor for multi-worker batch operations.
-
-This module provides the ParallelProcessor class for distributing work across
-multiple workers with load balancing and progress monitoring.
-"""
+"""Distributes batch work across multiple workers with load balancing and progress monitoring."""
 
 from __future__ import annotations
 

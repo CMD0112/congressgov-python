@@ -7,9 +7,6 @@ from datetime import date
 from ..base.enums import Chamber
 from ..entities.bill import Bill
 
-# === [FORWARD REFERENCES] Use string references to avoid circular imports ===
-# from .bill import BillRef
-
 class CommitteePrintRef(Model):
     jacketNumber: str | None = None
     url: str | None = None

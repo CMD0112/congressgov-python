@@ -1,13 +1,8 @@
 """
 Query methods for [ModelName] model.
 
-=====================================================================
-TEMPLATE FILE - DO NOT USE DIRECTLY - COPY AND CUSTOMIZE
-=====================================================================
-
-This file is a template for creating new extension modules. It is NOT
-executed or imported directly. Keep it updated as the extension pattern
-evolves to serve as documentation and a starting point for new extensions.
+TEMPLATE FILE - not executed or imported. Copy it to start a new
+extension module and keep it in sync as the extension pattern evolves.
 
 Steps to use this template:
 1. Copy this file: cp _template.py mymodel.py
@@ -46,114 +41,50 @@ import [model_path] as model_module
 # Optional: Import enums for field mappings
 # from congressgov.models.base.enums import StateCode, LegislationType, etc.
 
-# ========================================
-# CREATE QUERY BUILDER WITH FIELD MAPPINGS
-# ========================================
-
-# NOTE: Create the query class using the generic query builder
-# NOTE: Field mappings enable shorthand queries using existing enums
-# NOTE: item_class enables field validation to catch typos early
 [ModelName]Query = create_query_builder(
     collection_class=[ModelName],
     items_field="[items_field]",  # e.g., "bills", "committees", "members"
     item_class=[ModelItem],  # e.g., Bill, Committee, Member
     field_mappings={
-        # NOTE: Add field mappings for shorthand support
-        # Example: "state": FieldMapping(enum_class=StateCode),
-        # This allows: items.filter(state="CA") to match state="California"
+        # Example: "state": FieldMapping(enum_class=StateCode) lets
+        # items.filter(state="CA") also match state="California".
     }
 )
 
-# NOTE: Set it on the module so it can be imported
+# Expose the query class from both the model module and this module's
+# globals, since callers import it from either location.
 model_module.[ModelName]Query = [ModelName]Query
 
-# NOTE: Make it available for use in this module
 if not TYPE_CHECKING:
     globals()['[ModelName]Query'] = [ModelName]Query
 
 
-# ========================================
-# QUERY BUILDER ACCESS
-# ========================================
-
 @register_method([ModelName])
 def query(self):
-    """
-    Get query builder for chaining operations.
-    
-    Example:
-        items.query().filter(field="value", lazy=True).order_by("field").execute()
-    
-    Returns:
-        Query builder instance for this collection
-    """
+    """Return a query builder for chained filtering."""
     # Replace 'items' with your actual field name (e.g., 'members', 'bills', 'committees')
     return [ModelName]Query(self.[items_field] or [])
 
 
-# ========================================
-# CONVENIENCE METHODS
-# ========================================
-
 @register_method([ModelName])
 def filter(self, *, lazy: bool = False, **kwargs):
-    """
-    Filter items by field values.
-    
-    Args:
-        lazy: If True, return query builder. If False, return model instance (keyword-only).
-        **kwargs: Field-value pairs to filter by.
-    
-    Returns:
-        [ModelName] object (if eager) or [ModelName]Query (if lazy)
-    
-    Examples:
-        # Eager (default)
-        filtered = items.filter(field="value")
-        
-        # Lazy (for chaining)
-        filtered = items.filter(field="value", lazy=True).order_by("field").execute()
-    """
+    """Filter by field values; pass lazy=True to keep chaining."""
     return self.query().filter(lazy=lazy, **kwargs)
 
 
 @register_method([ModelName])
 def by_field(self, value: str) -> [ModelName]:
-    """
-    Get items by specific field value.
-    
-    Args:
-        value: The value to filter by
-    
-    Returns:
-        Filtered model instance
-    """
+    """Get items matching a specific field value."""
     return self.query().filter(field=value)
 
 
 @register_method([ModelName])
 def group_by(self, field: str):
-    """
-    Group items by field value.
-    
-    Args:
-        field: Field name to group by
-    
-    Returns:
-        Dictionary mapping field values to [ModelName] instances
-    
-    Example:
-        by_field = items.group_by("field")
-        # Returns: {"value1": [ModelName](...), "value2": [ModelName](...)}
-    """
+    """Group items into a dict keyed by field value."""
     return self.query().group_by(field)
 
 
-# ========================================
-# ADD YOUR CUSTOM METHODS BELOW
-# ========================================
-
-# Example custom method:
+# Add custom methods below, e.g.:
 # @register_method([ModelName])
 # def my_custom_method(self, arg: str) -> [ModelName]:
 #     """Custom method description."""

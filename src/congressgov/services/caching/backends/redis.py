@@ -1,9 +1,4 @@
-"""
-Redis cache backend for distributed caching.
-
-This backend provides Redis-based caching with connection pooling,
-automatic serialization, and TTL support.
-"""
+"""Redis-backed cache with connection pooling, serialization, and TTL support."""
 
 from __future__ import annotations
 
@@ -27,16 +22,9 @@ except ImportError:
 
 
 class RedisCache(BaseCacheBackend):
-    """
-    Redis-based cache backend with connection pooling.
-    
-    Features:
-    - Distributed caching across multiple processes/machines
-    - Connection pooling for efficient resource usage
-    - Automatic serialization/deserialization
-    - TTL support with Redis EXPIRE
-    - Thread-safe operations
-    
+    """Redis-backed cache, shareable across processes/machines, with
+    pooled connections and TTL via Redis EXPIRE.
+
     Example:
         cache = RedisCache(host="localhost", port=6379, db=0)
         cache.set("key", "value", ttl=60)

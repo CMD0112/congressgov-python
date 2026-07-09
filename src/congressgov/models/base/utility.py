@@ -1,16 +1,4 @@
-"""
-Utility module for model validation and data manipulation helpers.
-
-This module provides common utility functions used throughout the models layer,
-including pretty printing, validation helpers, and data transformation functions.
-
-Functions:
-- pretty_print_json: Pretty print JSON and model objects with filtering
-- validate_congress_number: Validate congress number is in valid range
-- validate_date_range: Validate date is not in future (unless allowed)
-- validate_chamber: Validate chamber value with helpful suggestions
-- validate_bill_type: Validate bill type with helpful suggestions
-"""
+"""Validation helpers and pretty-printing utilities shared across the models layer."""
 
 from __future__ import annotations
 
@@ -21,15 +9,11 @@ from datetime import date, datetime
 
 from ..exceptions import FieldValidationError
 
-# NOTE: Configure module-level logger
 logger = logging.getLogger(__name__)
 
-# === [VALIDATION CONSTANTS] ===
-# NOTE: First Congress convened in 1789 (Congress 1)
-MIN_CONGRESS = 1
+MIN_CONGRESS = 1  # The 1st Congress convened in 1789.
 
-# NOTE: Current Congress (as of 2025)
-# TODO: Update this value periodically or make it dynamic
+# TODO: update this periodically, or derive it dynamically.
 CURRENT_CONGRESS = 119
 
 # Valid chamber values
@@ -267,20 +251,13 @@ def pretty_print_json(data: Any, indent: int = 2, filter_nulls: bool = False) ->
             return
 
     def _to_serializable(obj):
-        """
-        === [HELPER] Convert non-serializable objects (like date/datetime) to strings ===
-        """
+        """Convert date/datetime to an ISO string; pass everything else through."""
         if isinstance(obj, (date, datetime)):
-            # Convert date/datetime to ISO format string
             return obj.isoformat()
         return obj
 
     def _filter_nulls(obj):
-        """
-        === [HELPER] Recursively remove None values from dicts, lists, and model objects ===
-        Handles nested dicts, lists, and also objects with __dict__.
-        Converts date/datetime to string for JSON serialization.
-        """
+        """Recursively drop `None` values from dicts/lists/model objects."""
         if isinstance(obj, dict):
             # Only keep items where value is not None, and recursively filter
             return {k: _filter_nulls(v) for k, v in obj.items() if v is not None}
@@ -297,9 +274,7 @@ def pretty_print_json(data: Any, indent: int = 2, filter_nulls: bool = False) ->
             return _to_serializable(obj)
 
     def _pretty(obj, level=0):
-        """
-        === [HELPER] Recursively pretty print, preserving class declarations ===
-        """
+        """Recursively pretty-print, wrapping model objects as `ClassName({...})`."""
         # --- Handle model objects (with __dict__) ---
         if hasattr(obj, "__dict__") and not isinstance(obj, type):
             # Recursively pretty print the object's dict, but wrap in ClassName({...})

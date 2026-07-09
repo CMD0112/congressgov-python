@@ -1,10 +1,4 @@
-"""
-Unified data exporter facade.
-
-This module provides a single interface for all data export operations,
-automatically detecting the appropriate exporter based on file extension
-and providing a consistent API across all formats.
-"""
+"""Unified export facade that picks the right exporter from a file extension."""
 
 from __future__ import annotations
 
@@ -22,13 +16,8 @@ logger = logging.getLogger(__name__)
 
 
 class DataExporter:
-    """
-    Unified data exporter with automatic format detection.
-    
-    This class provides a single interface for exporting data to various
-    formats, automatically selecting the appropriate exporter based on
-    the file extension.
-    
+    """Exports data to CSV/Excel/JSON/Parquet/XML, picking the exporter from the file extension.
+
     Example:
         exporter = DataExporter()
         exporter.to_csv(data, "output.csv")

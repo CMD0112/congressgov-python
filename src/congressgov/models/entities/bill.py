@@ -612,25 +612,13 @@ class Bill(Model):
 
 
 class Bills(Model):
+    """A container for a list of `Bill` objects, as returned by list/search/related-bill endpoints."""
+
     bills: List[Bill] | None = Field(
         default=None,
         alias=AliasChoices("bills", "relatedBills", "committee-bills"),
         validation_alias=AliasChoices("bills", "relatedBills", "committee-bills"),
     )
-
-    # @classmethod
-    # def model_validate(cls, obj, **kwargs):
-    #     # Handle dicts with only "relatedBills" or "committee-bills" key by wrapping as {"bills": ...}
-    #     if isinstance(obj, dict):
-    #         keys = list(obj.keys())
-    #         if keys == ["relatedBills"]:
-    #             obj = {"bills": obj["relatedBills"]}
-    #     # If input is a list, wrap as {"bills": obj}
-    #     elif isinstance(obj, list):
-    #         obj = {"bills": obj}
-    #     return super().model_validate(obj, **kwargs)
-    
-# Bills.model_rebuild()  # Handled by centralized rebuild system
 
 # Add Protocol inheritance for IDE type hinting (only in TYPE_CHECKING)
 if TYPE_CHECKING:

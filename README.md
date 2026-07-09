@@ -1,18 +1,21 @@
 # congressgov
 
+[![PyPI](https://img.shields.io/pypi/v/congressgov.svg)](https://pypi.org/project/congressgov/)
+[![CI](https://github.com/CMD0112/congressgov-python/actions/workflows/ci.yml/badge.svg)](https://github.com/CMD0112/congressgov-python/actions/workflows/ci.yml)
+[![Docs](https://github.com/CMD0112/congressgov-python/actions/workflows/docs.yml/badge.svg)](https://cmd0112.github.io/congressgov-python/)
 [![License](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](LICENSE)
 [![Python](https://img.shields.io/badge/python-3.13+-blue.svg)](https://www.python.org/downloads/)
 
-**Python SDK for the [Congress.gov API](https://api.congress.gov)** — typed Pydantic models, high-level services, and query extensions.
+A Python SDK for the [Congress.gov API](https://api.congress.gov): Pydantic models for bills, members, committees, and the rest of the API surface, plus higher-level services and query helpers on top of the generated HTTP client.
 
-Community client for the official [Congress.gov API specification](https://github.com/LibraryOfCongress/api.congress.gov) (not affiliated with the Library of Congress). **PyPI package:** [`congressgov`](https://pypi.org/project/congressgov/) · **This repo:** `congressgov-python`
+This is a community client for the official [Congress.gov API specification](https://github.com/LibraryOfCongress/api.congress.gov) and isn't affiliated with the Library of Congress. PyPI package: [`congressgov`](https://pypi.org/project/congressgov/). This repo: `congressgov-python`.
 
 ## Features
 
-- **Typed models** — Pydantic validation for bills, members, committees, and more
-- **High-level services** — `Bill`, `Member`, `Committee`, and 15+ other resource classes
-- **Query extensions** — `get_actions()`, `filter()`, `group_by()`, and chainable queries on collections
-- **Async** — parallel `AsyncBill`, `AsyncMember`, … under `congressgov.async_api`
+- Typed models: Pydantic validation for bills, members, committees, and more
+- High-level services: `Bill`, `Member`, `Committee`, and 15+ other resource classes
+- Query extensions: `get_actions()`, `filter()`, `group_by()`, and chainable queries on collections
+- Async support: parallel `AsyncBill`, `AsyncMember`, … under `congressgov.async_api`
 
 ## Requirements
 
@@ -80,6 +83,8 @@ poetry run python examples/congress_roster_graph_live.py
 ```
 
 The **network graph** example fetches a bill batch and writes `examples/output/network_graph/live_network_explorer.html`. The **congress roster graph** example seeds the full member roster, persists bills over time, and writes `examples/output/congress_roster_graph/roster_graph_explorer.html`.
+
+Two notebooks are also included: `examples/network_graph_exploration.ipynb` (graph construction and offline replay) and `examples/visualization_export.ipynb` (export + plotting, needs `pip install congressgov[export,viz]`). See [examples/README.md](examples/README.md) for the full list of scripts and prerequisites.
 
 ### Async
 
@@ -160,6 +165,8 @@ Full workflow: **[docs/CODEGEN.md](docs/CODEGEN.md)** (see **[docs/README.md](do
 
 ## Documentation
 
+Hosted docs (with auto-generated API reference): **https://cmd0112.github.io/congressgov-python/**
+
 | Guide | Contents |
 |-------|----------|
 | [docs/README.md](docs/README.md) | **Documentation index** (start here) |
@@ -175,13 +182,15 @@ Full workflow: **[docs/CODEGEN.md](docs/CODEGEN.md)** (see **[docs/README.md](do
 | [docs/PACKAGE_LAYOUT.md](docs/PACKAGE_LAYOUT.md) | Directory layout, wheel policy, 2.0 `src/` plan |
 | [docs/MIGRATION.md](docs/MIGRATION.md) | Import path changes (1.1 → 2.0) |
 | [docs/VERSIONING.md](docs/VERSIONING.md) | SemVer, deprecations, stability scope |
+| [docs/URL_FETCH.md](docs/URL_FETCH.md) | Fetch typed models from API `url` fields |
+| [docs/STORAGE_AUDIT.md](docs/STORAGE_AUDIT.md) | Storage adoption audit matrix (maintainers) |
 | [docs/CODEGEN.md](docs/CODEGEN.md) | OpenAPI code generation (maintainers) |
 | [docs/API_COVERAGE.md](docs/API_COVERAGE.md) | OpenAPI path coverage matrix (maintainers) |
 | [docs/PUBLISHING.md](docs/PUBLISHING.md) | PyPI trusted publishing (maintainers) |
 
 ## Contributing
 
-See [CONTRIBUTING.md](CONTRIBUTING.md). Security: [SECURITY.md](SECURITY.md). Releases: [CHANGELOG.md](CHANGELOG.md).
+See [CONTRIBUTING.md](CONTRIBUTING.md) and our [Code of Conduct](CODE_OF_CONDUCT.md). Security: [SECURITY.md](SECURITY.md). Releases: [CHANGELOG.md](CHANGELOG.md). Found a bug or have a feature request? [Open an issue](https://github.com/CMD0112/congressgov-python/issues/new/choose).
 
 ## License
 

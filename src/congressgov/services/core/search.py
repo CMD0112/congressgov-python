@@ -128,16 +128,14 @@ import importlib
 import logging
 from functools import lru_cache
 
-# NOTE: Import ModelRegistry for lazy model loading in search handlers
+# Import ModelRegistry for lazy model loading in search handlers
 from congressgov.services.core.model_registry import ModelRegistry
 
-# NOTE: Configure module-level logger for debugging lazy loading
+# Configure module-level logger for debugging lazy loading
 logger = logging.getLogger(__name__)
 
-# ============================================================================
-# TYPE CHECKING IMPORTS
-# ============================================================================
-# NOTE: These imports are only used for type checking and don't affect runtime
+# --- TYPE CHECKING IMPORTS ---
+# These imports are only used for type checking and don't affect runtime
 # This prevents circular imports and keeps lazy loading working
 
 if TYPE_CHECKING:
@@ -149,11 +147,9 @@ if TYPE_CHECKING:
     from congressgov.models.communications import HouseCommunications, SenateCommunications
 
 
-# ============================================================================
-# TYPE DEFINITIONS
-# ============================================================================
+# --- TYPE DEFINITIONS ---
 
-# NOTE: ResourceType literal provides autocomplete for valid resource type strings
+# ResourceType literal provides autocomplete for valid resource type strings
 ResourceType = Literal[
     'bill',
     'amendment',
@@ -218,9 +214,7 @@ class HandlerConfig(TypedDict):
     param_aliases: Dict[str, str]
 
 
-# ============================================================================
-# SEARCH HANDLER REGISTRY
-# ============================================================================
+# --- SEARCH HANDLER REGISTRY ---
 
 _SEARCH_REGISTRY: Dict[str, HandlerConfig]
 """Global registry of search handlers for Congressional data resources.
@@ -277,7 +271,7 @@ HandlerConfig : TypedDict defining the configuration structure
 _SEARCH_REGISTRY = {
     'bill': {
         'module': 'congressgov.services.core.search',
-        'function': 'billsearch',  # ✅ Updated to use local handler
+        'function': 'billsearch',
         'param_aliases': {
             'type': 'bill_type',
             'number': 'bill_number',
@@ -285,7 +279,7 @@ _SEARCH_REGISTRY = {
     },
     'amendment': {
         'module': 'congressgov.services.core.search',
-        'function': 'amendmentsearch',  # ✅ Local handler
+        'function': 'amendmentsearch',
         'param_aliases': {
             'type': 'amendment_type',
             'number': 'amendment_number',
@@ -293,66 +287,66 @@ _SEARCH_REGISTRY = {
     },
     'member': {
         'module': 'congressgov.services.core.search',
-        'function': 'membersearch',  # ✅ Local handler
+        'function': 'membersearch',
         'param_aliases': {}
     },
     'committee': {
         'module': 'congressgov.services.core.search',
-        'function': 'committeesearch',  # ✅ Local handler
+        'function': 'committeesearch',
         'param_aliases': {}
     },
     'nomination': {
         'module': 'congressgov.services.core.search',
-        'function': 'nominationsearch',  # ✅ Local handler
+        'function': 'nominationsearch',
         'param_aliases': {}
     },
     'treaty': {
         'module': 'congressgov.services.core.search',
-        'function': 'treatysearch',  # ✅ Local handler
+        'function': 'treatysearch',
         'param_aliases': {
             'number': 'treaty_number',
         }
     },
     'hearing': {
         'module': 'congressgov.services.core.search',
-        'function': 'hearingsearch',  # ✅ Local handler
+        'function': 'hearingsearch',
         'param_aliases': {}
     },
     'committee-meeting': {
         'module': 'congressgov.services.core.search',
-        'function': 'committeemeetingsearch',  # ✅ Local handler
+        'function': 'committeemeetingsearch',
         'param_aliases': {}
     },
     'committee-report': {
         'module': 'congressgov.services.core.search',
-        'function': 'committeereportsearch',  # ✅ Local handler
+        'function': 'committeereportsearch',
         'param_aliases': {
             'type': 'report_type',
         }
     },
     'committee-print': {
         'module': 'congressgov.services.core.search',
-        'function': 'committeeprintsearch',  # ✅ Local handler
+        'function': 'committeeprintsearch',
         'param_aliases': {}
     },
     'house-communication': {
         'module': 'congressgov.services.core.search',
-        'function': 'housecommunicationsearch',  # ✅ Local handler
+        'function': 'housecommunicationsearch',
         'param_aliases': {}
     },
     'senate-communication': {
         'module': 'congressgov.services.core.search',
-        'function': 'senatecommunicationsearch',  # ✅ Local handler
+        'function': 'senatecommunicationsearch',
         'param_aliases': {}
     },
     'congress': {
         'module': 'congressgov.services.core.search',
-        'function': 'congresssearch',  # ✅ Local handler
+        'function': 'congresssearch',
         'param_aliases': {}
     },
     'summary': {
         'module': 'congressgov.services.core.search',
-        'function': 'summariessearch',  # ✅ Local handler
+        'function': 'summariessearch',
         'param_aliases': {
             'type': 'bill_type',
         }
@@ -388,7 +382,7 @@ _SEARCH_REGISTRY = {
     },
 }
 
-# NOTE: Cache for loaded search functions is managed by @lru_cache decorator on
+# Cache for loaded search functions is managed by @lru_cache decorator on
 # _load_search_handler(). This explicit cache dict is no longer used but kept for
 # backwards compatibility if any external code references it.
 _HANDLER_CACHE: Dict[str, Callable] = {}
@@ -424,9 +418,7 @@ def _attach_client_to_search_result(result: Any, client: Any) -> Any:
     return result
 
 
-# ============================================================================
-# LAZY LOADING UTILITIES
-# ============================================================================
+# --- LAZY LOADING UTILITIES ---
 
 @lru_cache(maxsize=32)
 def _load_search_handler(resource_type: str) -> Callable[..., Any]:
@@ -502,7 +494,7 @@ def _load_search_handler(resource_type: str) -> Callable[..., Any]:
     function_name = handler_config['function']
     
     # --- <LAZY IMPORT MODULE> ---
-    # NOTE: This is the key to lazy loading - we only import when needed
+    # This is the key to lazy loading - we only import when needed
     logger.debug(f"Loading search handler: {module_path}.{function_name}")
     
     try:
@@ -602,11 +594,9 @@ def _normalize_parameters(
     return normalized
 
 
-# ============================================================================
-# UNIVERSAL SEARCH INTERFACE
-# ============================================================================
+# --- UNIVERSAL SEARCH INTERFACE ---
 
-# NOTE: Type overloads provide IntelliSense for each resource type
+# Type overloads provide IntelliSense for each resource type
 # Each overload specifies the exact parameters and return type for that resource
 
 @overload
@@ -1042,7 +1032,7 @@ def search(
     _normalize_parameters : Internal function that normalizes parameter names
     """
     # --- <LAZY LOAD SEARCH HANDLER> ---
-    # NOTE: This is where lazy loading happens - handler is imported only now
+    # This is where lazy loading happens - handler is imported only now
     handler = _load_search_handler(resource_type)
     
     # --- <NORMALIZE PARAMETERS> ---
@@ -1056,11 +1046,11 @@ def search(
         result = handler(self, **normalized_params)
     else:
         logger.debug(f"Calling {resource_type} search handler as standalone function")
-        # NOTE: Pass None as first arg since handlers expect 'self' parameter
+        # Pass None as first arg since handlers expect 'self' parameter
         result = handler(None, **normalized_params)
 
     # --- <ATTACH CLIENT TO RESULT> ---
-    # NOTE: The handler already resolved a client to make its API call (or it
+    # The handler already resolved a client to make its API call (or it
     # would have raised); re-resolving here is safe and lets us backfill
     # `.client` on results the handler itself didn't attach it to.
     from congressgov.services.core.api_service import ApiService
@@ -1073,9 +1063,7 @@ def search(
     return _attach_client_to_search_result(result, resolved_client)
 
 
-# ============================================================================
-# REGISTRY MANAGEMENT
-# ============================================================================
+# --- REGISTRY MANAGEMENT ---
 
 def register_search_handler(
     resource_type: str,
@@ -1400,15 +1388,11 @@ def unregister_search_handler(resource_type: str) -> None:
     logger.info(f"Unregistered search handler for '{resource_type}'")
 
 
-# ============================================================================
-# PUBLIC API EXPORTS
-# ============================================================================
+# --- PUBLIC API EXPORTS ---
 # These are the symbols available when using "from congressgov.services.core.search import *"
 # and are what IDEs will show in autocomplete for this module.
 
-# ============================================================================
-# SEARCH HANDLER IMPLEMENTATIONS
-# ============================================================================
+# --- SEARCH HANDLER IMPLEMENTATIONS ---
 # These handlers are loaded lazily by the universal search system.
 # Each handler follows the same pattern: resolve client, route to appropriate
 # endpoint based on parameters, and return validated model.
@@ -2338,7 +2322,7 @@ def housecommunicationsearch(
     resolved_client = ApiService._resolve_client(self, client)
     
     # --- <ROUTE TO APPROPRIATE ENDPOINT> ---
-    # NOTE: Route to the correct endpoint based on which parameters are provided:
+    # Route to the correct endpoint based on which parameters are provided:
     # - Both congress AND communication_type → house_communication_list_sync
     # - Only congress → house_communication_congress_sync
     # - Neither → house_communication_sync
@@ -2412,7 +2396,7 @@ def senatecommunicationsearch(
     resolved_client = ApiService._resolve_client(self, client)
     
     # --- <ROUTE TO APPROPRIATE ENDPOINT> ---
-    # NOTE: Route to the correct endpoint based on which parameters are provided:
+    # Route to the correct endpoint based on which parameters are provided:
     # - Both congress AND communication_type → senate_communication_list_sync
     # - Only congress → senate_communication_congress_sync
     # - Neither → senate_communication_sync
@@ -2703,7 +2687,7 @@ def summariessearch(
     client: Any = None,
     congress: int = None,
     bill_type: str = None,
-    format_: str = 'json',  # ✅ Default to 'json' format
+    format_: str = 'json',
     offset: int = None,
     limit: int = None,
     from_date_time: str = None,
@@ -2801,9 +2785,7 @@ def summariessearch(
         raise ValueError(f"Failed to parse API response as JSON: {e}. Response content: {content_preview}")
 
 
-# ============================================================================
-# PUBLIC API EXPORTS
-# ============================================================================
+# --- PUBLIC API EXPORTS ---
 # These are the symbols available when using "from congressgov.services.core.search import *"
 # and are what IDEs will show in autocomplete for this module.
 
@@ -3765,7 +3747,7 @@ async def housecommunicationsearch_async(
     resolved_client = await AsyncApiService._resolve_client(self, client)
     
     # --- <ROUTE TO APPROPRIATE ENDPOINT> ---
-    # NOTE: Route to the correct endpoint based on which parameters are provided:
+    # Route to the correct endpoint based on which parameters are provided:
     # - Both congress AND communication_type → house_communication_list_async
     # - Only congress → house_communication_congress_async
     # - Neither → house_communication_async
@@ -3841,7 +3823,7 @@ async def senatecommunicationsearch_async(
     resolved_client = await AsyncApiService._resolve_client(self, client)
     
     # --- <ROUTE TO APPROPRIATE ENDPOINT> ---
-    # NOTE: Route to the correct endpoint based on which parameters are provided:
+    # Route to the correct endpoint based on which parameters are provided:
     # - Both congress AND communication_type → senate_communication_list_async
     # - Only congress → senate_communication_congress_async
     # - Neither → senate_communication_async
@@ -4146,7 +4128,7 @@ async def summariessearch_async(
     client: Any = None,
     congress: int = None,
     bill_type: str = None,
-    format_: str = 'json',  # ✅ Default to 'json' format
+    format_: str = 'json',
     offset: int = None,
     limit: int = None,
     from_date_time: str = None,
@@ -4244,9 +4226,7 @@ async def summariessearch_async(
         raise ValueError(f"Failed to parse API response as JSON: {e}. Response content: {content_preview}")
 
 
-# ============================================================================
-# PUBLIC API EXPORTS
-# ============================================================================
+# --- PUBLIC API EXPORTS ---
 # These are the symbols available when using "from congressgov.services.core.search import *"
 # and are what IDEs will show in autocomplete for this module.
 
@@ -4275,7 +4255,7 @@ async def search_async(resource_type: str, self: Any = None, **kwargs: Any) -> A
     else:
         result = await handler(None, **normalized_params)
 
-    # NOTE: mirrors the client-attachment backfill in search() — see
+    # mirrors the client-attachment backfill in search() — see
     # _attach_client_to_search_result for why this is needed centrally.
     from congressgov.services.core.async_api_service import AsyncApiService
 

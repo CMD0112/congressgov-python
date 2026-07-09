@@ -1,12 +1,7 @@
 """
 Query and convenience methods for the SenateCommunications model.
 
-These methods are dynamically registered on the SenateCommunications class,
-keeping the model file clean and focused on data validation.
-
-The query builder (SenateCommunicationsQuery) is created using the generic
-CollectionQuery class from _query_builder.py, eliminating the
-need for custom query class implementations.
+Registered dynamically via ``_registry`` so SenateCommunications stay plain data models.
 
 Methods registered:
 - Query methods: filter(), query(), group_by()
@@ -31,49 +26,28 @@ import congressgov.models.communications.senate_communication as senate_comm_mod
 # Import SenateCommunication class for validation
 from congressgov.models.communications.senate_communication import SenateCommunication
 
-# ========================================
-# CREATE QUERY BUILDER WITH FIELD MAPPINGS
-# ========================================
 
-# NOTE: Create the SenateCommunicationsQuery class using the generic query builder
-# NOTE: item_class enables field validation to catch typos early
 SenateCommunicationsQuery = create_query_builder(
     collection_class=SenateCommunications,
     items_field="senateCommunications",
     item_class=SenateCommunication,
     field_mappings={
-        # NOTE: Add field mappings here as enums become available
     }
 )
 
-# NOTE: Set it on the module so it can be imported
+# Expose the query class from both the model module and this module's
+# globals, since callers import it from either location.
 senate_comm_module.SenateCommunicationsQuery = SenateCommunicationsQuery
 
-# NOTE: Make it available for use in this module
 if not TYPE_CHECKING:
     globals()['SenateCommunicationsQuery'] = SenateCommunicationsQuery
 
-# ========================================
-# QUERY BUILDER ACCESS
-# ========================================
 
 @register_method(SenateCommunications)
 def query(self):
-    """
-    Get query builder for chaining operations.
-    
-    Example:
-        comms.query().filter(congress=118, lazy=True).order_by("number").execute()
-    
-    Returns:
-        SenateCommunicationsQuery instance for chaining operations
-    """
+    """Return a query builder for chained filtering."""
     return SenateCommunicationsQuery(self.senateCommunications or [])
 
-
-# ========================================
-# CONVENIENCE METHODS (Eager by default)
-# ========================================
 
 @register_method(SenateCommunications)
 def filter(self, *, lazy: bool = False, **kwargs):
@@ -100,52 +74,19 @@ def filter(self, *, lazy: bool = False, **kwargs):
 
 @register_method(SenateCommunications)
 def by_congress(self, congress: int) -> SenateCommunications:
-    """
-    Get communications from a specific Congress (always eager, returns SenateCommunications).
-    
-    Args:
-        congress: Congress number (e.g., 118 for 118th Congress)
-    
-    Returns:
-        Filtered SenateCommunications object
-    
-    Example:
-        congress_118 = comms.by_congress(118)
-    """
+    """Get communications from a specific Congress."""
     return self.query().filter(congress=congress)
 
 
 @register_method(SenateCommunications)
 def by_type(self, comm_type: str) -> SenateCommunications:
-    """
-    Get communications of a specific type (always eager, returns SenateCommunications).
-    
-    Args:
-        comm_type: Communication type to filter by
-    
-    Returns:
-        Filtered SenateCommunications object
-    
-    Example:
-        executive = comms.by_type("EC")
-    """
+    """Get communications of a specific type."""
     return self.query().filter(type=comm_type)
 
 
 @register_method(SenateCommunications)
 def recent(self, days: int = 30) -> SenateCommunications:
-    """
-    Get communications from the last N days (always eager, returns SenateCommunications).
-    
-    Args:
-        days: Number of days to look back (default: 30)
-    
-    Returns:
-        Filtered SenateCommunications object
-    
-    Example:
-        last_week = comms.recent(days=7)
-    """
+    """Get communications from the last N days."""
     def is_recent(c: SenateCommunication) -> bool:
         if not hasattr(c, 'communicationDate') or not c.communicationDate:
             return False

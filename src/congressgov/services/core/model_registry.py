@@ -1,30 +1,20 @@
 """
-Model Registry for abstracting model type resolution.
+`ModelRegistry` resolves model classes and their API mappings by name, so
+services depend on this registry instead of importing model modules
+directly. That keeps model-structure changes isolated to one place and
+makes services easy to test with a mock registry.
 
-Generated mappings are maintained in ``congressgov.services.core.model_registry_generated``
+Generated mappings live in ``congressgov.services.core.model_registry_generated``
 (regenerate with ``poetry run generate-registry``).
 
-This module provides a central registry for resolving model classes and their
-associated API mappings, reducing direct coupling between services and models.
+Instead of importing models directly in a service::
 
-Architecture Benefits:
-- Service classes import only from model_registry
-- Changes to model structure are isolated to this module
-- Testable with mock registry
-- Supports plugin architecture for custom models
-- Clear separation between services and model layers
+    from congressgov.models.entities.bill import Bill, Bills
 
-Usage Pattern:
-    # Instead of importing models directly in services:
-    from congressgov.models.entities.bill import Bill, Bills  # ❌ Tight coupling
-    from congressgov.models.actions.action import Actions
-    
-    # Import from registry:
-    from congressgov.services.core.model_registry import ModelRegistry  # ✅ Loose coupling
-    
-    # Get model dynamically:
+use the registry::
+
+    from congressgov.services.core.model_registry import ModelRegistry
     bill_model = ModelRegistry.get_model("Bill")
-    actions_model = ModelRegistry.get_model("Actions")
 """
 
 from __future__ import annotations
@@ -33,7 +23,6 @@ import logging
 
 from congressgov.services.core.model_registry_generated import MODEL_PATH_MAP
 
-# NOTE: Configure module-level logger
 logger = logging.getLogger(__name__)
 
 # Hand-maintained aliases and legacy paths (override codegen map when keys collide)
@@ -104,23 +93,15 @@ HAND_MODEL_OVERRIDES: dict[str, str] = {
     "NominationRef": "congressgov.models.base.references",
 }
 
-# NOTE: Lazy-loaded model cache to avoid circular imports at module load time
+# Lazy-loaded model cache to avoid circular imports at module load time
 _model_cache: Dict[str, Type] = {}
 
 
 class ModelRegistry:
-    """
-    Central registry for model type resolution and API mappings.
-    
-    This registry provides a layer of indirection between services and models,
-    allowing API services to work with models without direct imports.
-    
-    Features:
-    - Lazy loading of model classes
-    - Caching for performance
-    - Support for custom model registration
-    - Clear error messages for missing models
-    
+    """Resolves model classes by name so services don't import model modules
+    directly. Classes are loaded lazily and cached; custom models can be
+    registered at runtime.
+
     Example:
         # Get a model class
         BillModel = ModelRegistry.get_model("Bill")
@@ -138,8 +119,8 @@ class ModelRegistry:
         """
         Get a model class by name with lazy loading.
         
-        NOTE: Uses caching to avoid repeated imports.
-        NOTE: Lazy loads on first access to avoid circular import issues.
+        Uses caching to avoid repeated imports.
+        Lazy loads on first access to avoid circular import issues.
         
         Args:
             model_name: Name of the model class (e.g., "Bill", "Actions", "Member")
@@ -177,7 +158,7 @@ class ModelRegistry:
         """
         Import a model class dynamically based on naming conventions.
         
-        NOTE: This method understands the project's model organization structure.
+        This method understands the project's model organization structure.
         
         Args:
             model_name: Name of the model class
@@ -208,8 +189,8 @@ class ModelRegistry:
         """
         Register a custom model class.
         
-        NOTE: This is an advanced feature for plugins, testing, or custom extensions.
-        NOTE: Most users should rely on built-in model registration via _import_model().
+        This is an advanced feature for plugins, testing, or custom extensions.
+        Most users should rely on built-in model registration via _import_model().
         
         Useful for:
         - Testing with mock models

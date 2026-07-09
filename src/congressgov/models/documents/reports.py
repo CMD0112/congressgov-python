@@ -6,7 +6,6 @@ from ..base.model import Model
 from ..base.enums import ReportType, Chamber, LegislationType, LawType
 from ..base.types import CountRef
 
-# NOTE: ✅ Sprint 2 improvement - Using reference models and direct imports
 from ..entities.treaty import Treaty
 from ..entities.bill import Bill
 

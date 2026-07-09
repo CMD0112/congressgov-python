@@ -1,12 +1,7 @@
 """
 Query and convenience methods for the Members model.
 
-These methods are dynamically registered on the Members class,
-keeping the model file clean and focused on data validation.
-
-The query builder (MembersQuery) is created using the generic
-CollectionQuery class from _query_builder.py, eliminating the
-need for custom query class implementations.
+Registered dynamically via ``_registry`` so Members stay plain data models.
 
 Field Mappings:
 - state: Supports both codes ("CA") and full names ("California")
@@ -36,37 +31,27 @@ import congressgov.models.entities.member as member_module
 # Import enum for state code mapping
 from congressgov.models.base.enums import StateCode
 
-# ========================================
-# CREATE QUERY BUILDER WITH FIELD MAPPINGS
-# ========================================
 
 # Import Member class for validation
 from congressgov.models.entities.member import Member
 
-# NOTE: Create the MembersQuery class using the generic query builder
-# NOTE: Field mappings enable shorthand queries (e.g., state="CA" matches "California")
-# NOTE: item_class enables field validation to catch typos early
 MembersQuery = create_query_builder(
     collection_class=Members,
     items_field="members",
     item_class=Member,
     field_mappings={
         "state": FieldMapping(enum_class=StateCode),
-        # NOTE: Add more field mappings here as needed
         # Example: "partyName": FieldMapping(enum_class=PartyCode)
     }
 )
 
-# NOTE: Set it on the module so it can be imported
+# Expose the query class from both the model module and this module's
+# globals, since callers import it from either location.
 member_module.MembersQuery = MembersQuery
 
-# NOTE: Make it available for use in this module
 if not TYPE_CHECKING:
     globals()['MembersQuery'] = MembersQuery
 
-# ========================================
-# QUERY BUILDER ACCESS
-# ========================================
 
 @register_method(Members)
 def query(self):
@@ -80,30 +65,9 @@ def query(self):
     return MembersQuery(self.members or [])
 
 
-# ========================================
-# CONVENIENCE METHODS (Eager by default)
-# ========================================
-
 @register_method(Members)
 def filter(self, *, lazy: bool = False, **kwargs):
-    """
-    Filter members by field values.
-    
-    Args:
-        lazy: If True, return MembersQuery for chaining. If False, return Members object (keyword-only).
-        **kwargs: Field-value pairs to filter by.
-    
-    Examples:
-        # Eager (default) - returns Members object
-        ca_members = members.filter(state="CA")
-        
-        # Lazy - returns builder for chaining
-        query = members.filter(state="CA", lazy=True).order_by("lastName")
-        results = query.execute()
-    
-    Returns:
-        Members object (if eager) or MembersQuery (if lazy)
-    """
+    """Filter by field values; pass lazy=True to keep chaining."""
     return self.query().filter(lazy=lazy, **kwargs)
 
 
@@ -157,30 +121,12 @@ def republicans(self) -> Members:
 
 @register_method(Members)
 def group_by(self, field: str):
-    """
-    Group members by field.
-    Returns dict mapping field values to Members objects.
-    
-    Args:
-        field: Field name to group by
-    
-    Returns:
-        Dictionary mapping field values to Members objects
-    
-    Example:
-        by_state = members.group_by("state")
-        # Returns: {"CA": Members(...), "NY": Members(...), ...}
-    """
+    """Group items into a dict keyed by field value."""
     return self.query().group_by(field)
 
 
-# ========================================
-# MEMBER (SINGULAR) INSTANCE METHODS
-# ========================================
-# NOTE: These methods operate on individual Member instances
-# NOTE: They provide convenient access to related data via the API
-
-# Import necessary modules for Member instance methods
+# The remaining methods operate on individual Member instances, fetching
+# related data (sponsorship, cosponsorship) from the API on demand.
 from typing import Any, Optional
 from congressgov._client.api.member import (
     member_sponsorship_list_sync,

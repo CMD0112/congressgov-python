@@ -7,15 +7,10 @@ from ..base.references import CommitteeRef
 from .vote import RecordedVote, RecordedVotes
 from .calendar import CalendarNumber
 
-
-# Action class definition
-
 class Action(Model):
-    """
-    Action model with properly typed references.
-    
-    NOTE: Uses CommitteeRef instead of full Committee model to avoid circular imports.
-    This maintains full type safety and IntelliSense support.
+    """A single action taken on a bill, amendment, or nomination (e.g. introduced,
+    referred to committee, passed). Uses `CommitteeRef` rather than the full
+    `Committee` model to avoid a circular import.
     """
     actionDate: date | str | None = None
     actionTime: time | None = None
@@ -23,7 +18,7 @@ class Action(Model):
     type: str | None = None  # ActionType enum
     actionCode: str | None = None  # ActionCode enum
     sourceSystem: dict | None = None
-    committees: list[CommitteeRef] | None = None  # ✅ Now fully typed with CommitteeRef
+    committees: list[CommitteeRef] | None = None
     recordedVotes: list[RecordedVote] | None = None
     calendarNumber: list[CalendarNumber] | None = None
 
@@ -85,10 +80,8 @@ class Action(Model):
 
 
 class Actions(Model):
-    """
-    === Actions Model ===
-    Represents a container for a list of Action objects, as well as pagination and request metadata.
-    This structure matches the JSON payload returned by the API, which includes 'actions', 'pagination', and 'request' keys.
+    """A container for a list of `Action` objects, matching the API's
+    `actions`/`pagination`/`request` response shape.
     """
     actions: List[Action] | None = Field(None, alias="actions")
 

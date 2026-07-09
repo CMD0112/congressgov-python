@@ -1,12 +1,7 @@
 """
 Query and convenience methods for the HouseCommunications model.
 
-These methods are dynamically registered on the HouseCommunications class,
-keeping the model file clean and focused on data validation.
-
-The query builder (HouseCommunicationsQuery) is created using the generic
-CollectionQuery class from _query_builder.py, eliminating the
-need for custom query class implementations.
+Registered dynamically via ``_registry`` so HouseCommunications stay plain data models.
 
 Methods registered:
 - Query methods: filter(), query(), group_by()
@@ -31,49 +26,28 @@ import congressgov.models.communications.house_communication as house_comm_modul
 # Import HouseCommunication class for validation
 from congressgov.models.communications.house_communication import HouseCommunication
 
-# ========================================
-# CREATE QUERY BUILDER WITH FIELD MAPPINGS
-# ========================================
 
-# NOTE: Create the HouseCommunicationsQuery class using the generic query builder
-# NOTE: item_class enables field validation to catch typos early
 HouseCommunicationsQuery = create_query_builder(
     collection_class=HouseCommunications,
     items_field="houseCommunications",
     item_class=HouseCommunication,
     field_mappings={
-        # NOTE: Add field mappings here as enums become available
     }
 )
 
-# NOTE: Set it on the module so it can be imported
+# Expose the query class from both the model module and this module's
+# globals, since callers import it from either location.
 house_comm_module.HouseCommunicationsQuery = HouseCommunicationsQuery
 
-# NOTE: Make it available for use in this module
 if not TYPE_CHECKING:
     globals()['HouseCommunicationsQuery'] = HouseCommunicationsQuery
 
-# ========================================
-# QUERY BUILDER ACCESS
-# ========================================
 
 @register_method(HouseCommunications)
 def query(self):
-    """
-    Get query builder for chaining operations.
-    
-    Example:
-        comms.query().filter(congress=118, lazy=True).order_by("number").execute()
-    
-    Returns:
-        HouseCommunicationsQuery instance for chaining operations
-    """
+    """Return a query builder for chained filtering."""
     return HouseCommunicationsQuery(self.houseCommunications or [])
 
-
-# ========================================
-# CONVENIENCE METHODS (Eager by default)
-# ========================================
 
 @register_method(HouseCommunications)
 def filter(self, *, lazy: bool = False, **kwargs):
@@ -100,52 +74,19 @@ def filter(self, *, lazy: bool = False, **kwargs):
 
 @register_method(HouseCommunications)
 def by_congress(self, congress: int) -> HouseCommunications:
-    """
-    Get communications from a specific Congress (always eager, returns HouseCommunications).
-    
-    Args:
-        congress: Congress number (e.g., 118 for 118th Congress)
-    
-    Returns:
-        Filtered HouseCommunications object
-    
-    Example:
-        congress_118 = comms.by_congress(118)
-    """
+    """Get communications from a specific Congress."""
     return self.query().filter(congress=congress)
 
 
 @register_method(HouseCommunications)
 def by_type(self, comm_type: str) -> HouseCommunications:
-    """
-    Get communications of a specific type (always eager, returns HouseCommunications).
-    
-    Args:
-        comm_type: Communication type to filter by
-    
-    Returns:
-        Filtered HouseCommunications object
-    
-    Example:
-        executive = comms.by_type("EC")
-    """
+    """Get communications of a specific type."""
     return self.query().filter(type=comm_type)
 
 
 @register_method(HouseCommunications)
 def recent(self, days: int = 30) -> HouseCommunications:
-    """
-    Get communications from the last N days (always eager, returns HouseCommunications).
-    
-    Args:
-        days: Number of days to look back (default: 30)
-    
-    Returns:
-        Filtered HouseCommunications object
-    
-    Example:
-        last_week = comms.recent(days=7)
-    """
+    """Get communications from the last N days."""
     def is_recent(c: HouseCommunication) -> bool:
         if not hasattr(c, 'communicationDate') or not c.communicationDate:
             return False

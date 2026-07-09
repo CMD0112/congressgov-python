@@ -1,14 +1,8 @@
 """
-API Service module for congressgov.services functionality.
-
-This module provides:
-- ApiService: Base class for API services with client resolution and expansion
-- ExpansionResult: Dataclass for detailed expansion results
-
-Best Practices:
-- Client resolution with fallback logic
-- Deep copying with Pydantic model awareness
-- Attribute expansion by fetching additional data from API
+`ApiService` is the base class services use for client resolution (with
+fallback logic), Pydantic-aware deep copying, and expanding an entity's
+related attributes by fetching them from the API. `ExpansionResult` carries
+detailed per-attribute outcomes when a caller needs them.
 """
 
 from __future__ import annotations
@@ -24,7 +18,6 @@ from congressgov.services.api_format import resolve_response_format
 from congressgov.services.config import MAX_EXPANSION_ATTRIBUTES
 from congressgov.services.core.expansion_helpers import extract_parameters_from_target
 
-# NOTE: Configure module-level logger
 logger = logging.getLogger(__name__)
 
 
@@ -82,17 +75,15 @@ class ApiService:
         Raises:
             ValueError: If no client can be resolved
         """
-        # NOTE: Check provided client first (highest priority)
         if provided_client is not None:
             return provided_client
         
-        # NOTE: Fall back to target's client attribute
         if target is not None:
             target_client = getattr(target, 'client', None)
             if target_client is not None:
                 return target_client
 
-            # NOTE: Items in a collection may inherit client from the parent Members/Bills/etc.
+            # Items in a collection may inherit client from the parent Members/Bills/etc.
             parent = getattr(target, '_parent_collection', None)
             if parent is not None:
                 parent_client = getattr(parent, 'client', None)
@@ -116,7 +107,7 @@ class ApiService:
         """
         Create deep copy of target object with special handling for Pydantic models.
         
-        NOTE: Pydantic models require special handling - client and session attributes
+        Pydantic models require special handling - client and session attributes
         must be temporarily removed before copying to avoid serialization issues.
         
         Args:
@@ -125,7 +116,6 @@ class ApiService:
         Returns:
             Deep copy of target with client/session attributes preserved
         """
-        # NOTE: Handle Pydantic models with model_copy method
         if hasattr(target, 'model_copy'):
             # Store attributes that can't be serialized
             saved_attrs = {
@@ -154,7 +144,6 @@ class ApiService:
             
             return copied_target
         
-        # NOTE: Handle regular objects with __dict__
         else:
             # Exclude non-serializable attributes
             exclude_attrs = {'client', '_client', 'session', '_session'}
@@ -186,7 +175,7 @@ class ApiService:
         """
         Extract and validate required parameters from target object.
         
-        NOTE: Supports parameter aliases for flexibility in attribute naming.
+        Supports parameter aliases for flexibility in attribute naming.
         
         Args:
             target: Object to extract parameters from
@@ -232,7 +221,7 @@ class ApiService:
             Tuple of (success: bool, error: Optional[Exception])
         """
         try:
-            # NOTE: Extract API function and model class from mapping
+            # Extract API function and model class from mapping
             # Mapping entry format: {api_function: model_class}
             api_function, model_class = next(iter(mapping_entry.items()))
 
@@ -247,24 +236,20 @@ class ApiService:
                 setattr(target, attr_name, current)
                 return True, None
 
-            # NOTE: Call API function to fetch data
             with fetch_options(force_fetch=force_fetch):
                 response = api_function(client=client, **extracted_parameters, **kwargs)
             
-            # NOTE: Parse response through API envelope
             json_response = json.loads(response.content)
             api_envelope = ApiEnvelope.model_validate(json_response)
             
-            # NOTE: Validate data as model instance
             model_instance = model_class.model_validate(api_envelope.data)
             
-            # NOTE: Set expanded attribute on target
             setattr(target, attr_name, model_instance)
             
             return True, None
             
         except Exception as e:
-            # NOTE: Log warning but don't raise - allow other attributes to expand
+            # Log warning but don't raise - allow other attributes to expand
             logger.warning(f"Failed to expand attribute '{attr_name}': {e}")
             return False, e
 
@@ -283,8 +268,8 @@ class ApiService:
         """
         Expand attributes of a target object by fetching additional data from the API.
         
-        NOTE: Creates a deep copy of the target before expansion to avoid mutating original.
-        NOTE: Failed expansions log warnings but don't prevent other attributes from expanding.
+        Creates a deep copy of the target before expansion to avoid mutating original.
+        Failed expansions log warnings but don't prevent other attributes from expanding.
         
         Args:
             target: Object to expand (will be deep copied)
@@ -315,24 +300,21 @@ class ApiService:
                 parameters=["congress", "billType", "billNumber"]
             )
         """
-        # NOTE: Create deep copy to avoid mutating original object
         expanded_target = self._create_deep_copy(target)
         
-        # NOTE: Resolve client using fallback logic
         client = self._resolve_client(target, client)
         
-        # NOTE: Extract and validate required parameters
+        # Extract and validate required parameters
         extracted_parameters = self._extract_parameters(
             target, parameters, normalize_params
         )
         
-        # NOTE: Determine which attributes to expand
         if mapping is None:
             mapping = {}
         
         attributes_to_expand = attributes if attributes is not None else list(mapping.keys())
         
-        # NOTE: Validate attribute count against configuration limit
+        # Validate attribute count against configuration limit
         if len(attributes_to_expand) > MAX_EXPANSION_ATTRIBUTES:
             logger.warning(
                 f"Attempting to expand {len(attributes_to_expand)} attributes, "
@@ -340,7 +322,7 @@ class ApiService:
                 f"Proceeding anyway but consider expanding fewer attributes for better performance."
             )
         
-        # NOTE: Expand each attribute independently
+        # Expand each attribute independently
         errors = []
         for attr_name in attributes_to_expand:
             if attr_name not in mapping:
@@ -358,7 +340,6 @@ class ApiService:
             if not success and error is not None:
                 errors.append((attr_name, error))
         
-        # NOTE: Return detailed result if requested
         if return_detailed_result:
             return ExpansionResult(
                 success=len(errors) == 0,

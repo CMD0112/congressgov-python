@@ -1,9 +1,4 @@
-"""
-Circuit breaker pattern implementation for batch operations.
-
-This module provides the CircuitBreaker class for protecting against cascading
-failures during batch processing operations.
-"""
+"""Circuit breaker pattern for batch operations, to stop cascading failures."""
 
 from __future__ import annotations
 

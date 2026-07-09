@@ -1,6 +1,6 @@
 [project]
 name = "congressgov"
-version = "2.1.0"
+version = "2.1.1"
 description = "Python SDK for the Congress.gov API — services, models, and generated HTTP client"
 readme = "README.md"
 license = "Apache-2.0"
@@ -71,11 +71,18 @@ codegen = [
     "pyyaml>=6.0",
     "isort>=5.12.0",
 ]
+docs = [
+    "mkdocs>=1.6.1,<2.0.0",
+    "mkdocs-material>=9.7.6,<10.0.0",
+    "mkdocstrings[python]>=1.0.4,<2.0.0",
+]
 
 [project.urls]
 Homepage = "https://github.com/CMD0112/congressgov-python"
 Repository = "https://github.com/CMD0112/congressgov-python"
-Documentation = "https://github.com/CMD0112/congressgov-python#documentation"
+Documentation = "https://cmd0112.github.io/congressgov-python/"
+Changelog = "https://github.com/CMD0112/congressgov-python/blob/main/CHANGELOG.md"
+Issues = "https://github.com/CMD0112/congressgov-python/issues"
 
 [project.scripts]
 congressgov-store = "congressgov.services.core.workspace.__main__:main"
@@ -148,6 +155,14 @@ click = "^8.1.0"
 pyyaml = "^6.0"
 isort = "^5.12.0"
 
+[tool.poetry.group.docs]
+optional = true
+
+[tool.poetry.group.docs.dependencies]
+mkdocs = "^1.6.1"
+mkdocs-material = "^9.7.6"
+mkdocstrings = { version = "^1.0.4", extras = ["python"] }
+
 [tool.codegen]
 spec = "codegen/config/openapi_spec.yaml"
 config = "codegen/config/generator_config.yaml"
@@ -204,7 +219,7 @@ ignore = ["E402"]
 [tool.deptry]
 extend_exclude = ["codegen/data", "examples"]
 known_first_party = ["congressgov", "codegen"]
-pep621_dev_dependency_groups = ["dev"]
+pep621_dev_dependency_groups = ["dev", "docs"]
 
 [tool.deptry.package_module_name_map]
 redis = ["redis"]

@@ -1,14 +1,8 @@
 """
-Batch operations and bulk processing for congressgov.
-
-This module provides comprehensive batch processing capabilities including:
-- Parallel processing with configurable concurrency
-- Memory-efficient streaming for large datasets
-- Comprehensive error handling and recovery
-- Progress tracking and monitoring
-- Checkpoint/resume functionality
-
-All features are designed to work seamlessly with the existing async infrastructure.
+Batch operations and bulk processing for congressgov: parallel processing
+with configurable concurrency, memory-efficient streaming for large
+datasets, error handling/recovery, progress tracking, and checkpoint/resume,
+all built on the existing async infrastructure.
 
 Usage:
     from congressgov.services.batch import BatchProcessor, StreamingProcessor, BatchMonitor

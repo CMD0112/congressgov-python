@@ -1,12 +1,7 @@
 """
 Query and convenience methods for the Amendments model.
 
-These methods are dynamically registered on the Amendments class,
-keeping the model file clean and focused on data validation.
-
-The query builder (AmendmentsQuery) is created using the generic
-CollectionQuery class from _query_builder.py, eliminating the
-need for custom query class implementations.
+Registered dynamically via ``_registry`` so Amendments stay plain data models.
 
 Field Mappings:
 - type: Supports both codes ("hamdt", "samdt") and full names
@@ -35,119 +30,51 @@ import congressgov.models.entities.amendment as amendment_module
 # Import Amendment class for validation
 from congressgov.models.entities.amendment import Amendment
 
-# ========================================
-# CREATE QUERY BUILDER WITH FIELD MAPPINGS
-# ========================================
 
-# NOTE: Create the AmendmentsQuery class using the generic query builder
-# NOTE: item_class enables field validation to catch typos early
 AmendmentsQuery = create_query_builder(
     collection_class=Amendments,
     items_field="amendments",
     item_class=Amendment,
     field_mappings={
-        # NOTE: Add field mappings here as enums become available
         # Example: "type": FieldMapping(enum_class=AmendmentType)
     }
 )
 
-# NOTE: Set it on the module so it can be imported
+# Expose the query class from both the model module and this module's
+# globals, since callers import it from either location.
 amendment_module.AmendmentsQuery = AmendmentsQuery
 
-# NOTE: Make it available for use in this module
 if not TYPE_CHECKING:
     globals()['AmendmentsQuery'] = AmendmentsQuery
 
-# ========================================
-# QUERY BUILDER ACCESS
-# ========================================
 
 @register_method(Amendments)
 def query(self):
-    """
-    Get query builder for chaining operations.
-    
-    Example:
-        amendments.query().filter(type="hamdt", lazy=True).order_by("number").execute()
-    
-    Returns:
-        AmendmentsQuery instance for chaining operations
-    """
+    """Return a query builder for chained filtering."""
     return AmendmentsQuery(self.amendments or [])
 
 
-# ========================================
-# CONVENIENCE METHODS (Eager by default)
-# ========================================
-
 @register_method(Amendments)
 def filter(self, *, lazy: bool = False, **kwargs):
-    """
-    Filter amendments by field values.
-    
-    Args:
-        lazy: If True, return AmendmentsQuery for chaining. If False, return Amendments object (keyword-only).
-        **kwargs: Field-value pairs to filter by.
-    
-    Examples:
-        # Eager (default) - returns Amendments object
-        house_amendments = amendments.filter(type="hamdt")
-        
-        # Lazy - returns builder for chaining
-        query = amendments.filter(type="hamdt", lazy=True).order_by("number")
-        results = query.execute()
-    
-    Returns:
-        Amendments object (if eager) or AmendmentsQuery (if lazy)
-    """
+    """Filter by field values; pass lazy=True to keep chaining."""
     return self.query().filter(lazy=lazy, **kwargs)
 
 
 @register_method(Amendments)
 def by_type(self, amendment_type: str) -> Amendments:
-    """
-    Get amendments of a specific type (always eager, returns Amendments).
-    
-    Args:
-        amendment_type: Amendment type code (e.g., "hamdt", "samdt", "suamdt")
-    
-    Returns:
-        Filtered Amendments object
-    
-    Example:
-        house_amendments = amendments.by_type("hamdt")
-    """
+    """Get amendments of a specific type."""
     return self.query().filter(type=amendment_type)
 
 
 @register_method(Amendments)
 def by_congress(self, congress: int) -> Amendments:
-    """
-    Get amendments from a specific Congress (always eager, returns Amendments).
-    
-    Args:
-        congress: Congress number (e.g., 118 for 118th Congress)
-    
-    Returns:
-        Filtered Amendments object
-    
-    Example:
-        congress_118 = amendments.by_congress(118)
-    """
+    """Get amendments from a specific Congress."""
     return self.query().filter(congress=congress)
 
 
 @register_method(Amendments)
 def house_amendments(self) -> Amendments:
-    """
-    Get all House amendments (hamdt) (always eager, returns Amendments).
-    
-    Returns:
-        Filtered Amendments object containing only House amendments
-    
-    Example:
-        house = amendments.house_amendments()
-    """
+    """Get all House amendments (hamdt)."""
     def is_house_amendment(a: Amendment) -> bool:
         if not a.type:
             return False
@@ -159,15 +86,7 @@ def house_amendments(self) -> Amendments:
 
 @register_method(Amendments)
 def senate_amendments(self) -> Amendments:
-    """
-    Get all Senate amendments (samdt, suamdt) (always eager, returns Amendments).
-    
-    Returns:
-        Filtered Amendments object containing only Senate amendments
-    
-    Example:
-        senate = amendments.senate_amendments()
-    """
+    """Get all Senate amendments (samdt, suamdt)."""
     def is_senate_amendment(a: Amendment) -> bool:
         if not a.type:
             return False
@@ -179,15 +98,7 @@ def senate_amendments(self) -> Amendments:
 
 @register_method(Amendments)
 def with_actions(self) -> Amendments:
-    """
-    Get amendments that have actions recorded (always eager, returns Amendments).
-    
-    Returns:
-        Filtered Amendments object containing amendments with actions
-    
-    Example:
-        active_amendments = amendments.with_actions()
-    """
+    """Get amendments that have actions recorded."""
     def has_actions(a: Amendment) -> bool:
         if not hasattr(a, 'actions') or a.actions is None:
             return False
@@ -204,26 +115,9 @@ def with_actions(self) -> Amendments:
 
 @register_method(Amendments)
 def group_by(self, field: str):
-    """
-    Group amendments by field.
-    Returns dict mapping field values to Amendments objects.
-    
-    Args:
-        field: Field name to group by
-    
-    Returns:
-        Dictionary mapping field values to Amendments objects
-    
-    Example:
-        by_type = amendments.group_by("type")
-        # Returns: {"hamdt": Amendments(...), "samdt": Amendments(...), ...}
-    """
+    """Group items into a dict keyed by field value."""
     return self.query().group_by(field)
 
-
-# ========================================
-# AMENDMENT (SINGULAR) INSTANCE METHODS
-# ========================================
 
 import json
 from typing import Any, Optional

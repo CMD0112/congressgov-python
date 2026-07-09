@@ -1,12 +1,5 @@
-"""
-Cache backends for the congressgov caching system.
-
-This module provides various cache backend implementations:
-- MemoryCache: Fast in-memory caching with LRU eviction
-- RedisCache: Distributed caching using Redis
-- FileCache: Persistent file-based caching
-
-All backends implement the CacheBackend protocol for consistent interface.
+"""Cache backends: `MemoryCache` (LRU, in-process), `RedisCache` (distributed),
+and `FileCache` (persistent to disk), all implementing the `CacheBackend` protocol.
 """
 
 from .base import CacheBackend

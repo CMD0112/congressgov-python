@@ -1,10 +1,4 @@
-"""
-Database export functionality using SQLAlchemy.
-
-This module provides comprehensive database export capabilities,
-including automatic schema generation, bulk inserts, and support
-for multiple database backends.
-"""
+"""SQLAlchemy-backed database export: schema generation, bulk inserts, multi-backend support."""
 
 from __future__ import annotations
 
@@ -42,13 +36,9 @@ logger = logging.getLogger(__name__)
 
 
 class DatabaseExporter:
-    """
-    Database exporter using SQLAlchemy.
-    
-    This class provides comprehensive database export capabilities,
-    including automatic schema generation from Pydantic models,
-    bulk insert operations, and support for multiple database backends.
-    
+    """Exports data to a SQL database: generates a schema from Pydantic models
+    and bulk-inserts rows, on any SQLAlchemy-supported backend.
+
     Example:
         from sqlalchemy import create_engine
         from congressgov.services.export import DatabaseExporter

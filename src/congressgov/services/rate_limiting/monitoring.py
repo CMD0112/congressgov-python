@@ -1,9 +1,4 @@
-"""
-Rate limiting monitoring and alerting.
-
-This module provides monitoring capabilities for rate limiting,
-including metrics collection, alerting, and performance analysis.
-"""
+"""Rate limiting metrics, alerting, and performance analysis."""
 
 from __future__ import annotations
 
@@ -77,13 +72,7 @@ class RateLimitMetrics:
 
 
 class RateLimitMonitor:
-    """
-    Monitor rate limiting performance and generate alerts.
-    
-    This class provides comprehensive monitoring of rate limiting
-    behavior, including metrics collection, alerting, and performance
-    analysis.
-    """
+    """Tracks rate limiting metrics per endpoint and fires alerts when thresholds are crossed."""
     
     def __init__(
         self,

@@ -1,24 +1,11 @@
 """
-Lightweight reference models for breaking circular dependencies.
+Minimal reference models (`BillRef`, `CommitteeRef`, `MemberRef`, etc.) that carry
+just enough identification to link to an entity without importing its full model.
+Bill, Committee, Action, and Member all reference each other, so importing the
+full models directly would create circular imports; these break that cycle.
 
-This module provides minimal reference models that contain only essential
-identification information, avoiding the need for full model imports and
-breaking circular dependency chains.
+    from models.base.references import BillRef
 
-Architecture Benefits:
-- Eliminates circular imports between Bill ↔ Committee ↔ Action ↔ Member
-- Maintains type safety without full model coupling
-- Enables IntelliSense support without TYPE_CHECKING guards
-- Provides clear separation between references and full entities
-
-Usage Pattern:
-    # Instead of importing full models (causes circular imports):
-    from models.entities.bill import Bill  # ❌ Circular dependency
-    
-    # Use lightweight references:
-    from models.base.references import BillRef  # ✅ No circular dependency
-    
-    # Expand to full model when needed:
     full_bill = bill_service.get(
         congress=bill_ref.congress,
         bill_type=bill_ref.type,
@@ -37,40 +24,9 @@ from .model import Model
 from .enums import LegislationType, Chamber, CommitteeType
 
 
-# ============================================================================
-# CORE ENTITY REFERENCES
-# ============================================================================
-
-
 class BillRef(Model):
-    """
-    Lightweight reference to a Bill entity.
-    
-    Contains only essential identification information for referencing
-    a bill without requiring the full Bill model (which has many dependencies).
-    
-    Use Cases:
-    - In Committee models to reference bills without importing Bill
-    - In Action models to reference related bills
-    - In Amendment models to reference amended bills
-    - In any model that needs to reference but not fully load a bill
-    
-    Example:
-        # Create reference from full bill
-        bill_ref = BillRef(
-            congress=118,
-            type=LegislationType.HR,
-            number=1,
-            title="Example Bill Title",
-            url="https://api.congress.gov/v3/bill/118/hr/1"
-        )
-        
-        # Use reference to fetch full bill later
-        full_bill = bill_service.get(
-            congress=bill_ref.congress,
-            bill_type=bill_ref.type,
-            bill_number=bill_ref.number
-        )
+    """Enough fields to identify a `Bill` and fetch it later, without the full model's
+    dependency chain. Used by Committee, Action, and Amendment models.
     """
     congress: int | None = None
     type: LegislationType | str | None = None
@@ -85,26 +41,7 @@ class BillRef(Model):
 
 
 class CommitteeRef(Model):
-    """
-    Lightweight reference to a Committee entity.
-    
-    Contains only essential identification information for referencing
-    a committee without requiring the full Committee model.
-    
-    Use Cases:
-    - In Bill models to reference committees
-    - In Action models to reference committees that took action
-    - In Meeting models to reference parent committee
-    - In Report models to reference issuing committee
-    
-    Example:
-        committee_ref = CommitteeRef(
-            chamber=Chamber.HOUSE,
-            code="hspw00",
-            name="Committee on Transportation and Infrastructure",
-            url="https://api.congress.gov/v3/committee/house/hspw00"
-        )
-    """
+    """Enough fields to identify a `Committee`, for use in Bill, Action, Meeting, and Report models."""
     chamber: Chamber | str | None = None
     code: str | None = Field(None, alias="systemCode")  # API uses "systemCode"
     name: str | None = None
@@ -114,28 +51,7 @@ class CommitteeRef(Model):
 
 
 class MemberRef(Model):
-    """
-    Lightweight reference to a Member entity.
-    
-    Contains only essential identification information for referencing
-    a congressional member without requiring the full Member model.
-    
-    Use Cases:
-    - In Sponsor/Cosponsor models instead of full Member
-    - In Action models to reference members who took action
-    - In Vote models to reference voting members
-    - In Committee models to reference committee members
-    
-    Example:
-        member_ref = MemberRef(
-            bioguideId="A000374",
-            name="Ralph Abraham",
-            party="R",
-            state="LA",
-            district=5,
-            url="https://api.congress.gov/v3/member/A000374"
-        )
-    """
+    """Enough fields to identify a `Member`, for use in Sponsor, Action, Vote, and Committee models."""
     bioguideId: str | None = None
     name: str | None = None
     firstName: str | None = None
@@ -149,25 +65,8 @@ class MemberRef(Model):
 
 
 class AmendmentRef(Model):
-    """
-    Lightweight reference to an Amendment entity.
-    
-    Contains only essential identification information for referencing
-    an amendment without requiring the full Amendment model.
-    
-    Use Cases:
-    - In Bill models to reference amendments
-    - In Action models to reference amendments being acted upon
-    - In Amendment models to reference parent/related amendments
-    
-    Example:
-        amendment_ref = AmendmentRef(
-            congress=118,
-            type="hamdt",
-            number=100,
-            description="Amendment to add section on infrastructure",
-            url="https://api.congress.gov/v3/amendment/118/hamdt/100"
-        )
+    """Enough fields to identify an `Amendment`, for use in Bill and Action models,
+    and for self-references between amendments.
     """
     congress: int | None = None
     type: str | None = None  # e.g., "hamdt", "samdt", "suamdt"
@@ -182,25 +81,7 @@ class AmendmentRef(Model):
 
 
 class TreatyRef(Model):
-    """
-    Lightweight reference to a Treaty entity.
-    
-    Contains only essential identification information for referencing
-    a treaty without requiring the full Treaty model.
-    
-    Use Cases:
-    - In action models to reference treaties
-    - In committee models to reference treaties under consideration
-    
-    Example:
-        treaty_ref = TreatyRef(
-            congress=118,
-            number=1,
-            suffix="A",
-            title="Treaty on Nuclear Non-Proliferation",
-            url="https://api.congress.gov/v3/treaty/118/1"
-        )
-    """
+    """Enough fields to identify a `Treaty`, for use in Action and Committee models."""
     congress: int | None = None
     number: int | None = None
     suffix: str | None = None  # e.g., "A", "B", etc.
@@ -212,25 +93,7 @@ class TreatyRef(Model):
 
 
 class NominationRef(Model):
-    """
-    Lightweight reference to a Nomination entity.
-    
-    Contains only essential identification information for referencing
-    a nomination without requiring the full Nomination model.
-    
-    Use Cases:
-    - In action models to reference nominations
-    - In committee models to reference nominations under consideration
-    
-    Example:
-        nomination_ref = NominationRef(
-            congress=118,
-            number=100,
-            partNumber=1,
-            citation="PN100",
-            description="John Doe to be Secretary of State"
-        )
-    """
+    """Enough fields to identify a `Nomination`, for use in Action and Committee models."""
     congress: int | None = None
     number: int | None = None
     partNumber: int | None = None
@@ -241,25 +104,8 @@ class NominationRef(Model):
     updateDate: datetime | None = None
 
 
-# ============================================================================
-# HELPER FUNCTIONS FOR REFERENCE CONVERSION
-# ============================================================================
-
-
 def bill_to_ref(bill: Any) -> BillRef:
-    """
-    Convert a full Bill model to a lightweight BillRef.
-    
-    Args:
-        bill: Full Bill model instance (or dict-like object)
-        
-    Returns:
-        BillRef with essential identification info
-        
-    Example:
-        full_bill = bill_service.get(congress=118, type="hr", number=1)
-        bill_ref = bill_to_ref(full_bill)
-    """
+    """Convert a full `Bill` (model instance or dict) to a `BillRef`."""
     if isinstance(bill, dict):
         return BillRef(**{
             k: v for k, v in bill.items()
@@ -283,19 +129,7 @@ def bill_to_ref(bill: Any) -> BillRef:
 
 
 def committee_to_ref(committee: Any) -> CommitteeRef:
-    """
-    Convert a full Committee model to a lightweight CommitteeRef.
-    
-    Args:
-        committee: Full Committee model instance (or dict-like object)
-        
-    Returns:
-        CommitteeRef with essential identification info
-        
-    Example:
-        full_committee = committee_service.get(chamber="house", committee_code="hspw00")
-        committee_ref = committee_to_ref(full_committee)
-    """
+    """Convert a full `Committee` (model instance or dict) to a `CommitteeRef`."""
     if isinstance(committee, dict):
         return CommitteeRef(**{
             k: v for k, v in committee.items()
@@ -313,19 +147,7 @@ def committee_to_ref(committee: Any) -> CommitteeRef:
 
 
 def member_to_ref(member: Any) -> MemberRef:
-    """
-    Convert a full Member model to a lightweight MemberRef.
-    
-    Args:
-        member: Full Member model instance (or dict-like object)
-        
-    Returns:
-        MemberRef with essential identification info
-        
-    Example:
-        full_member = member_service.get(bioguide_id="A000374")
-        member_ref = member_to_ref(full_member)
-    """
+    """Convert a full `Member` (model instance or dict) to a `MemberRef`."""
     if isinstance(member, dict):
         return MemberRef(**{
             k: v for k, v in member.items()
@@ -348,19 +170,7 @@ def member_to_ref(member: Any) -> MemberRef:
 
 
 def amendment_to_ref(amendment: Any) -> AmendmentRef:
-    """
-    Convert a full Amendment model to a lightweight AmendmentRef.
-    
-    Args:
-        amendment: Full Amendment model instance (or dict-like object)
-        
-    Returns:
-        AmendmentRef with essential identification info
-        
-    Example:
-        full_amendment = amendment_service.get(congress=118, type="hamdt", number=100)
-        amendment_ref = amendment_to_ref(full_amendment)
-    """
+    """Convert a full `Amendment` (model instance or dict) to an `AmendmentRef`."""
     if isinstance(amendment, dict):
         return AmendmentRef(**{
             k: v for k, v in amendment.items()
@@ -384,15 +194,7 @@ def amendment_to_ref(amendment: Any) -> AmendmentRef:
 
 
 def treaty_to_ref(treaty: Any) -> TreatyRef:
-    """
-    Convert a full Treaty model to a lightweight TreatyRef.
-    
-    Args:
-        treaty: Full Treaty model instance (or dict-like object)
-        
-    Returns:
-        TreatyRef with essential identification info
-    """
+    """Convert a full `Treaty` (model instance or dict) to a `TreatyRef`."""
     if isinstance(treaty, dict):
         return TreatyRef(**{
             k: v for k, v in treaty.items()
@@ -412,15 +214,7 @@ def treaty_to_ref(treaty: Any) -> TreatyRef:
 
 
 def nomination_to_ref(nomination: Any) -> NominationRef:
-    """
-    Convert a full Nomination model to a lightweight NominationRef.
-    
-    Args:
-        nomination: Full Nomination model instance (or dict-like object)
-        
-    Returns:
-        NominationRef with essential identification info
-    """
+    """Convert a full `Nomination` (model instance or dict) to a `NominationRef`."""
     if isinstance(nomination, dict):
         return NominationRef(**{
             k: v for k, v in nomination.items()

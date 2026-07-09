@@ -1,10 +1,4 @@
-"""
-Pandas integration for data export and analysis.
-
-This module provides seamless integration with pandas DataFrames,
-enabling easy conversion from congressgov models to
-pandas DataFrames for data analysis and manipulation.
-"""
+"""Converts congressgov models to/from pandas DataFrames."""
 
 from __future__ import annotations
 
@@ -28,13 +22,9 @@ logger = logging.getLogger(__name__)
 
 
 class PandasIntegration:
-    """
-    Pandas integration for congressgov.
-    
-    This class provides seamless conversion between congressgov
-    models and pandas DataFrames, with automatic type inference and data
-    cleaning capabilities.
-    
+    """Converts between congressgov models and pandas DataFrames, with type
+    inference and basic data cleaning.
+
     Example:
         pandas_int = PandasIntegration()
         bills = bill_service.search(congress=118, limit=100)
@@ -303,12 +293,11 @@ class PandasIntegration:
         return df
     
     def get_dataframe_info(self, df: 'pd.DataFrame') -> Dict[str, Any]:
-        """
-        Get comprehensive information about a DataFrame.
-        
+        """Return shape, dtypes, memory usage, and null counts for a DataFrame.
+
         Args:
             df: DataFrame to analyze
-            
+
         Returns:
             Dictionary with DataFrame information
         """
@@ -417,12 +406,11 @@ class PandasIntegration:
             raise
     
     def create_summary_report(self, df: 'pd.DataFrame') -> Dict[str, Any]:
-        """
-        Create a comprehensive summary report for a DataFrame.
-        
+        """Build a summary report (stats, dtypes, nulls) for a DataFrame.
+
         Args:
             df: DataFrame to analyze
-            
+
         Returns:
             Dictionary with summary report
         """

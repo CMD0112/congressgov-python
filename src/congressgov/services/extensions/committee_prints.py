@@ -1,12 +1,7 @@
 """
 Query and convenience methods for the CommitteePrints model.
 
-These methods are dynamically registered on the CommitteePrints class,
-keeping the model file clean and focused on data validation.
-
-The query builder (CommitteePrintsQuery) is created using the generic
-CollectionQuery class from _query_builder.py, eliminating the
-need for custom query class implementations.
+Registered dynamically via ``_registry`` so CommitteePrints stay plain data models.
 
 Methods registered:
 - Query methods: filter(), query(), group_by()
@@ -30,49 +25,28 @@ import congressgov.models.documents.prints as prints_module
 # Import CommitteePrint class for validation
 from congressgov.models.documents.prints import CommitteePrint
 
-# ========================================
-# CREATE QUERY BUILDER WITH FIELD MAPPINGS
-# ========================================
 
-# NOTE: Create the CommitteePrintsQuery class using the generic query builder
-# NOTE: item_class enables field validation to catch typos early
 CommitteePrintsQuery = create_query_builder(
     collection_class=CommitteePrints,
     items_field="committeePrints",
     item_class=CommitteePrint,
     field_mappings={
-        # NOTE: Add field mappings here as enums become available
     }
 )
 
-# NOTE: Set it on the module so it can be imported
+# Expose the query class from both the model module and this module's
+# globals, since callers import it from either location.
 prints_module.CommitteePrintsQuery = CommitteePrintsQuery
 
-# NOTE: Make it available for use in this module
 if not TYPE_CHECKING:
     globals()['CommitteePrintsQuery'] = CommitteePrintsQuery
 
-# ========================================
-# QUERY BUILDER ACCESS
-# ========================================
 
 @register_method(CommitteePrints)
 def query(self):
-    """
-    Get query builder for chaining operations.
-    
-    Example:
-        prints.query().filter(chamber="House", lazy=True).order_by("number").execute()
-    
-    Returns:
-        CommitteePrintsQuery instance for chaining operations
-    """
+    """Return a query builder for chained filtering."""
     return CommitteePrintsQuery(self.committeePrints or [])
 
-
-# ========================================
-# CONVENIENCE METHODS (Eager by default)
-# ========================================
 
 @register_method(CommitteePrints)
 def filter(self, *, lazy: bool = False, **kwargs):
@@ -99,49 +73,19 @@ def filter(self, *, lazy: bool = False, **kwargs):
 
 @register_method(CommitteePrints)
 def by_congress(self, congress: int) -> CommitteePrints:
-    """
-    Get prints from a specific Congress (always eager, returns CommitteePrints).
-    
-    Args:
-        congress: Congress number (e.g., 118 for 118th Congress)
-    
-    Returns:
-        Filtered CommitteePrints object
-    
-    Example:
-        congress_118 = prints.by_congress(118)
-    """
+    """Get prints from a specific Congress."""
     return self.query().filter(congress=congress)
 
 
 @register_method(CommitteePrints)
 def by_chamber(self, chamber: str) -> CommitteePrints:
-    """
-    Get prints from a specific chamber (always eager, returns CommitteePrints).
-    
-    Args:
-        chamber: Chamber name ("House", "Senate")
-    
-    Returns:
-        Filtered CommitteePrints object
-    
-    Example:
-        house_prints = prints.by_chamber("House")
-    """
+    """Get prints from a specific chamber."""
     return self.query().filter(chamber=chamber)
 
 
 @register_method(CommitteePrints)
 def house_prints(self) -> CommitteePrints:
-    """
-    Get all House committee prints (always eager, returns CommitteePrints).
-    
-    Returns:
-        Filtered CommitteePrints object containing only House prints
-    
-    Example:
-        house = prints.house_prints()
-    """
+    """Get all House committee prints."""
     def is_house_print(p: CommitteePrint) -> bool:
         if not hasattr(p, 'chamber') or not p.chamber:
             return False
@@ -153,15 +97,7 @@ def house_prints(self) -> CommitteePrints:
 
 @register_method(CommitteePrints)
 def senate_prints(self) -> CommitteePrints:
-    """
-    Get all Senate committee prints (always eager, returns CommitteePrints).
-    
-    Returns:
-        Filtered CommitteePrints object containing only Senate prints
-    
-    Example:
-        senate = prints.senate_prints()
-    """
+    """Get all Senate committee prints."""
     def is_senate_print(p: CommitteePrint) -> bool:
         if not hasattr(p, 'chamber') or not p.chamber:
             return False
@@ -173,18 +109,7 @@ def senate_prints(self) -> CommitteePrints:
 
 @register_method(CommitteePrints)
 def by_committee(self, committee_name: str) -> CommitteePrints:
-    """
-    Get prints by committee name (partial match, case-insensitive) (always eager, returns CommitteePrints).
-    
-    Args:
-        committee_name: Committee name or partial name to search for
-    
-    Returns:
-        Filtered CommitteePrints object
-    
-    Example:
-        judiciary = prints.by_committee("Judiciary")
-    """
+    """Get prints by committee name (partial match, case-insensitive)."""
     def committee_matches(p: CommitteePrint) -> bool:
         # Check committees list
         if hasattr(p, 'committees') and p.committees:
@@ -215,10 +140,6 @@ def group_by(self, field: str):
     """
     return self.query().group_by(field)
 
-
-# ========================================
-# COMMITTEE PRINT (SINGULAR) INSTANCE METHODS
-# ========================================
 
 from typing import Any, Optional
 

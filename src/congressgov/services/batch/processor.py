@@ -1,9 +1,4 @@
-"""
-Core batch processor for async bulk operations.
-
-This module provides the main BatchProcessor class for handling bulk operations
-with configurable concurrency, retry logic, and progress tracking.
-"""
+"""Async bulk operations with configurable concurrency, retry logic, and progress tracking."""
 
 from __future__ import annotations
 
@@ -17,12 +12,8 @@ logger = logging.getLogger(__name__)
 
 
 class BatchProcessor(BaseBatchProcessor):
-    """
-    Core batch processor for async bulk operations.
-    
-    This class provides efficient batch processing with configurable concurrency,
-    automatic retry logic, and comprehensive progress tracking.
-    
+    """Async bulk operations with configurable concurrency, retry logic, and progress tracking.
+
     Example:
         processor = BatchProcessor(
             max_concurrent=10,

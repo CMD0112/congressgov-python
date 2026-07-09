@@ -1,9 +1,4 @@
-"""
-Memory monitoring and management for batch operations.
-
-This module provides memory monitoring capabilities to prevent out-of-memory
-errors during large batch operations.
-"""
+"""Memory monitoring for batch operations, to catch out-of-memory conditions before they hit."""
 
 from __future__ import annotations
 
@@ -24,12 +19,8 @@ logger = logging.getLogger(__name__)
 
 
 class MemoryMonitor:
-    """
-    Memory monitor for tracking and managing memory usage.
-    
-    This class provides comprehensive memory monitoring including current usage,
-    peak usage, and automatic garbage collection management.
-    
+    """Tracks current/peak memory usage and triggers garbage collection when needed.
+
     Example:
         monitor = MemoryMonitor()
         
@@ -95,12 +86,7 @@ class MemoryMonitor:
             return 0.0
     
     def get_memory_stats(self) -> Dict[str, Any]:
-        """
-        Get comprehensive memory statistics.
-        
-        Returns:
-            Dictionary with memory statistics
-        """
+        """Return current/peak/available memory usage as a dict."""
         current_usage = self.get_memory_usage_mb()
         
         stats = {

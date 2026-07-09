@@ -1,9 +1,4 @@
-"""
-Cache invalidation strategies and management.
-
-This module provides intelligent cache invalidation based on
-data relationships, time-based rules, and pattern matching.
-"""
+"""Cache invalidation based on data relationships, time-based rules, and pattern matching."""
 
 from __future__ import annotations
 
@@ -20,12 +15,7 @@ logger = logging.getLogger(__name__)
 
 @dataclass
 class InvalidationRule:
-    """
-    Defines a cache invalidation rule.
-    
-    Rules specify when and how cache entries should be invalidated
-    based on various triggers and patterns.
-    """
+    """A rule specifying when and how matching cache entries get invalidated."""
     
     name: str
     patterns: List[str]
@@ -35,14 +25,10 @@ class InvalidationRule:
 
 
 class CacheInvalidator:
-    """
-    Intelligent cache invalidation system.
-    
-    This class provides sophisticated cache invalidation based on:
-    - Data relationships (e.g., invalidate bill actions when bill changes)
-    - Time-based rules (e.g., expire data after certain time)
-    - Pattern matching (e.g., invalidate all entries matching a pattern)
-    - Event-driven invalidation (e.g., invalidate on data updates)
+    """Invalidates cache entries via rules keyed on data relationships, time,
+    glob patterns, or trigger events - e.g. invalidate bill actions when the
+    parent bill changes, expire entries after a fixed window, or wipe
+    everything matching a pattern.
     """
     
     def __init__(

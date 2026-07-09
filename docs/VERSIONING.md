@@ -49,4 +49,4 @@ Through **1.0.x**, the generated HTTP client keeps legacy `*_sync` / `*_async` n
 - **Python:** 3.13+ (see `pyproject.toml`)
 - **Congress.gov API:** v3 (`https://api.congress.gov/v3`)
 
-Report issues via the project issue tracker; security issues per [SECURITY.md](../SECURITY.md).
+Report bugs and feature requests via [GitHub Issues](https://github.com/CMD0112/congressgov-python/issues); security issues per [SECURITY.md](../SECURITY.md).

@@ -1,12 +1,7 @@
 """
 Query and convenience methods for the Cosponsors model.
 
-These methods are dynamically registered on the Cosponsors class,
-keeping the model file clean and focused on data validation.
-
-The query builder (CosponsorsQuery) is created using the generic
-CollectionQuery class from _query_builder.py, eliminating the
-need for custom query class implementations.
+Registered dynamically via ``_registry`` so Cosponsors stay plain data models.
 
 Methods registered:
 - Query methods: filter(), query(), group_by()
@@ -37,7 +32,7 @@ try:
 except ImportError:
     STATE_ENUM = None
 
-# NOTE: Cosponsor.party stores the API's single-letter code ("D"/"R"/"I"), not
+# Cosponsor.party stores the API's single-letter code ("D"/"R"/"I"), not
 # the full party name. by_party()/democrats()/republicans() pass full names, so
 # without this expansion filter(party="Democratic") would silently match nothing.
 _PARTY_CODE_TO_NAME = {
@@ -62,12 +57,6 @@ def _expand_party(value):
     return values
 
 
-# ========================================
-# CREATE QUERY BUILDER WITH FIELD MAPPINGS
-# ========================================
-
-# NOTE: Create the CosponsorsQuery class using the generic query builder
-# NOTE: item_class enables field validation to catch typos early
 field_mappings = {"party": FieldMapping(expand_value=_expand_party)}
 if STATE_ENUM:
     field_mappings["state"] = FieldMapping(enum_class=STATE_ENUM)
@@ -79,131 +68,53 @@ CosponsorsQuery = create_query_builder(
     field_mappings=field_mappings
 )
 
-# NOTE: Set it on the module so it can be imported
+# Expose the query class from both the model module and this module's
+# globals, since callers import it from either location.
 sponsor_module.CosponsorsQuery = CosponsorsQuery
 
-# NOTE: Make it available for use in this module
 if not TYPE_CHECKING:
     globals()['CosponsorsQuery'] = CosponsorsQuery
 
-# ========================================
-# QUERY BUILDER ACCESS
-# ========================================
 
 @register_method(Cosponsors)
 def query(self):
-    """
-    Get query builder for chaining operations.
-    
-    Example:
-        cosponsors.query().filter(state="CA", lazy=True).order_by("sponsorshipDate").execute()
-    
-    Returns:
-        CosponsorsQuery instance for chaining operations
-    """
+    """Return a query builder for chained filtering."""
     return CosponsorsQuery(self.cosponsors or [])
 
 
-# ========================================
-# CONVENIENCE METHODS (Eager by default)
-# ========================================
-
 @register_method(Cosponsors)
 def filter(self, *, lazy: bool = False, **kwargs):
-    """
-    Filter cosponsors by field values.
-    
-    Args:
-        lazy: If True, return CosponsorsQuery for chaining. If False, return Cosponsors object (keyword-only).
-        **kwargs: Field-value pairs to filter by.
-    
-    Examples:
-        # Eager (default) - returns Cosponsors object
-        ca_cosponsors = cosponsors.filter(state="CA")
-        
-        # Lazy - returns builder for chaining
-        query = cosponsors.filter(state="CA", lazy=True).order_by("sponsorshipDate")
-        results = query.execute()
-    
-    Returns:
-        Cosponsors object (if eager) or CosponsorsQuery (if lazy)
-    """
+    """Filter by field values; pass lazy=True to keep chaining."""
     return self.query().filter(lazy=lazy, **kwargs)
 
 
 @register_method(Cosponsors)
 def by_state(self, state: str) -> Cosponsors:
-    """
-    Get cosponsors from a specific state (always eager, returns Cosponsors).
-    
-    Args:
-        state: State code (e.g., "CA") or full name (e.g., "California")
-    
-    Returns:
-        Filtered Cosponsors object
-    
-    Example:
-        ca_cosponsors = cosponsors.by_state("CA")
-    """
+    """Get cosponsors from a specific state."""
     return self.query().filter(state=state)
 
 
 @register_method(Cosponsors)
 def by_party(self, party: str) -> Cosponsors:
-    """
-    Get cosponsors from a specific party (always eager, returns Cosponsors).
-    
-    Args:
-        party: Party name (e.g., "Democratic", "Republican")
-    
-    Returns:
-        Filtered Cosponsors object
-    
-    Example:
-        democrats = cosponsors.by_party("Democratic")
-    """
+    """Get cosponsors from a specific party."""
     return self.query().filter(party=party)
 
 
 @register_method(Cosponsors)
 def democrats(self) -> Cosponsors:
-    """
-    Get all Democratic cosponsors (always eager, returns Cosponsors).
-    
-    Returns:
-        Filtered Cosponsors object
-    
-    Example:
-        democrats = cosponsors.democrats()
-    """
+    """Get all Democratic cosponsors."""
     return self.by_party("Democratic")
 
 
 @register_method(Cosponsors)
 def republicans(self) -> Cosponsors:
-    """
-    Get all Republican cosponsors (always eager, returns Cosponsors).
-    
-    Returns:
-        Filtered Cosponsors object
-    
-    Example:
-        republicans = cosponsors.republicans()
-    """
+    """Get all Republican cosponsors."""
     return self.by_party("Republican")
 
 
 @register_method(Cosponsors)
 def withdrawn(self) -> Cosponsors:
-    """
-    Get cosponsors who have withdrawn support (always eager, returns Cosponsors).
-    
-    Returns:
-        Filtered Cosponsors object containing only withdrawn cosponsors
-    
-    Example:
-        withdrawn = cosponsors.withdrawn()
-    """
+    """Get cosponsors who have withdrawn support."""
     def is_withdrawn(c: Cosponsor) -> bool:
         if hasattr(c, 'sponsorshipWithdrawnDate') and c.sponsorshipWithdrawnDate:
             return True
@@ -214,15 +125,7 @@ def withdrawn(self) -> Cosponsors:
 
 @register_method(Cosponsors)
 def active(self) -> Cosponsors:
-    """
-    Get cosponsors who have not withdrawn support (always eager, returns Cosponsors).
-    
-    Returns:
-        Filtered Cosponsors object containing only active cosponsors
-    
-    Example:
-        active = cosponsors.active()
-    """
+    """Get cosponsors who have not withdrawn support."""
     def is_active(c: Cosponsor) -> bool:
         if hasattr(c, 'sponsorshipWithdrawnDate') and c.sponsorshipWithdrawnDate:
             return False
@@ -233,19 +136,6 @@ def active(self) -> Cosponsors:
 
 @register_method(Cosponsors)
 def group_by(self, field: str):
-    """
-    Group cosponsors by field.
-    Returns dict mapping field values to Cosponsors objects.
-    
-    Args:
-        field: Field name to group by
-    
-    Returns:
-        Dictionary mapping field values to Cosponsors objects
-    
-    Example:
-        by_state = cosponsors.group_by("state")
-        # Returns: {"CA": Cosponsors(...), "NY": Cosponsors(...), ...}
-    """
+    """Group items into a dict keyed by field value."""
     return self.query().group_by(field)
 

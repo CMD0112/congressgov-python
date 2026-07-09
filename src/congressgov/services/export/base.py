@@ -1,9 +1,4 @@
-"""
-Base export infrastructure and configuration.
-
-This module provides the foundational classes and utilities for data export,
-including configuration, base exporter class, and common serialization utilities.
-"""
+"""Shared export infrastructure: `ExportConfig`, `BaseExporter`, and serialization helpers."""
 
 from __future__ import annotations
 
@@ -30,12 +25,7 @@ class ExportFormat(Enum):
 
 @dataclass
 class ExportConfig:
-    """
-    Configuration for data export operations.
-    
-    This class provides comprehensive configuration options for all export
-    operations, including formatting, validation, and performance settings.
-    """
+    """Settings shared by all exporters: formatting, validation, and performance knobs."""
     
     # File format settings
     format: ExportFormat = ExportFormat.CSV
@@ -91,12 +81,7 @@ class DataSerializable(Protocol):
 
 
 class BaseExporter(ABC):
-    """
-    Abstract base class for all data exporters.
-    
-    This class provides common functionality for data export operations,
-    including data serialization, validation, and error handling.
-    """
+    """Base class for exporters: handles serialization, validation, and error handling."""
     
     def __init__(self, config: Optional[ExportConfig] = None):
         """

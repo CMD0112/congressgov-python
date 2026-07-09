@@ -1,0 +1,111 @@
+site_name: congressgov
+site_description: Python SDK for the Congress.gov API
+site_url: https://cmd0112.github.io/congressgov-python/
+repo_url: https://github.com/CMD0112/congressgov-python
+repo_name: CMD0112/congressgov-python
+edit_uri: edit/main/docs/
+
+docs_dir: docs
+
+# The guides under docs/ link out to files elsewhere in the repo (../README.md,
+# ../CHANGELOG.md, ../examples/*, ../src/*) that render fine on GitHub but sit
+# outside docs_dir, so mkdocs can't confirm they exist. Downgrade those from
+# warnings to info so `mkdocs build --strict` doesn't fail on known-good links.
+validation:
+  nav:
+    omitted_files: info
+    not_found: warn
+    absolute_links: info
+  links:
+    not_found: info
+    absolute_links: info
+    unrecognized_links: info
+    anchors: warn
+
+theme:
+  name: material
+  palette:
+    - media: "(prefers-color-scheme: light)"
+      scheme: default
+      primary: indigo
+      accent: indigo
+      toggle:
+        icon: material/brightness-7
+        name: Switch to dark mode
+    - media: "(prefers-color-scheme: dark)"
+      scheme: slate
+      primary: indigo
+      accent: indigo
+      toggle:
+        icon: material/brightness-4
+        name: Switch to light mode
+  features:
+    - navigation.instant
+    - navigation.tracking
+    - navigation.top
+    - navigation.indexes
+    - content.code.copy
+    - search.suggest
+    - search.highlight
+
+markdown_extensions:
+  - admonition
+  - pymdownx.details
+  - pymdownx.superfences
+  - pymdownx.highlight
+  - pymdownx.inlinehilite
+  - pymdownx.tabbed:
+      alternate_style: true
+  - tables
+  - toc:
+      permalink: true
+
+plugins:
+  - search
+  - mkdocstrings:
+      handlers:
+        python:
+          paths: [src]
+          options:
+            docstring_style: google
+            show_source: true
+            show_root_heading: true
+            show_if_no_docstring: false
+            merge_init_into_class: true
+            separate_signature: true
+            show_signature_annotations: true
+            members_order: source
+
+nav:
+  - Home: README.md
+  - Getting started:
+      - USAGE.md
+      - REFERENCE.md
+      - MEMBERS_QUERY.md
+      - URL_FETCH.md
+  - Storage & requests:
+      - REQUEST_STORE.md
+      - STORAGE.md
+  - Optional features:
+      - ADVANCED.md
+  - Network graphs:
+      - NETWORK_GRAPH.md
+      - GRAPH_CONSTRUCTION.md
+  - Architecture & packaging:
+      - ARCHITECTURE.md
+      - PACKAGE_LAYOUT.md
+      - MIGRATION.md
+      - VERSIONING.md
+  - API reference:
+      - Overview: api/index.md
+      - Facade: api/congressgov.md
+      - Services: api/services.md
+      - Extensions: api/extensions.md
+      - Models: api/models.md
+      - Async API: api/async_api.md
+  - Maintainers:
+      - CODEGEN.md
+      - API_COVERAGE.md
+      - STORAGE_AUDIT.md
+      - PUBLISHING.md
+      - GITHUB_SETUP.md

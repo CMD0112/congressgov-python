@@ -1,12 +1,7 @@
 """
 Query and convenience methods for the CommitteeMeetings model.
 
-These methods are dynamically registered on the CommitteeMeetings class,
-keeping the model file clean and focused on data validation.
-
-The query builder (CommitteeMeetingsQuery) is created using the generic
-CollectionQuery class from _query_builder.py, eliminating the
-need for custom query class implementations.
+Registered dynamically via ``_registry`` so CommitteeMeetings stay plain data models.
 
 Methods registered:
 - Query methods: filter(), query(), group_by()
@@ -31,49 +26,28 @@ import congressgov.models.meetings.meeting as meeting_module
 # Import CommitteeMeeting class for validation
 from congressgov.models.meetings.meeting import CommitteeMeeting
 
-# ========================================
-# CREATE QUERY BUILDER WITH FIELD MAPPINGS
-# ========================================
 
-# NOTE: Create the CommitteeMeetingsQuery class using the generic query builder
-# NOTE: item_class enables field validation to catch typos early
 CommitteeMeetingsQuery = create_query_builder(
     collection_class=CommitteeMeetings,
     items_field="meetings",
     item_class=CommitteeMeeting,
     field_mappings={
-        # NOTE: Add field mappings here as enums become available
     }
 )
 
-# NOTE: Set it on the module so it can be imported
+# Expose the query class from both the model module and this module's
+# globals, since callers import it from either location.
 meeting_module.CommitteeMeetingsQuery = CommitteeMeetingsQuery
 
-# NOTE: Make it available for use in this module
 if not TYPE_CHECKING:
     globals()['CommitteeMeetingsQuery'] = CommitteeMeetingsQuery
 
-# ========================================
-# QUERY BUILDER ACCESS
-# ========================================
 
 @register_method(CommitteeMeetings)
 def query(self):
-    """
-    Get query builder for chaining operations.
-    
-    Example:
-        meetings.query().filter(chamber="House", lazy=True).order_by("date").execute()
-    
-    Returns:
-        CommitteeMeetingsQuery instance for chaining operations
-    """
+    """Return a query builder for chained filtering."""
     return CommitteeMeetingsQuery(self.meetings or [])
 
-
-# ========================================
-# CONVENIENCE METHODS (Eager by default)
-# ========================================
 
 @register_method(CommitteeMeetings)
 def filter(self, *, lazy: bool = False, **kwargs):
@@ -100,52 +74,19 @@ def filter(self, *, lazy: bool = False, **kwargs):
 
 @register_method(CommitteeMeetings)
 def by_congress(self, congress: int) -> CommitteeMeetings:
-    """
-    Get meetings from a specific Congress (always eager, returns CommitteeMeetings).
-    
-    Args:
-        congress: Congress number (e.g., 118 for 118th Congress)
-    
-    Returns:
-        Filtered CommitteeMeetings object
-    
-    Example:
-        congress_118 = meetings.by_congress(118)
-    """
+    """Get meetings from a specific Congress."""
     return self.query().filter(congress=congress)
 
 
 @register_method(CommitteeMeetings)
 def by_chamber(self, chamber: str) -> CommitteeMeetings:
-    """
-    Get meetings from a specific chamber (always eager, returns CommitteeMeetings).
-    
-    Args:
-        chamber: Chamber name ("House", "Senate")
-    
-    Returns:
-        Filtered CommitteeMeetings object
-    
-    Example:
-        house_meetings = meetings.by_chamber("House")
-    """
+    """Get meetings from a specific chamber."""
     return self.query().filter(chamber=chamber)
 
 
 @register_method(CommitteeMeetings)
 def upcoming(self, days: int = 30) -> CommitteeMeetings:
-    """
-    Get meetings scheduled in the next N days (always eager, returns CommitteeMeetings).
-    
-    Args:
-        days: Number of days to look ahead (default: 30)
-    
-    Returns:
-        Filtered CommitteeMeetings object
-    
-    Example:
-        next_week = meetings.upcoming(days=7)
-    """
+    """Get meetings scheduled in the next N days."""
     def is_upcoming(m: CommitteeMeeting) -> bool:
         if not hasattr(m, 'date') or not m.date:
             return False
@@ -173,18 +114,7 @@ def upcoming(self, days: int = 30) -> CommitteeMeetings:
 
 @register_method(CommitteeMeetings)
 def past(self, days: int = 30) -> CommitteeMeetings:
-    """
-    Get meetings from the last N days (always eager, returns CommitteeMeetings).
-    
-    Args:
-        days: Number of days to look back (default: 30)
-    
-    Returns:
-        Filtered CommitteeMeetings object
-    
-    Example:
-        last_week = meetings.past(days=7)
-    """
+    """Get meetings from the last N days."""
     def is_past(m: CommitteeMeeting) -> bool:
         if not hasattr(m, 'date') or not m.date:
             return False
@@ -212,18 +142,7 @@ def past(self, days: int = 30) -> CommitteeMeetings:
 
 @register_method(CommitteeMeetings)
 def by_committee(self, committee_name: str) -> CommitteeMeetings:
-    """
-    Get meetings by committee name (partial match, case-insensitive) (always eager, returns CommitteeMeetings).
-    
-    Args:
-        committee_name: Committee name or partial name to search for
-    
-    Returns:
-        Filtered CommitteeMeetings object
-    
-    Example:
-        judiciary = meetings.by_committee("Judiciary")
-    """
+    """Get meetings by committee name (partial match, case-insensitive)."""
     def committee_matches(m: CommitteeMeeting) -> bool:
         # Check committees list
         if hasattr(m, 'committees') and m.committees:

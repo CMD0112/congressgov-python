@@ -52,9 +52,10 @@ flowchart LR
   store[(CongressGraphStore)] --> G
 ```
 
-**`SponsorshipEvent`** is the raw, auditable layer: one row per sponsor/cosponsor
-pair on one bill. **`GraphSlice`** is a filtered projection: aggregated member-pair
-edges with layout coordinates, community labels, and truncation metadata.
+`SponsorshipEvent` is the raw, auditable layer: one row per sponsor/cosponsor
+pair on one bill. `GraphSlice` is a filtered projection built from those events:
+aggregated member-pair edges with layout coordinates, community labels, and
+truncation metadata.
 
 ## Method catalog
 
@@ -416,19 +417,12 @@ repeat runs reuse stored responses.
 
 ### `network_graph_live.py`
 
-Build an **ephemeral** sponsor/cosponsor graph from a live bill batch. Members
+Builds an ephemeral sponsor/cosponsor graph from a live bill batch. Members
 appear only when they have sponsorship ties in the fetched bills.
-
-**Syntax:**
 
 ```bash
 poetry run python examples/network_graph_live.py [OPTIONS]
-```
-
-**Help:**
-
-```bash
-poetry run python examples/network_graph_live.py --help
+# or: poetry run python examples/network_graph_live.py --help
 ```
 
 | Flag | Type | Default | Description |
@@ -444,7 +438,7 @@ poetry run python examples/network_graph_live.py --help
 | `--env-file` | path | `.env` | Path to the dotenv file containing `CONGRESS_API_KEY` |
 | `--workspace-exports` | flag | off | Also write HTML/JSON to `.congressgov/exports/network_graph/{congress}_{bill_type}/` |
 
-**Examples:**
+Examples:
 
 ```bash
 # Defaults: 118th Congress, HR bills, 25 bills
@@ -468,7 +462,7 @@ poetry run python examples/network_graph_live.py \
 poetry run python examples/network_graph_live.py --workspace-exports
 ```
 
-**Output files** (under `--output-dir`):
+Output files (under `--output-dir`):
 
 | File | Description |
 |------|-------------|
@@ -479,32 +473,24 @@ poetry run python examples/network_graph_live.py --workspace-exports
 When `--workspace-exports` is set, matching HTML/JSON are also written under
 `.congressgov/exports/network_graph/{congress}_{bill_type}/`.
 
-**Automatic density tuning:** When the exported slice is **truncated** (eligible
-edges exceed `--max-edges`), `recommend_explore_config` may raise effective
-`--min-weight` and/or lower effective `--max-edges` before export. If the slice
-fits within your limits, your `--min-weight` and `--max-edges` values are kept.
-Pass `--no-safer-filters` to skip tuning entirely. A message is printed when
-filters change.
+When the exported slice is truncated (eligible edges exceed `--max-edges`),
+`recommend_explore_config` may raise the effective `--min-weight` and/or lower
+`--max-edges` before export; if the slice already fits your limits, your
+values are kept as-is. Pass `--no-safer-filters` to skip this tuning
+entirely — a message is printed whenever filters change.
 
-**Exit codes:** `0` on success, `1` on configuration/API/event errors.
+Exit codes: `0` on success, `1` on configuration/API/event errors.
 
 ---
 
 ### `congress_roster_graph_live.py`
 
-Build a **persistent** member-first graph: seed the full Congress roster, then
+Builds a persistent member-first graph: seed the full Congress roster, then
 incrementally add bills. Dataset state is saved between runs.
-
-**Syntax:**
 
 ```bash
 poetry run python examples/congress_roster_graph_live.py [OPTIONS]
-```
-
-**Help:**
-
-```bash
-poetry run python examples/congress_roster_graph_live.py --help
+# or: poetry run python examples/congress_roster_graph_live.py --help
 ```
 
 | Flag | Type | Default | Description |
@@ -522,7 +508,7 @@ poetry run python examples/congress_roster_graph_live.py --help
 | `--store-path` | path | *(workspace default)* | Override path for the persistent roster dataset JSON. When omitted, uses `.congressgov/datasets/graphs/{congress}.json` via `Workspace.open_graph()` |
 | `--workspace-exports` | flag | off | Also write HTML/JSON to `.congressgov/exports/congress_roster_graph/{congress}_{bill_type}/` |
 
-**Examples:**
+Examples:
 
 ```bash
 # First run: seeds ~535 members, fetches 25 HR bills, saves dataset
@@ -546,7 +532,7 @@ poetry run python examples/congress_roster_graph_live.py \
 poetry run python examples/congress_roster_graph_live.py --all-bill-types --max-edges 10000
 ```
 
-**Output files** (under `--output-dir`):
+Output files (under `--output-dir`):
 
 | File | Description |
 |------|-------------|
@@ -554,22 +540,16 @@ poetry run python examples/congress_roster_graph_live.py --all-bill-types --max-
 | `roster_graph_api.json` | Graph slice JSON |
 | `roster_graph_summary.json` | Run metadata plus `storeStats` (member/bill/event counts) |
 
-**Persistent dataset** (default path):
-
-```plain text
-.congressgov/datasets/graphs/{congress}.json
-```
-
+Persistent dataset (default path): `.congressgov/datasets/graphs/{congress}.json`.
 Re-running with the same Congress and store path skips bills whose IDs are
-already recorded. Member roster is seeded only when `member_count == 0`.
+already recorded; the member roster is seeded only when `member_count == 0`.
 
-**Roster-specific behavior** (not controlled by CLI flags):
+A few behaviors here aren't controlled by CLI flags: `include_all_members=True`
+is always set when building the slice, member display names are resolved and
+saved back to the dataset when possible, and isolated members (no sponsorship
+edges yet) still appear as nodes in the HTML.
 
-- `include_all_members=True` is always set when building the slice
-- Member display names are resolved and saved back to the dataset when possible
-- Isolated members (no sponsorship edges yet) still appear as nodes in the HTML
-
-**Exit codes:** `0` on success, `1` on configuration/API/event errors.
+Exit codes: `0` on success, `1` on configuration/API/event errors.
 
 ---
 
@@ -605,10 +585,8 @@ already recorded. Member roster is seeded only when `member_count == 0`.
 
 ### `reexport_explorer_from_json.py`
 
-Rebuild interactive HTML from a previously exported sigma-format JSON. No API
-key required. **No argparse** — uses positional arguments only.
-
-**Syntax:**
+Rebuilds interactive HTML from a previously exported sigma-format JSON. No API
+key required, and no argparse — just positional arguments.
 
 ```bash
 poetry run python examples/scripts/reexport_explorer_from_json.py [JSON_PATH] [HTML_PATH]
@@ -619,7 +597,7 @@ poetry run python examples/scripts/reexport_explorer_from_json.py [JSON_PATH] [H
 | `JSON_PATH` | 1 | `examples/output/network_graph/live_graph_api.json` | Input graph JSON (sigma payload) |
 | `HTML_PATH` | 2 | `examples/output/network_graph/live_network_explorer.html` | Output HTML path (overwritten) |
 
-**Examples:**
+Examples:
 
 ```bash
 # Re-export default live graph outputs
@@ -637,10 +615,8 @@ Prints the resolved HTML path on success. Exit code `0`.
 
 ### `stress_dense_graphs.py`
 
-Profile rendering on synthetic dense graphs. **No CLI flags** — scenarios and
+Profiles rendering on synthetic dense graphs. No CLI flags - scenarios and
 output paths are hard-coded.
-
-**Syntax:**
 
 ```bash
 poetry run python examples/scripts/stress_dense_graphs.py
@@ -662,13 +638,13 @@ Prints density tier, safer config, and payload size stats to stdout.
 
 ### `examples/network_graph_exploration.ipynb`
 
-Progressive construction without requiring an API key for early cells:
+Builds up progressively, and doesn't need an API key for the early cells:
 
-1. **Offline sample bills** — `sponsorship_events_from_bill` on validated `Bill` dicts
-2. **Graph slice** — `build_graph_slice` with matplotlib/NetworkX preview
-3. **Workspace offline replay** — `workspace.open_graph` + `build_slice` from persisted roster data
-4. **Live API** (optional) — `ingest_bill_events` when `CONGRESS_API_KEY` is set
-5. **Dense synthetic** — `generate_dense_sponsorship_events` stress section
+1. Offline sample bills - `sponsorship_events_from_bill` on validated `Bill` dicts
+2. Graph slice - `build_graph_slice` with matplotlib/NetworkX preview
+3. Workspace offline replay - `workspace.open_graph` + `build_slice` from persisted roster data
+4. Live API (optional) - `ingest_bill_events` when `CONGRESS_API_KEY` is set
+5. Dense synthetic - `generate_dense_sponsorship_events` stress section
 
 CLI equivalents for the live notebook cells are documented in [§6 CLI reference](#6-cli-reference).
 
@@ -724,7 +700,7 @@ The roster store can persist upgraded labels via `store.resolve_member_labels(me
 
 ## Related documentation
 
-- [NETWORK_GRAPH.md](NETWORK_GRAPH.md) — projections, export formats, interactive explorer UI
-- [STORAGE.md](STORAGE.md) — `.congressgov/` workspace lanes (datasets, exports, API cache)
-- [REQUEST_STORE.md](REQUEST_STORE.md) — HTTP response persistence used by live scripts
-- [ADVANCED.md](ADVANCED.md) — optional `graph`, `export`, and `viz` extras
+- [NETWORK_GRAPH.md](NETWORK_GRAPH.md): projections, export formats, interactive explorer UI
+- [STORAGE.md](STORAGE.md): `.congressgov/` workspace lanes (datasets, exports, API cache)
+- [REQUEST_STORE.md](REQUEST_STORE.md): HTTP response persistence used by live scripts
+- [ADVANCED.md](ADVANCED.md): optional `graph`, `export`, and `viz` extras

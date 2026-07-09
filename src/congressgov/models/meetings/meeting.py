@@ -5,11 +5,6 @@ from datetime import date, datetime
 from ..base.enums import Chamber
 from ..base.types import URL
 from ..base.model import Model
-# from ..entities.committee import Committees  # Temporarily disabled due to circular import
-# === [FORWARD REFERENCES] Use string references to avoid circular imports ===
-# from .core import Bill
-# from .treaty import Treaty
-# from .nomination import Nomination
 
 
 class CommitteeMeetingRef(Model):

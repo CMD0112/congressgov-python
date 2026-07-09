@@ -1,9 +1,4 @@
-"""
-Cache key generation and management.
-
-This module provides utilities for generating consistent, deterministic
-cache keys from method parameters and context.
-"""
+"""Deterministic cache-key generation from method parameters and context."""
 
 from __future__ import annotations
 
@@ -18,12 +13,7 @@ logger = logging.getLogger(__name__)
 
 @dataclass
 class CacheKeyGenerator:
-    """
-    Generates consistent cache keys from method parameters.
-    
-    This class provides deterministic key generation that ensures
-    the same parameters always produce the same cache key.
-    """
+    """Turns method parameters into a deterministic cache key: same inputs, same key."""
     
     version: str = "v1"
     separator: str = ":"

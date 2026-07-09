@@ -18,41 +18,38 @@ from .treaty import Treaty
 
 
 class Amendment(Model):
-    # === [CORE FIELDS] Basic amendment information ===
+    """A single amendment: sponsors, the bill/amendment/treaty it amends, its
+    actions, and its text versions.
+    """
+
     number: str | None = None
     description: str | None = None
     purpose: str | None = None
     congress: int | None = None
     type: AmendmentType | None = None
 
-    # === [ACTION & TIMING FIELDS] ===
     latestAction: "LatestAction | None" = None
     proposedDate: datetime | None = None
     submittedDate: datetime | None = None
 
-    # === [CHAMBER & SPONSORSHIP] ===
     chamber: Chamber | None = None
 
-    # === [COMPOSITION APPROACH] Use Member class instead of duplicating fields ===
-    sponsors: list[Sponsor] | None = None  # ✅ Direct import (no circular dependency)
+    sponsors: list[Sponsor] | None = None
     # API may return a single object or a list of on-behalf sponsors.
     onBehalfOfSponsor: OnBehalfOfSponsor | list[OnBehalfOfSponsor] | None = None
-    cosponsors: list[Cosponsor] | CountRef | None = None  # ✅ Direct import
+    cosponsors: list[Cosponsor] | CountRef | None = None
 
-    # === [RELATED OBJECTS] ===
-    # NOTE: ✅ Sprint 2 improvement - Using reference models to avoid circular imports
-    amendedBill: BillRef | None = None  # ✅ Using BillRef instead of Bill
+    # Reference models (BillRef/TreatyRef) instead of full Bill/Treaty to avoid circular imports.
+    amendedBill: BillRef | None = None
     amendedAmendment: "Amendment | None" = None  # Self-reference is fine
     amendmentsToAmendment: list["Amendment"] | CountRef | None = None  # Self-reference is fine
-    amendedTreaty: TreatyRef | None = None  # ✅ Using TreatyRef instead of Treaty
+    amendedTreaty: TreatyRef | None = None
 
-    # === [ACTIONS & TEXT] ===
-    actions: list[Action] | CountRef | None = None  # ✅ Direct import (no circular dependency)
-    amendmentActions: list[Action] | CountRef | None = None  # ✅ Direct import
-    textVersions: list[TextVersionItem] | CountRef | None = None  # ✅ Direct import
+    actions: list[Action] | CountRef | None = None
+    amendmentActions: list[Action] | CountRef | None = None
+    textVersions: list[TextVersionItem] | CountRef | None = None
 
-    # === [URL] ===
-    # URL class now handles string conversion automatically via __get_pydantic_core_schema__
+    # URL handles str conversion itself via __get_pydantic_core_schema__.
     url: URL | None = None
 
     @property
@@ -116,6 +113,8 @@ class Amendment(Model):
 
 
 class Amendments(Model):
+    """A collection of `Amendment` records, as returned by list/search endpoints."""
+
     amendments: List["Amendment"] | None = Field(None, validation_alias=AliasChoices("amendments", "amendmentsToAmendment"))
 
 

@@ -9,8 +9,6 @@ from pydantic import Field, model_validator
 from ..base.enums import Chamber, SessionType
 from ..base.model import Model
 
-# NOTE: Only using Congress class and allowing for partial initialization
-
 _CONGRESS_URL_RE = re.compile(r"/congress/(\d+)(?:/|\?|$)", re.IGNORECASE)
 _CONGRESS_NAME_RE = re.compile(r"^(\d+)(?:st|nd|rd|th)?\s+Congress", re.IGNORECASE)
 
@@ -81,10 +79,8 @@ class CongressSession(Model):
 
 
 class CongressSessions(Model):
-    """
-    === CongressSessions Model ===
-    Represents a container for a list of CongressSession objects.
-    """
+    """A container for a list of `CongressSession` objects."""
+
     sessions: list[CongressSession] | None = Field(None, alias="sessions", validation_alias="sessions")
 
 
@@ -92,6 +88,8 @@ class CongressSessions(Model):
 
 
 class Congress(Model):
+    """A numbered Congress (e.g. the 118th): its sessions, name, and date range."""
+
     sessions: list[CongressSession] | None = None
     name: str | None = None
     startYear: int | None = None
@@ -150,10 +148,8 @@ class Congress(Model):
 
 
 class Congresses(Model):
-    """
-    === Congresses Model ===
-    Represents a container for a list of Congress objects.
-    """
+    """A container for a list of `Congress` objects."""
+
     congresses: list[Congress] | None = Field(None, alias="congresses")
 
 
@@ -168,7 +164,3 @@ if TYPE_CHECKING:
         """Congress model with sync and async extension method type hints."""
 
         pass
-
-
-# === Ensure all Pydantic models with forward references are rebuilt for type resolution ===
-# All model_rebuild() calls have been moved to right after each model definition

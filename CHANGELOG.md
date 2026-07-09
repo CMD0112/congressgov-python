@@ -4,6 +4,21 @@ All notable changes to this project are documented in this file.
 
 ## [Unreleased]
 
+## [2.1.1] - 2026-07-09
+
+### Changed
+
+- Codebase-wide prose and comment cleanup — rewrote module/class docstrings and stripped boilerplate `# NOTE:` comments, section banners, and templated "Best Practices"/"Features" headers across `services/extensions`, `services/core`, `services/batch`, `services/export`, `services/caching`, `services/rate_limiting`, and `models/entities`; added missing class docstrings (`Member`, `Amendment`, `Bills`, `Amendments`, and others) that double as the new API reference content.
+- Reduced bold/em-dash/emoji density in `README.md`, `docs/GRAPH_CONSTRUCTION.md`, and `docs/STORAGE_AUDIT.md` (status legends now use plain `yes`/`partial`/`no` instead of `✅`/`⚠️`/`❌`).
+- `README.md`: added PyPI/CI/docs badges, linked the Code of Conduct and GitHub Issues, added `URL_FETCH.md`/`STORAGE_AUDIT.md` to the doc table, and linked both example notebooks.
+- `CONTRIBUTING.md`: added `pytest` and `mkdocs build --strict` to the quality-check list; linked the Code of Conduct and issue/PR templates.
+- `docs/VERSIONING.md`: pointed the issue-reporting line at the concrete GitHub Issues URL.
+
+### Added
+
+- Hosted documentation site at https://cmd0112.github.io/congressgov-python/, built with MkDocs Material and deployed to GitHub Pages via `.github/workflows/docs.yml`. Includes an auto-generated API reference (`docs/api/*.md`, via `mkdocstrings`) alongside the existing hand-written guides.
+- `examples/README.md` indexing every example script and notebook with its prerequisites.
+
 ## [2.1.0] - 2026-07-09
 
 ### Added

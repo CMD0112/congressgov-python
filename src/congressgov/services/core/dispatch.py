@@ -1,21 +1,15 @@
 """
-Dispatch module for congressgov.services endpoint management.
-
-This module provides:
-- Dispatch: Primary user-facing class for accessing API service endpoints
-- Helper functions for dynamic service class loading
-
-Best Practices:
-- Lazy loading of service classes to avoid circular imports
-- Caching for performance
-- Clear error messages for invalid endpoints
+`Dispatch` is the primary user-facing entry point for accessing API service
+endpoints (``dispatch.bill``, ``dispatch.member``, etc.). Service classes are
+loaded lazily, both to dodge circular imports and to avoid importing
+modules a caller never touches.
 """
 
 from __future__ import annotations
 
 from typing import Any, Optional
 
-# NOTE: Global cache to prevent repeated imports
+# Global cache to prevent repeated imports
 _classes_dict_cache: Optional[dict[str, Any]] = None
 
 
@@ -23,14 +17,14 @@ def _get_classes_dict() -> dict[str, Any]:
     """
     Lazy-load service classes to avoid circular imports.
     
-    NOTE: Imports are performed at function call time, not module load time.
+    Imports are performed at function call time, not module load time.
     This prevents circular import issues that would occur if these were
     imported at the top of the module.
     
     Returns:
         Dictionary mapping endpoint names to service classes
     """
-    # NOTE: Import service classes locally to avoid circular dependencies
+    # Import service classes locally to avoid circular dependencies
     from congressgov.services.bill import Bill
     from congressgov.services.amendment import Amendment
     from congressgov.services.summaries import Summaries
@@ -78,7 +72,7 @@ def get_classes_dict() -> dict[str, Any]:
     """
     Get service classes dictionary with caching.
     
-    NOTE: First call loads all classes, subsequent calls return cached dict.
+    First call loads all classes, subsequent calls return cached dict.
     This provides a good balance between lazy loading and performance.
     
     Returns:
@@ -173,13 +167,13 @@ class Dispatch:
         classes = get_classes_dict()
         
         if endpoint_name not in classes:
-            # NOTE: Provide helpful error message with available options
+            # Provide helpful error message with available options
             available = ', '.join(sorted(classes.keys()))
             raise KeyError(
                 f"Endpoint '{endpoint_name}' is not recognized. "
                 f"Available endpoints: {available}"
             )
         
-        # NOTE: Instantiate service class with client
+        # Instantiate service class with client
         return classes[endpoint_name](client=self.client)
 

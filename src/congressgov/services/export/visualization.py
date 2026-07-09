@@ -1,10 +1,4 @@
-"""
-Visualization utilities for data export and analysis.
-
-This module provides comprehensive visualization capabilities for
-congressgov data, including common chart types and
-custom visualization support.
-"""
+"""Chart-plotting helpers for congressgov data: common chart types plus custom plots."""
 
 from __future__ import annotations
 
@@ -44,13 +38,10 @@ logger = logging.getLogger(__name__)
 
 
 class VisualizationExporter:
-    """
-    Visualization exporter for congressgov.
-    
-    This class provides comprehensive visualization capabilities for
-    congressional data, including common chart types, custom plots,
-    and export functionality.
-    
+    """Plots congressional data (bill types, member counts, vote breakdowns,
+    etc.) and saves the result to a file, or builds a custom plot from a
+    caller-supplied function.
+
     Example:
         viz_exporter = VisualizationExporter()
         bills = bill_service.search(congress=118, limit=1000)
@@ -317,9 +308,8 @@ class VisualizationExporter:
             raise
     
     def create_dashboard(self, data: Any, filepath: Union[str, Path], **kwargs) -> None:
-        """
-        Create a comprehensive dashboard with multiple charts.
-        
+        """Create a dashboard combining multiple charts into one figure.
+
         Args:
             data: Data to visualize
             filepath: Output file path

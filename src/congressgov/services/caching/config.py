@@ -1,9 +1,4 @@
-"""
-Cache configuration and TTL strategies.
-
-This module provides configuration classes for the caching system,
-including TTL strategies and cache backend configuration.
-"""
+"""Configuration classes for the caching system: TTL strategies and backend settings."""
 
 from __future__ import annotations
 
@@ -28,12 +23,7 @@ class TTLStrategy(Enum):
 
 @dataclass
 class CacheConfig:
-    """
-    Configuration for cache backends and behavior.
-    
-    This class provides a unified way to configure caching across
-    different backends and use cases.
-    """
+    """Configuration shared across cache backends and use cases."""
     
     # Backend configuration
     backend: Union[str, CacheBackend] = "memory"
@@ -169,12 +159,7 @@ class CacheConfig:
 
 @dataclass
 class RateLimitConfig:
-    """
-    Configuration for rate limiting.
-    
-    This class provides configuration for rate limiting behavior
-    to prevent hitting API rate limits.
-    """
+    """Configuration for rate limiting behavior, to stay under API rate limits."""
     
     # Rate limiting parameters
     requests_per_second: float = 10.0

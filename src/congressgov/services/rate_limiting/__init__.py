@@ -1,9 +1,4 @@
-"""
-Rate limiting system for congressgov.
-
-This module provides intelligent rate limiting to prevent hitting API
-rate limits while maximizing throughput through adaptive strategies.
-"""
+"""Adaptive rate limiting to stay under API limits without leaving throughput on the table."""
 
 from .limiter import RateLimiter
 from .backoff import ExponentialBackoff, LinearBackoff

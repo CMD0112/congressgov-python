@@ -1,6 +1,11 @@
 # Contributing to congressgov-python
 
-Source for the PyPI package [`congressgov`](https://pypi.org/project/congressgov/).
+Source for the PyPI package [`congressgov`](https://pypi.org/project/congressgov/). By
+participating in this project you agree to abide by our [Code of Conduct](CODE_OF_CONDUCT.md).
+
+Found a bug or want a new feature? [Open an issue](https://github.com/CMD0112/congressgov-python/issues/new/choose)
+using the bug report or feature request template. Sending a PR? It'll pick up
+[`.github/pull_request_template.md`](.github/pull_request_template.md) automatically.
 
 ## Setup
 
@@ -33,10 +38,18 @@ Read [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) for core vs optional extras an
 poetry run ruff check .
 poetry run deptry .
 poetry run mypy src/congressgov/services/client_factory.py
+poetry run pytest tests/ -q
 poetry build
 ```
 
-Run `deptry` before adding dependencies to `pyproject.toml`; legacy reference modules under `codegen/data` are excluded via `[tool.deptry]`.
+Run `deptry` before adding dependencies to `pyproject.toml`; legacy reference modules under `codegen/data` are excluded via `[tool.deptry]`. The test suite runs fully offline (no `CONGRESS_API_KEY` needed) — client calls are mocked or monkeypatched.
+
+If you're touching `docs/` or docstrings on public classes, also check the docs site builds:
+
+```bash
+poetry install --with docs
+poetry run mkdocs build --strict
+```
 
 ## Regenerating code
 

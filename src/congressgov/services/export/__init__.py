@@ -1,14 +1,7 @@
 """
-Data export and integration for congressgov.
-
-This module provides comprehensive data export capabilities including:
-- Multi-format export (CSV, Excel, JSON, Parquet)
-- Pandas DataFrame integration
-- Database export with SQLAlchemy
-- Data transformation pipelines
-- Visualization utilities
-
-All features are purely additive with zero breaking changes.
+Data export and integration for congressgov: multi-format file export
+(CSV/Excel/JSON/Parquet), pandas DataFrame conversion, SQLAlchemy-backed
+database export, transformation pipelines, and plotting helpers.
 
 Usage:
     from congressgov.services.export import DataExporter, PandasIntegration

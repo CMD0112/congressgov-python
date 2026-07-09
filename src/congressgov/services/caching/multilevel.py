@@ -1,9 +1,4 @@
-"""
-Multi-level cache implementation with cascading lookups.
-
-This module provides a multi-level cache that checks multiple cache
-backends in order, providing a hierarchy of speed vs. capacity.
-"""
+"""Multi-level cache that checks backends in order, from fastest to largest."""
 
 from __future__ import annotations
 
@@ -17,18 +12,11 @@ logger = logging.getLogger(__name__)
 
 
 class MultiLevelCache(BaseCacheBackend):
-    """
-    Multi-level cache with cascading lookups.
+    """Checks backends in order (L1 -> L2 -> L3 -> ...), writes through to all
+    levels, and promotes hot data to faster levels on read.
 
     .. deprecated::
         Use the request store blob lane via ``get_client_from_env()`` instead.
-
-    Features:
-    - Cascading lookups (L1 -> L2 -> L3 -> ...)
-    - Write-through to all levels
-    - Automatic promotion of hot data to faster levels
-    - Configurable TTL per level
-    - Fallback handling
     """
     
     def __init__(

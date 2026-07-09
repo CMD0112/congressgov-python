@@ -1,9 +1,4 @@
-"""
-Batch monitoring and progress tracking.
-
-This module provides the BatchMonitor class for comprehensive progress tracking,
-performance monitoring, and real-time metrics collection.
-"""
+"""Batch monitoring: progress tracking, performance metrics, and real-time collection."""
 
 from __future__ import annotations
 
@@ -136,12 +131,9 @@ class BatchMetrics:
 
 
 class BatchMonitor:
-    """
-    Batch monitor for comprehensive progress tracking.
-    
-    This class provides real-time monitoring of batch operations including
-    progress tracking, performance metrics, and integration with progress bars.
-    
+    """Real-time monitoring of batch operations: progress, performance
+    metrics, and integration with progress bars.
+
     Example:
         monitor = BatchMonitor(
             total_items=1000,
