@@ -4,6 +4,17 @@ All notable changes to this project are documented in this file.
 
 ## [Unreleased]
 
+## [2.1.2] - 2026-07-09
+
+### Changed
+
+- Split `docs/` into `docs/guide/` (end-user guides) and `docs/maintainers/` (release, CI, and codegen runbooks), mirrored in `mkdocs.yml`'s nav and in the `README.md`/`docs/README.md` documentation tables. Each maintainer doc now opens with a banner pointing back to the user guide.
+- Removed `docs/STORAGE_AUDIT.md` from the repo — it was an internal adoption-tracking audit that linked directly to internal issue tracker tickets and had no end-user value.
+- Trimmed `docs/guide/ARCHITECTURE.md` and `docs/guide/PACKAGE_LAYOUT.md` down to end-user-relevant content (layers, install extras, storage lanes); moved the codegen internals they used to carry (protected paths, spec regeneration workflow, model registry merge behavior) into `docs/maintainers/CODEGEN.md`.
+- Rewrote `docs/guide/MEMBERS_QUERY.md`, which had been skipped in the earlier prose cleanup pass — tightened the bullet-heavy, repetitive original into a shorter guide with one example per concept and a single reference table.
+- Added short "why you'd use this" intros to `docs/guide/REQUEST_STORE.md`, `docs/guide/STORAGE.md`, `docs/guide/URL_FETCH.md`, and `docs/guide/ADVANCED.md`, which previously jumped straight into config tables with no framing.
+- `codegen/scripts/api_coverage_matrix.py` now writes to `docs/maintainers/API_COVERAGE.md`.
+
 ## [2.1.1] - 2026-07-09
 
 ### Changed

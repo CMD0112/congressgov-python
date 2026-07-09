@@ -1,8 +1,10 @@
 # Code generation
 
+> **Maintainer documentation.** This page is for people maintaining the congressgov repository (releases, CI, codegen). If you're using the SDK, you don't need this — see the [user guide](../guide/USAGE.md) instead.
+
 **congressgov** can regenerate the HTTP client, Pydantic models, `congressgov.services` wrappers, and extension stubs from an OpenAPI specification. Generated code is committed to the repo; consumers typically use the pre-built packages without running codegen.
 
-See [ARCHITECTURE.md](ARCHITECTURE.md) for how generation fits the hybrid layout. End users: [USAGE.md](USAGE.md). SemVer: [VERSIONING.md](VERSIONING.md). Doc index: [README.md](README.md).
+See [ARCHITECTURE.md](../guide/ARCHITECTURE.md) for how generation fits the hybrid layout. End users: [USAGE.md](../guide/USAGE.md). SemVer: [VERSIONING.md](../guide/VERSIONING.md). Doc index: [README.md](../README.md). Maintainer index: [maintainers/README.md](README.md).
 
 ## Prerequisites
 
@@ -46,12 +48,12 @@ poetry run python -m codegen.scripts.api_coverage_matrix --check
 
 | File | Purpose |
 |------|---------|
-| [`codegen/config/congressgov_openapi_base.yaml`](../codegen/config/congressgov_openapi_base.yaml) | Vendored official Congress.gov OpenAPI (do not edit by hand) |
-| [`codegen/config/openapi_spec_annotations.yaml`](../codegen/config/openapi_spec_annotations.yaml) | `x-*` codegen annotations (21 entities) |
-| [`codegen/config/openapi_spec.yaml`](../codegen/config/openapi_spec.yaml) | **Merged** spec — input for validate/generate |
-| [`codegen/config/generator_config.yaml`](../codegen/config/generator_config.yaml) | Output paths, incremental markers, `protected_paths`, `emit_review_sidecars` |
-| [`codegen/config/entity_mappings.yaml`](../codegen/config/entity_mappings.yaml) | Entity and field mapping overrides |
-| [`codegen/config/openapi_client_config.yaml`](../codegen/config/openapi_client_config.yaml) | `openapi-python-client` options (`post_hooks`, package name) |
+| [`codegen/config/congressgov_openapi_base.yaml`](../../codegen/config/congressgov_openapi_base.yaml) | Vendored official Congress.gov OpenAPI (do not edit by hand) |
+| [`codegen/config/openapi_spec_annotations.yaml`](../../codegen/config/openapi_spec_annotations.yaml) | `x-*` codegen annotations (21 entities) |
+| [`codegen/config/openapi_spec.yaml`](../../codegen/config/openapi_spec.yaml) | **Merged** spec — input for validate/generate |
+| [`codegen/config/generator_config.yaml`](../../codegen/config/generator_config.yaml) | Output paths, incremental markers, `protected_paths`, `emit_review_sidecars` |
+| [`codegen/config/entity_mappings.yaml`](../../codegen/config/entity_mappings.yaml) | Entity and field mapping overrides |
+| [`codegen/config/openapi_client_config.yaml`](../../codegen/config/openapi_client_config.yaml) | `openapi-python-client` options (`post_hooks`, package name) |
 
 Default output directories (from `generator_config.yaml`):
 
@@ -65,6 +67,8 @@ Default output directories (from `generator_config.yaml`):
 
 CLI command `generate-middleware` still uses the historical name; it targets `congressgov.services`, not a separate package.
 
+**Model registry:** `generate-registry` writes `congressgov/services/core/model_registry_generated.py`; hand `model_registry.py` merges its `MODEL_PATH_MAP` with `HAND_MODEL_OVERRIDES`, so the generated map stays current without maintainers editing generated code.
+
 ## Incremental generation
 
 When `incremental: true` and `preserve_custom: true`:
@@ -77,7 +81,7 @@ Review diffs carefully after `generate-all`; do not commit unintended overwrites
 
 ## Protected paths
 
-The file manager **skips writes** to paths in `protected_paths` in [`generator_config.yaml`](../codegen/config/generator_config.yaml). Hand-maintained core files are listed explicitly (not the whole `congressgov/services/core/` tree), so **`model_registry_generated.py` is regenerated** while `model_registry.py` stays hand-maintained and imports `MODEL_PATH_MAP` from the generated module.
+The file manager **skips writes** to paths in `protected_paths` in [`generator_config.yaml`](../../codegen/config/generator_config.yaml). Hand-maintained core files are listed explicitly (not the whole `congressgov/services/core/` tree), so **`model_registry_generated.py` is regenerated** while `model_registry.py` stays hand-maintained and imports `MODEL_PATH_MAP` from the generated module.
 
 Examples of protected service and extension modules:
 
@@ -131,7 +135,7 @@ Use `# CUSTOM:` markers in incrementally generated model files to preserve hand 
 | `emit-client-compat` | Rebuild `api/*/__init__.py` legacy `*_sync` / `*_async` exports |
 | `emit-client-compat --vendor-legacy` | Snapshot legacy modules into `codegen/data/legacy_api_modules/` |
 | `audit-client-compat` | Audit aliases vs `__init__` exports (CI) |
-| `api-coverage-matrix` | Regenerate [API_COVERAGE.md](API_COVERAGE.md) + `api_coverage.json` |
+| `api-coverage-matrix` | Regenerate [API_COVERAGE.md](API_COVERAGE.md) + `api_coverage.json` (moved to `docs/maintainers/`) |
 | `api-coverage-matrix --check-service-methods` | Fail if any `service_method` rows remain (CI) |
 
 Verbose logging: `poetry run python -m codegen.cli -v generate-all`.
@@ -145,7 +149,7 @@ Verbose logging: `poetry run python -m codegen.cli -v generate-all`.
 5. Run `poetry run python -m codegen generate-all` (or stepwise commands).
 6. Run `poetry run ruff check .` and fix any issues in custom code.
 7. Run `poetry run python -m codegen.scripts.api_coverage_matrix` and commit updated coverage docs if paths changed.
-8. Update [CHANGELOG.md](../CHANGELOG.md) if public APIs changed.
+8. Update [CHANGELOG.md](../../CHANGELOG.md) if public APIs changed.
 
 ## API client regeneration (fail-safe)
 
@@ -155,7 +159,7 @@ After `merge-openapi-spec`, the merged spec is sanitized automatically (see tabl
 
 ## Merge-time spec sanitization
 
-`merge-openapi-spec` applies fixes in [`codegen/scripts/merge_openapi_annotations.py`](../codegen/scripts/merge_openapi_annotations.py) (do not hand-edit the vendored base spec):
+`merge-openapi-spec` applies fixes in [`codegen/scripts/merge_openapi_annotations.py`](../../codegen/scripts/merge_openapi_annotations.py) (do not hand-edit the vendored base spec):
 
 | Quirk | Fix |
 |-------|-----|
@@ -166,9 +170,9 @@ After `merge-openapi-spec`, the merged spec is sanitized automatically (see tabl
 | Path parameters not `required` | Set `required: true` |
 | `default` on path parameter schemas | Remove (avoids invalid Python param order in generated client) |
 
-After `generate-client`, [`normalize_client_tree`](../codegen/scripts/normalize_client_tree.py) runs **isort** and **ruff** (see `codegen/config/ruff_generated_client.toml`). [`patch_client_parse_response`](../codegen/scripts/patch_client_parse_response.py) fixes envelope list parsers that do not match API JSON shape. [`patch_client_format_none`](../codegen/scripts/patch_client_format_none.py) coerces `format_=None` to JSON so service callers can omit `format_` without `AttributeError`.
+After `generate-client`, [`normalize_client_tree`](../../codegen/scripts/normalize_client_tree.py) runs **isort** and **ruff** (see `codegen/config/ruff_generated_client.toml`). [`patch_client_parse_response`](../../codegen/scripts/patch_client_parse_response.py) fixes envelope list parsers that do not match API JSON shape. [`patch_client_format_none`](../../codegen/scripts/patch_client_format_none.py) coerces `format_=None` to JSON so service callers can omit `format_` without `AttributeError`.
 
-Hand-maintained services should prefer [`resolve_response_format`](../src/congressgov/services/api_format.py) (or `ApiService.resolve_format`) when calling the client; the client patch is a safety net for universal search and legacy call sites.
+Hand-maintained services should prefer [`resolve_response_format`](../../src/congressgov/services/api_format.py) (or `ApiService.resolve_format`) when calling the client; the client patch is a safety net for universal search and legacy call sites.
 
 ## Troubleshooting
 
@@ -182,4 +186,4 @@ Hand-maintained services should prefer [`resolve_response_format`](../src/congre
 | Async out of sync with sync | Edit `congressgov/services/async_api/` manually for affected services |
 | No files from `generate-middleware` | Expected when paths are protected and `emit_review_sidecars` is false — update hand services directly |
 
-Implementation: [`codegen/`](../codegen/) package and Jinja templates under `codegen/templates/`.
+Implementation: [`codegen/`](../../codegen/) package and Jinja templates under `codegen/templates/`.

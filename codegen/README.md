@@ -2,7 +2,7 @@
 
 Maintainer tooling to regenerate the client, models, and `congressgov.services` from OpenAPI.
 
-**Documentation:** [docs/CODEGEN.md](../docs/CODEGEN.md)
+**Documentation:** [docs/maintainers/CODEGEN.md](../docs/maintainers/CODEGEN.md)
 
 ```bash
 poetry install --with codegen

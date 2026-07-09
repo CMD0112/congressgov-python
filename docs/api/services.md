@@ -2,8 +2,8 @@
 
 Each class below wraps one Congress.gov resource: a `get()` for the detail endpoint, a `search()`
 for the list endpoint, and (where the API supports it) sub-resource getters like `get_actions()` or
-`get_cosponsors()`. See [REFERENCE.md](../REFERENCE.md) for the typical `get()` identifiers per
-service, and [MEMBERS_QUERY.md](../MEMBERS_QUERY.md) for the `Members` collection's query helpers.
+`get_cosponsors()`. See [REFERENCE.md](../guide/REFERENCE.md) for the typical `get()` identifiers per
+service, and [MEMBERS_QUERY.md](../guide/MEMBERS_QUERY.md) for the `Members` collection's query helpers.
 
 ## Bill
 

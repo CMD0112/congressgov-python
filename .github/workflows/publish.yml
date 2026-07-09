@@ -2,7 +2,7 @@ name: Publish to PyPI
 
 # Trusted publishing: configure on PyPI for package "congressgov" with this
 # workflow file, repository CMD0112/congressgov-python, environment "pypi".
-# Release tag must match pyproject.toml (e.g. v2.0.8). See docs/PUBLISHING.md.
+# Release tag must match pyproject.toml (e.g. v2.0.8). See docs/maintainers/PUBLISHING.md.
 #
 # Release flow: bump pyproject.toml + CHANGELOG on main, commit, push, then:
 #   git tag v2.0.8 && git push origin v2.0.8

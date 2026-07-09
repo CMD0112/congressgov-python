@@ -45,7 +45,7 @@ poetry install --with dev,cache,export,batch,codegen
 # Or: pip install -e ".[dev,all,codegen]"
 ```
 
-First-time maintainers wiring a new GitHub remote: [docs/GITHUB_SETUP.md](docs/GITHUB_SETUP.md).
+First-time maintainers wiring a new GitHub remote: [docs/maintainers/GITHUB_SETUP.md](docs/maintainers/GITHUB_SETUP.md).
 
 ### API key
 
@@ -138,11 +138,11 @@ Caching, batch jobs, export, and rate limiting require optional extras (lazy-imp
 | `all` | `pip install congressgov[all]` | All optional runtime extras above |
 | `codegen` | `pip install congressgov[codegen]` | Maintainer deps only; run `python -m codegen` from a git clone |
 
-Storage: **[docs/STORAGE.md](docs/STORAGE.md)** (workspace layout, lanes, `congressgov-store` CLI) and
-**[docs/REQUEST_STORE.md](docs/REQUEST_STORE.md)** (HTTP deduplication, offline replay).
-Network graphs: **[docs/NETWORK_GRAPH.md](docs/NETWORK_GRAPH.md)** · construction methods: **[docs/GRAPH_CONSTRUCTION.md](docs/GRAPH_CONSTRUCTION.md)**.
+Storage: **[docs/guide/STORAGE.md](docs/guide/STORAGE.md)** (workspace layout, lanes, `congressgov-store` CLI) and
+**[docs/guide/REQUEST_STORE.md](docs/guide/REQUEST_STORE.md)** (HTTP deduplication, offline replay).
+Network graphs: **[docs/guide/NETWORK_GRAPH.md](docs/guide/NETWORK_GRAPH.md)** · construction methods: **[docs/guide/GRAPH_CONSTRUCTION.md](docs/guide/GRAPH_CONSTRUCTION.md)**.
 
-Other optional features: **[docs/ADVANCED.md](docs/ADVANCED.md)**.
+Other optional features: **[docs/guide/ADVANCED.md](docs/guide/ADVANCED.md)**.
 
 ## Regenerating from OpenAPI
 
@@ -161,7 +161,7 @@ Stepwise: `python -m codegen generate-client`, `generate-models`, `generate-midd
 - **Incremental mode** preserves `# CUSTOM:` blocks in generated files
 - **Do not overwrite** hand-maintained `congressgov/services/async_api/bill.py`
 
-Full workflow: **[docs/CODEGEN.md](docs/CODEGEN.md)** (see **[docs/README.md](docs/README.md)** for the full index).
+Full workflow: **[docs/maintainers/CODEGEN.md](docs/maintainers/CODEGEN.md)** (see **[docs/README.md](docs/README.md)** for the full index).
 
 ## Documentation
 
@@ -170,23 +170,28 @@ Hosted docs (with auto-generated API reference): **https://cmd0112.github.io/con
 | Guide | Contents |
 |-------|----------|
 | [docs/README.md](docs/README.md) | **Documentation index** (start here) |
-| [docs/USAGE.md](docs/USAGE.md) | Getting started, async, errors, congressional record types |
-| [docs/REFERENCE.md](docs/REFERENCE.md) | Services, client, models, extensions |
-| [docs/MEMBERS_QUERY.md](docs/MEMBERS_QUERY.md) | `Members` collection query/filter helpers |
-| [docs/ADVANCED.md](docs/ADVANCED.md) | Caching, batch, export, rate limits |
-| [docs/REQUEST_STORE.md](docs/REQUEST_STORE.md) | HTTP request store, offline mode, policies |
-| [docs/STORAGE.md](docs/STORAGE.md) | Unified workspace, storage lanes, `congressgov-store` |
-| [docs/NETWORK_GRAPH.md](docs/NETWORK_GRAPH.md) | Sponsor/cosponsor graphs and interactive export |
-| [docs/GRAPH_CONSTRUCTION.md](docs/GRAPH_CONSTRUCTION.md) | Graph construction methods and live script reference |
-| [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) | Core vs extras, generated vs hand-maintained |
-| [docs/PACKAGE_LAYOUT.md](docs/PACKAGE_LAYOUT.md) | Directory layout, wheel policy, 2.0 `src/` plan |
-| [docs/MIGRATION.md](docs/MIGRATION.md) | Import path changes (1.1 → 2.0) |
-| [docs/VERSIONING.md](docs/VERSIONING.md) | SemVer, deprecations, stability scope |
-| [docs/URL_FETCH.md](docs/URL_FETCH.md) | Fetch typed models from API `url` fields |
-| [docs/STORAGE_AUDIT.md](docs/STORAGE_AUDIT.md) | Storage adoption audit matrix (maintainers) |
-| [docs/CODEGEN.md](docs/CODEGEN.md) | OpenAPI code generation (maintainers) |
-| [docs/API_COVERAGE.md](docs/API_COVERAGE.md) | OpenAPI path coverage matrix (maintainers) |
-| [docs/PUBLISHING.md](docs/PUBLISHING.md) | PyPI trusted publishing (maintainers) |
+| [docs/guide/USAGE.md](docs/guide/USAGE.md) | Getting started, async, errors, congressional record types |
+| [docs/guide/REFERENCE.md](docs/guide/REFERENCE.md) | Services, client, models, extensions |
+| [docs/guide/MEMBERS_QUERY.md](docs/guide/MEMBERS_QUERY.md) | `Members` collection query/filter helpers |
+| [docs/guide/ADVANCED.md](docs/guide/ADVANCED.md) | Caching, batch, export, rate limits |
+| [docs/guide/REQUEST_STORE.md](docs/guide/REQUEST_STORE.md) | HTTP request store, offline mode, policies |
+| [docs/guide/STORAGE.md](docs/guide/STORAGE.md) | Unified workspace, storage lanes, `congressgov-store` |
+| [docs/guide/NETWORK_GRAPH.md](docs/guide/NETWORK_GRAPH.md) | Sponsor/cosponsor graphs and interactive export |
+| [docs/guide/GRAPH_CONSTRUCTION.md](docs/guide/GRAPH_CONSTRUCTION.md) | Graph construction methods and live script reference |
+| [docs/guide/ARCHITECTURE.md](docs/guide/ARCHITECTURE.md) | Core vs extras, generated vs hand-maintained |
+| [docs/guide/PACKAGE_LAYOUT.md](docs/guide/PACKAGE_LAYOUT.md) | Directory layout, wheel policy, 2.0 `src/` plan |
+| [docs/guide/MIGRATION.md](docs/guide/MIGRATION.md) | Import path changes (1.1 → 2.0) |
+| [docs/guide/VERSIONING.md](docs/guide/VERSIONING.md) | SemVer, deprecations, stability scope |
+| [docs/guide/URL_FETCH.md](docs/guide/URL_FETCH.md) | Fetch typed models from API `url` fields |
+
+Maintaining this repository (releases, CI, codegen) rather than using the SDK? Start at [docs/maintainers/README.md](docs/maintainers/README.md):
+
+| Maintainer doc | Contents |
+|-----------------|----------|
+| [docs/maintainers/CODEGEN.md](docs/maintainers/CODEGEN.md) | OpenAPI code generation |
+| [docs/maintainers/API_COVERAGE.md](docs/maintainers/API_COVERAGE.md) | OpenAPI path coverage matrix |
+| [docs/maintainers/PUBLISHING.md](docs/maintainers/PUBLISHING.md) | PyPI trusted publishing |
+| [docs/maintainers/GITHUB_SETUP.md](docs/maintainers/GITHUB_SETUP.md) | GitHub remote and CI setup |
 
 ## Contributing
 

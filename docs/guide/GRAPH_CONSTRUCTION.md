@@ -78,12 +78,12 @@ truncation metadata.
 
 | Goal | Recommended path | Example |
 |------|------------------|---------|
-| Quick one-shot graph from a bill batch | `ingest_bill_events` → `build_graph_slice` | [`examples/network_graph_live.py`](../examples/network_graph_live.py) |
-| Full Congress roster + incremental bills over time | `CongressGraphStore` seed → `add_bill` → `build_slice` | [`examples/congress_roster_graph_live.py`](../examples/congress_roster_graph_live.py) |
-| Offline / notebook exploration with sample data | `sponsorship_events_from_bill` on `Bill.model_validate(...)` | [`examples/network_graph_exploration.ipynb`](../examples/network_graph_exploration.ipynb) |
+| Quick one-shot graph from a bill batch | `ingest_bill_events` → `build_graph_slice` | [`examples/network_graph_live.py`](../../examples/network_graph_live.py) |
+| Full Congress roster + incremental bills over time | `CongressGraphStore` seed → `add_bill` → `build_slice` | [`examples/congress_roster_graph_live.py`](../../examples/congress_roster_graph_live.py) |
+| Offline / notebook exploration with sample data | `sponsorship_events_from_bill` on `Bill.model_validate(...)` | [`examples/network_graph_exploration.ipynb`](../../examples/network_graph_exploration.ipynb) |
 | Already have `Bill` objects in memory | `build_graph_from_bills` or `sponsorship_events_from_bills` | See below |
-| Stress-test layouts without API calls | `generate_dense_sponsorship_events` → `build_graph_slice` | [`examples/scripts/stress_dense_graphs.py`](../examples/scripts/stress_dense_graphs.py) |
-| Rebuild HTML from saved JSON | Load JSON → `export_interactive_html` | [`examples/scripts/reexport_explorer_from_json.py`](../examples/scripts/reexport_explorer_from_json.py) |
+| Stress-test layouts without API calls | `generate_dense_sponsorship_events` → `build_graph_slice` | [`examples/scripts/stress_dense_graphs.py`](../../examples/scripts/stress_dense_graphs.py) |
+| Rebuild HTML from saved JSON | Load JSON → `export_interactive_html` | [`examples/scripts/reexport_explorer_from_json.py`](../../examples/scripts/reexport_explorer_from_json.py) |
 
 ### Network graph vs congress roster graph
 

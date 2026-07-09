@@ -124,7 +124,7 @@ def ingest_bill_events(
         search_kwargs["sort"] = config.search_sort
     if config.bill_type:
         search_kwargs["bill_type"] = config.bill_type
-    # `limit` caps the number of *events* returned (see docs/GRAPH_CONSTRUCTION.md),
+    # `limit` caps the number of *events* returned (see docs/guide/GRAPH_CONSTRUCTION.md),
     # not the bill search batch size -- clamping the search itself by `limit`
     # under-fetches bills whenever a bill yields more than one event (e.g. any
     # bill with 2+ cosponsors), since fewer bills than `limit` could still

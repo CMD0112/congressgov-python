@@ -2,6 +2,11 @@
 
 Load typed models from Congress.gov **API** URLs embedded in API responses (`url` fields, `CountRef`, and reference types).
 
+A lot of Congress.gov responses are shallow on purpose — a bill's cosponsors, actions, or
+related bills often come back as a count plus a URL rather than the full list. This module
+gives those stubs a `.fetch()` method so you can turn "there are 14 cosponsors, here's the
+URL" into an actual `Cosponsors` object without hand-building the request yourself.
+
 ## Requirements
 
 - URL must target `api.congress.gov` under the `/v3` prefix (with or without scheme).

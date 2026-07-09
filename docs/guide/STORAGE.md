@@ -1,7 +1,10 @@
 # Unified storage
 
 The SDK uses a **workspace** (default: `./.congressgov`) as the single root for all
-persistent data. Storage is organized into **lanes** by abstraction level.
+persistent data. Storage is organized into **lanes** by abstraction level, so raw API
+responses, incremental datasets you build up over time (like a graph of a Congress),
+queryable model collections, and exported files each land in a predictable place instead
+of you having to invent a folder layout for each project.
 
 ## Workspace layout
 
@@ -107,7 +110,6 @@ and build timestamps.
 ## Related docs
 
 - [REQUEST_STORE.md](./REQUEST_STORE.md) — HTTP-layer deduplication and policies
-- [STORAGE_AUDIT.md](./STORAGE_AUDIT.md) — Adoption audit matrix (criteria A/B/C)
 - [NETWORK_GRAPH.md](./NETWORK_GRAPH.md) — record lane graph datasets
 - [ADVANCED.md](./ADVANCED.md) — optional export extras
 

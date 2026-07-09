@@ -1,5 +1,7 @@
 # Publishing to PyPI
 
+> **Maintainer documentation.** This page is for people maintaining the congressgov repository (releases, CI, codegen). If you're using the SDK, you don't need this — see the [user guide](../guide/USAGE.md) instead.
+
 Publish via **GitHub Actions trusted publishing** (no long-lived PyPI API token in the repo).
 
 If you just recreated the GitHub repository, start with [GITHUB_SETUP.md](GITHUB_SETUP.md).
@@ -24,7 +26,7 @@ Complete these before tagging **v2.1.0** (or any release):
 - [ ] All CI checks green on `main` (`pytest`, `ruff`, `deptry`, `audit-client-compat`, `api-coverage-matrix --check --check-service-methods`)
 - [ ] `pyproject.toml` version matches the git tag (e.g. `2.1.0` → `v2.1.0`)
 - [ ] Version bump is committed and pushed to `main` **before** creating the tag
-- [ ] [`CHANGELOG.md`](../CHANGELOG.md) documents the release
+- [ ] [`CHANGELOG.md`](../../CHANGELOG.md) documents the release
 - [ ] Local wheel smoke: `poetry build` and `pip install dist/congressgov-*.whl`
 - [ ] PyPI project `congressgov` exists (or you own the name you publish under)
 - [ ] PyPI **trusted publisher** configured (see below)
@@ -60,7 +62,7 @@ In **GitHub → CMD0112/congressgov-python → Settings → Environments**:
 2. (Optional) Add protection rules: required reviewers, wait timer, or restrict to `main` branch
 3. Save
 
-The publish workflow [`.github/workflows/publish.yml`](../.github/workflows/publish.yml) uses `environment: pypi`, which must match the PyPI trusted publisher environment name.
+The publish workflow [`.github/workflows/publish.yml`](../../.github/workflows/publish.yml) uses `environment: pypi`, which must match the PyPI trusted publisher environment name.
 
 ### 4. Publish a release
 
@@ -94,5 +96,5 @@ python -c "from congressgov import Bill, get_client_from_env; print('ok')"
 
 ## Versioning
 
-- **1.1.x**: `congressgov` import facade; see [VERSIONING.md](VERSIONING.md) and [MIGRATION.md](MIGRATION.md)
+- **1.1.x**: `congressgov` import facade; see [VERSIONING.md](../guide/VERSIONING.md) and [MIGRATION.md](../guide/MIGRATION.md)
 - Tag format must be `vX.Y.Z` and match `version` in `pyproject.toml` for release-triggered publishes

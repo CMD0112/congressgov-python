@@ -1,5 +1,7 @@
 # GitHub repository setup
 
+> **Maintainer documentation.** This page is for people maintaining the congressgov repository (releases, CI, codegen). If you're using the SDK, you don't need this — see the [user guide](../guide/USAGE.md) instead.
+
 Use this checklist after creating a fresh **`CMD0112/congressgov-python`** repository on GitHub (empty, no template files required).
 
 ## 1. Push the project
@@ -12,7 +14,7 @@ git remote add origin https://github.com/CMD0112/congressgov-python.git
 git push -u origin main
 ```
 
-Use your default branch name (`main` or `master`) consistently with [`.github/workflows/ci.yml`](../.github/workflows/ci.yml).
+Use your default branch name (`main` or `master`) consistently with [`.github/workflows/ci.yml`](../../.github/workflows/ci.yml).
 
 ## 2. Enable Actions
 
@@ -41,4 +43,4 @@ Follow [PUBLISHING.md](PUBLISHING.md):
 
 ## Commits and attribution
 
-All commits should list **human maintainers only**. Do not add `Co-authored-by` trailers for bots or IDE assistants. See [CONTRIBUTING.md](../CONTRIBUTING.md).
+All commits should list **human maintainers only**. Do not add `Co-authored-by` trailers for bots or IDE assistants. See [CONTRIBUTING.md](../../CONTRIBUTING.md).

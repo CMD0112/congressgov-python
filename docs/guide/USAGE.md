@@ -1,6 +1,6 @@
 # Usage guide
 
-End-user guide for **congressgov**. For API tables and extension lists, see [REFERENCE.md](REFERENCE.md). For maintainers, see [CODEGEN.md](CODEGEN.md).
+End-user guide for **congressgov**. For API tables and extension lists, see [REFERENCE.md](REFERENCE.md). Maintaining this repository? See [CODEGEN.md](../maintainers/CODEGEN.md).
 
 ## Getting started
 
@@ -29,7 +29,7 @@ Omitting `format_` on `.search()` defaults to **JSON** for handlers that resolve
 
 For CRS bill summary **data**, use `from congressgov import Summary` (model) or `Summaries(client).search(...)` (service). There is no `Summary` service class.
 
-Runnable sample: [`examples/quickstart.py`](../examples/quickstart.py).
+Runnable sample: [`examples/quickstart.py`](../../examples/quickstart.py).
 
 ## Async usage
 
@@ -51,7 +51,7 @@ async def main() -> None:
 asyncio.run(main())
 ```
 
-See [`examples/quickstart_async.py`](../examples/quickstart_async.py). Parity between sync and async public methods is enforced in CI (`tests/test_async_service_parity.py`).
+See [`examples/quickstart_async.py`](../../examples/quickstart_async.py). Parity between sync and async public methods is enforced in CI (`tests/test_async_service_parity.py`).
 
 ## Authentication
 
@@ -114,4 +114,4 @@ articles = daily.get_articles(volume_number=170, issue_number=1, limit=5)
 
 ## Versioning
 
-Public API stability and deprecation rules: [VERSIONING.md](VERSIONING.md). Release history: [CHANGELOG.md](../CHANGELOG.md).
+Public API stability and deprecation rules: [VERSIONING.md](VERSIONING.md). Release history: [CHANGELOG.md](../../CHANGELOG.md).

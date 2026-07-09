@@ -7,10 +7,10 @@ edit_uri: edit/main/docs/
 
 docs_dir: docs
 
-# The guides under docs/ link out to files elsewhere in the repo (../README.md,
-# ../CHANGELOG.md, ../examples/*, ../src/*) that render fine on GitHub but sit
-# outside docs_dir, so mkdocs can't confirm they exist. Downgrade those from
-# warnings to info so `mkdocs build --strict` doesn't fail on known-good links.
+# The guides under docs/guide/ and docs/maintainers/ link out to files elsewhere in the
+# repo (../../README.md, ../../CHANGELOG.md, ../../examples/*, ../../src/*) that render
+# fine on GitHub but sit outside docs_dir, so mkdocs can't confirm they exist. Downgrade
+# those from warnings to info so `mkdocs build --strict` doesn't fail on known-good links.
 validation:
   nav:
     omitted_files: info
@@ -79,23 +79,23 @@ plugins:
 nav:
   - Home: README.md
   - Getting started:
-      - USAGE.md
-      - REFERENCE.md
-      - MEMBERS_QUERY.md
-      - URL_FETCH.md
+      - guide/USAGE.md
+      - guide/REFERENCE.md
+      - guide/MEMBERS_QUERY.md
+      - guide/URL_FETCH.md
   - Storage & requests:
-      - REQUEST_STORE.md
-      - STORAGE.md
+      - guide/REQUEST_STORE.md
+      - guide/STORAGE.md
   - Optional features:
-      - ADVANCED.md
+      - guide/ADVANCED.md
   - Network graphs:
-      - NETWORK_GRAPH.md
-      - GRAPH_CONSTRUCTION.md
+      - guide/NETWORK_GRAPH.md
+      - guide/GRAPH_CONSTRUCTION.md
   - Architecture & packaging:
-      - ARCHITECTURE.md
-      - PACKAGE_LAYOUT.md
-      - MIGRATION.md
-      - VERSIONING.md
+      - guide/ARCHITECTURE.md
+      - guide/PACKAGE_LAYOUT.md
+      - guide/MIGRATION.md
+      - guide/VERSIONING.md
   - API reference:
       - Overview: api/index.md
       - Facade: api/congressgov.md
@@ -103,9 +103,9 @@ nav:
       - Extensions: api/extensions.md
       - Models: api/models.md
       - Async API: api/async_api.md
-  - Maintainers:
-      - CODEGEN.md
-      - API_COVERAGE.md
-      - STORAGE_AUDIT.md
-      - PUBLISHING.md
-      - GITHUB_SETUP.md
+  - Maintainer docs (not needed to use the SDK):
+      - maintainers/README.md
+      - maintainers/CODEGEN.md
+      - maintainers/API_COVERAGE.md
+      - maintainers/PUBLISHING.md
+      - maintainers/GITHUB_SETUP.md

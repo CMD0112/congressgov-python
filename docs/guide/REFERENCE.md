@@ -1,6 +1,6 @@
 # API reference
 
-Condensed reference for **congressgov**. For a minimal runnable sample, see [`examples/quickstart.py`](../examples/quickstart.py).
+Condensed reference for **congressgov**. For a minimal runnable sample, see [`examples/quickstart.py`](../../examples/quickstart.py).
 
 Caching, export, and batch symbols require optional extras (`pip install congressgov[all]`). See [ARCHITECTURE.md](ARCHITECTURE.md).
 
@@ -130,4 +130,4 @@ Async `*_async` expansion helpers exist for Bill, Amendment, Member, Committee, 
 
 ## Breaking changes
 
-See [CHANGELOG.md](../CHANGELOG.md) for API migrations (e.g. `HouseVote.get()` kwargs, `Hearing.get()` parameters).
+See [CHANGELOG.md](../../CHANGELOG.md) for API migrations (e.g. `HouseVote.get()` kwargs, `Hearing.get()` parameters).

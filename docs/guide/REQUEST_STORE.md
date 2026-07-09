@@ -3,6 +3,12 @@
 Persistent deduplication for every Congress.gov API request. The store is the **blob lane**
 of the project workspace — see **[STORAGE.md](STORAGE.md)** for the full storage model.
 
+If you've ever re-run a script and watched it re-fetch the same bill or member you already
+pulled minutes ago, this is the layer that fixes that: every request gets its response
+recorded locally, keyed by URL and query parameters, so an identical call later is served
+from disk instead of hitting Congress.gov again. It also means you can develop and test
+offline once a workspace has been populated.
+
 The store is enabled by default when you call `get_client_from_env()`.
 
 ## Quick start
@@ -85,7 +91,7 @@ bill = ref.fetch(force_fetch=True)
 ## Policies
 
 Bundled rules live in
-[`default_policies.json`](../src/congressgov/services/core/request_store/data/default_policies.json).
+[`default_policies.json`](../../src/congressgov/services/core/request_store/data/default_policies.json).
 Override with a JSON or YAML file:
 
 ```python

@@ -131,7 +131,7 @@ class EgoNetworkConfig(GraphExploreConfig):
     """Settings for ego-network subgraph extraction."""
 
     direction: Literal["outgoing", "incoming", "both", "reciprocal"] = "both"
-    # 1-3 hops, matching the HTML explorer's ego view (docs/NETWORK_GRAPH.md).
+    # 1-3 hops, matching the HTML explorer's ego view (docs/guide/NETWORK_GRAPH.md).
     depth: int = Field(default=1, ge=1, le=3)
     max_neighbors: int = Field(default=100, ge=1)
 

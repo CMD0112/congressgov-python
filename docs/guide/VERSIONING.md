@@ -38,7 +38,7 @@ Example (0.5.x → 1.0.0): `DailyCongressionalRecord.list()` was deprecated in 0
 
 ## API coverage
 
-As of 1.0.0, all paths in the merged OpenAPI spec are classified as covered by middleware services (see [API_COVERAGE.md](API_COVERAGE.md)). New Congress.gov paths may appear in future spec updates; we treat uncovered matrix rows as release blockers for minors that adopt new spec versions.
+As of 1.0.0, all paths in the merged OpenAPI spec are classified as covered by middleware services (see [API_COVERAGE.md](../maintainers/API_COVERAGE.md), a maintainer doc). New Congress.gov paths may appear in future spec updates; we treat uncovered matrix rows as release blockers for minors that adopt new spec versions.
 
 ## Client compatibility shims
 
@@ -49,4 +49,4 @@ Through **1.0.x**, the generated HTTP client keeps legacy `*_sync` / `*_async` n
 - **Python:** 3.13+ (see `pyproject.toml`)
 - **Congress.gov API:** v3 (`https://api.congress.gov/v3`)
 
-Report bugs and feature requests via [GitHub Issues](https://github.com/CMD0112/congressgov-python/issues); security issues per [SECURITY.md](../SECURITY.md).
+Report bugs and feature requests via [GitHub Issues](https://github.com/CMD0112/congressgov-python/issues); security issues per [SECURITY.md](../../SECURITY.md).

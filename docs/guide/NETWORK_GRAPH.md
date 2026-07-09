@@ -213,7 +213,7 @@ graph = store.build_slice(GraphExploreConfig(congress=118, include_all_members=T
 export_interactive_html(graph, workspace.write_export("roster_graph_explorer.html"))
 ```
 
-The notebook [`examples/network_graph_exploration.ipynb`](../examples/network_graph_exploration.ipynb) includes a **Workspace offline replay** section that rebuilds a roster graph slice from a persisted dataset without live API calls.
+The notebook [`examples/network_graph_exploration.ipynb`](../../examples/network_graph_exploration.ipynb) includes a **Workspace offline replay** section that rebuilds a roster graph slice from a persisted dataset without live API calls.
 
 ## Export formats
 
@@ -327,6 +327,6 @@ When presenting graphs to users:
 - [ADVANCED.md](ADVANCED.md) — optional extras (`export`, `graph`, `batch`)
 - [REFERENCE.md](REFERENCE.md) — services and extensions
 - Bill cosponsor fetching — `Bill.get_cosponsors(...)`
-- Interactive notebook — [`examples/network_graph_exploration.ipynb`](../examples/network_graph_exploration.ipynb)
-- Ephemeral network graph — [`examples/network_graph_live.py`](../examples/network_graph_live.py)
-- Congress roster graph — [`examples/congress_roster_graph_live.py`](../examples/congress_roster_graph_live.py)
+- Interactive notebook — [`examples/network_graph_exploration.ipynb`](../../examples/network_graph_exploration.ipynb)
+- Ephemeral network graph — [`examples/network_graph_live.py`](../../examples/network_graph_live.py)
+- Congress roster graph — [`examples/congress_roster_graph_live.py`](../../examples/congress_roster_graph_live.py)

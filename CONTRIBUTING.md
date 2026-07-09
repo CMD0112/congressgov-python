@@ -30,7 +30,7 @@ Use this repo’s own `.venv`, not another project’s, when working in this rep
 
 ## Architecture
 
-Read [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) for core vs optional extras and protected codegen paths.
+Read [docs/guide/ARCHITECTURE.md](docs/guide/ARCHITECTURE.md) for core vs optional extras. Codegen internals and protected paths are covered in [docs/maintainers/CODEGEN.md](docs/maintainers/CODEGEN.md).
 
 ## Quality checks
 
@@ -58,7 +58,7 @@ poetry run python -m codegen validate-spec
 poetry run python -m codegen generate-all
 ```
 
-See [docs/CODEGEN.md](docs/CODEGEN.md). CI runs `validate-spec` on every PR; `generate-all` drift must be clean before merge.
+See [docs/maintainers/CODEGEN.md](docs/maintainers/CODEGEN.md). CI runs `validate-spec` on every PR; `generate-all` drift must be clean before merge.
 
 ## Pull requests
 

@@ -1,6 +1,10 @@
 # Advanced features
 
-Optional capabilities beyond basic `get` / `search`. Install the matching extra first:
+Optional capabilities beyond basic `get` / `search` — reach for these once you're doing more
+than fetching a handful of records: bulk backfills across thousands of bills, exporting to
+pandas or a database, or layering your own caching and rate-limit handling on top of the
+request store. None of this is required for typical use; the core install covers `get()` and
+`search()` on every service without any extras. Install the matching extra first:
 
 ```bash
 pip install congressgov[cache]   # caching and rate limiting
@@ -99,7 +103,7 @@ See [NETWORK_GRAPH.md](NETWORK_GRAPH.md). Optional spring layouts use NetworkX: 
 
 ## Custom extensions
 
-Add methods under `congressgov/services/extensions/` and register them in `congressgov/services/extensions/__init__.py`. Use `# CUSTOM:` markers in generated files so codegen preserves your edits (see [CODEGEN.md](CODEGEN.md)).
+Add methods under `congressgov/services/extensions/` and register them in `congressgov/services/extensions/__init__.py`. Use `# CUSTOM:` markers in generated files so codegen preserves your edits (see [CODEGEN.md](../maintainers/CODEGEN.md), a maintainer doc).
 
 ## Performance tips
 

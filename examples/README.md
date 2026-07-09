@@ -48,6 +48,6 @@ charts) under `examples/output/`, which is gitignored — safe to delete anytime
 
 ## See also
 
-- [docs/USAGE.md](../docs/USAGE.md) — install, API key setup, sync/async basics
-- [docs/NETWORK_GRAPH.md](../docs/NETWORK_GRAPH.md) and [docs/GRAPH_CONSTRUCTION.md](../docs/GRAPH_CONSTRUCTION.md) — graph construction reference
-- [docs/ADVANCED.md](../docs/ADVANCED.md) — caching, batch, export, rate limiting extras
+- [docs/guide/USAGE.md](../docs/guide/USAGE.md) — install, API key setup, sync/async basics
+- [docs/guide/NETWORK_GRAPH.md](../docs/guide/NETWORK_GRAPH.md) and [docs/guide/GRAPH_CONSTRUCTION.md](../docs/guide/GRAPH_CONSTRUCTION.md) — graph construction reference
+- [docs/guide/ADVANCED.md](../docs/guide/ADVANCED.md) — caching, batch, export, rate limiting extras

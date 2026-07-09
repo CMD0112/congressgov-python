@@ -52,12 +52,6 @@ from congressgov.async_api import AsyncBill
 | `middleware` / `models` / `congress_gov_api_client` | No | No | Removed in 2.0 |
 | `codegen/` | No | Yes | `format = "sdist"` in `pyproject.toml` |
 
-## Codegen implications
-
-- **Client output:** `src/congressgov/_client/` (import as `congressgov._client`)
-- **Services / models / registry:** under `src/congressgov/` per `codegen/config/generator_config.yaml`
-- `emit-client-compat` and CI drift checks target `src/congressgov/_client/`
-
 ## Migration phases
 
 | Release | Packaging work |

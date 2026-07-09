@@ -1,6 +1,6 @@
 [project]
 name = "congressgov"
-version = "2.1.1"
+version = "2.1.2"
 description = "Python SDK for the Congress.gov API — services, models, and generated HTTP client"
 readme = "README.md"
 license = "Apache-2.0"
