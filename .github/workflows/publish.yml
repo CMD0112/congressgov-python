@@ -1,0 +1,131 @@
+name: Publish to PyPI
+
+# Trusted publishing: configure on PyPI for package "congressgov" with this
+# workflow file, repository CMD0112/congressgov-python, environment "pypi".
+# Release tag must match pyproject.toml (e.g. v2.0.8). See docs/PUBLISHING.md.
+#
+# Release flow: bump pyproject.toml + CHANGELOG on main, commit, push, then:
+#   git tag v2.0.8 && git push origin v2.0.8
+# Create a GitHub Release for that tag (do not tag before the version bump is on main).
+
+on:
+  release:
+    types: [published]
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: "Git tag to build and publish (e.g. v2.0.8). Leave empty to use the selected branch ref."
+        required: false
+        type: string
+
+concurrency:
+  group: pypi-publish
+  cancel-in-progress: false
+
+permissions:
+  id-token: write
+  contents: read
+
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    environment: pypi
+    steps:
+      # Release events default to the release's target commit (frozen at publish
+      # time), not the tag ref. Checkout the tag explicitly so pyproject matches.
+      - uses: actions/checkout@v5
+        with:
+          ref: ${{ github.event_name == 'release' && format('refs/tags/{0}', github.event.release.tag_name) || github.event_name == 'workflow_dispatch' && inputs.tag != '' && format('refs/tags/{0}', inputs.tag) || github.ref }}
+          fetch-depth: 0
+
+      - name: Set up Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: "3.13"
+
+      - name: Install Poetry
+        uses: snok/install-poetry@v1
+        with:
+          version: "2.1.3"
+          virtualenvs-create: true
+          virtualenvs-in-project: true
+
+      - name: Resolve expected release tag
+        id: meta
+        run: |
+          if [ "${{ github.event_name }}" = "release" ]; then
+            TAG="${{ github.event.release.tag_name }}"
+          elif [ -n "${{ inputs.tag }}" ]; then
+            TAG="${{ inputs.tag }}"
+          else
+            TAG=""
+          fi
+          echo "tag=$TAG" >> "$GITHUB_OUTPUT"
+          echo "Expected tag: ${TAG:-<none — branch ref publish>}"
+
+      - name: Verify checkout matches release tag
+        if: steps.meta.outputs.tag != ''
+        run: |
+          TAG="${{ steps.meta.outputs.tag }}"
+          HEAD=$(git rev-parse HEAD)
+          TAG_SHA=$(git rev-parse "refs/tags/${TAG}")
+          echo "HEAD=$HEAD"
+          echo "Tag $TAG=$TAG_SHA"
+          if [ "$HEAD" != "$TAG_SHA" ]; then
+            echo "::error::Checked-out HEAD does not match refs/tags/${TAG}. Ensure the tag points at the commit with the matching pyproject.toml version."
+            exit 1
+          fi
+
+      - name: Verify version matches release tag
+        if: steps.meta.outputs.tag != ''
+        run: |
+          VERSION=$(poetry version -s)
+          TAG="${{ steps.meta.outputs.tag }}"
+          TAG="${TAG#v}"
+          echo "pyproject version=$VERSION tag=$TAG"
+          if [ "$VERSION" != "$TAG" ]; then
+            echo "::error::pyproject.toml version ($VERSION) does not match tag (v$TAG). Bump version on main, push, then tag."
+            exit 1
+          fi
+          echo "EXPECTED_VERSION=$VERSION" >> "$GITHUB_ENV"
+
+      - name: Record package version (workflow_dispatch without tag)
+        if: steps.meta.outputs.tag == ''
+        run: echo "EXPECTED_VERSION=$(poetry version -s)" >> "$GITHUB_ENV"
+
+      - name: Build package
+        run: poetry build
+
+      - name: Wheel smoke test
+        run: |
+          python -m venv /tmp/congressgov-publish-venv
+          /tmp/congressgov-publish-venv/bin/pip install --upgrade pip
+          /tmp/congressgov-publish-venv/bin/pip install dist/*.whl
+          cd /tmp
+          /tmp/congressgov-publish-venv/bin/python -c "
+          import congressgov
+          from congressgov import Bill, get_client_from_env
+          from congressgov.services import Bill as ServiceBill
+          from congressgov.models import Bill as BillModel
+          from congressgov.client import AuthenticatedClient
+          assert ServiceBill is Bill
+          assert BillModel is not Bill
+          expected = '${{ env.EXPECTED_VERSION }}'
+          assert congressgov.__version__ == expected, (
+              f'wheel __version__ {congressgov.__version__!r} != pyproject {expected!r}'
+          )
+          print('wheel smoke ok', congressgov.__version__)
+          "
+          ! /tmp/congressgov-publish-venv/bin/python -c "import codegen" 2>/dev/null
+          ! /tmp/congressgov-publish-venv/bin/python -c "import middleware" 2>/dev/null
+          ! /tmp/congressgov-publish-venv/bin/python -c "import models" 2>/dev/null
+          ! /tmp/congressgov-publish-venv/bin/python -c "import congress_gov_api_client" 2>/dev/null
+
+      - name: Publish to PyPI
+        uses: pypa/gh-action-pypi-publish@release/v1
+        with:
+          packages-dir: dist
+          skip-existing: true

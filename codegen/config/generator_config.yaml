@@ -1,0 +1,229 @@
+# Generator configuration for congressgov code generation
+
+output:
+  # Output directories for generated code
+  api_client: src/congressgov/_client/
+  models: src/congressgov/models/
+  middleware: src/congressgov/services/
+  extensions: src/congressgov/services/extensions/
+
+generation:
+  # Generation behavior settings
+  incremental: true # Preserve existing custom modifications
+  preserve_custom: true # Keep sections marked with # CUSTOM:
+  backup: true # Create backups before overwriting files
+  format_output: true # Run isort/ruff on generated files
+
+  # File operation settings
+  backup_suffix: ".backup"
+  custom_marker: "# CUSTOM:"
+  generated_marker: "# GENERATED:"
+
+api_client:
+  # openapi-python-client configuration
+  generator: openapi-python-client
+  version: ">=0.25.3"
+  package_name: "congressgov._client"
+  config_path: codegen/config/openapi_client_config.yaml
+
+  # Generation options
+  options:
+    meta: "none" # Don't include meta information
+    url: null # Will be set from spec
+    package_name: "congressgov._client"
+    package_version: "1.0.0"
+    package_description: "A Python client for the Congress.gov API"
+
+models:
+  # Pydantic model generation settings
+  base_class: congressgov.models.base.model.Model
+  use_datetime_parsing: true
+  use_enum_values: true
+  use_field_descriptions: true
+
+  # Model organization
+  entity_models_dir: entities/
+  action_models_dir: actions/
+  committee_models_dir: committees/
+  communication_models_dir: communications/
+  document_models_dir: documents/
+  meeting_models_dir: meetings/
+  nomination_models_dir: nominations/
+  core_models_dir: core/
+  base_models_dir: base/
+
+middleware:
+  # Middleware service generation settings
+  base_service_class: congressgov.services.core.api_service.ApiService
+  use_model_registry: true
+  export_mappings: true
+  export_parameters: true
+  # Protected hand modules are skipped on regen unless sidecars are re-enabled.
+  emit_review_sidecars: false
+  # Legacy: when emit_review_sidecars is true, write *.generated.py next to protected files.
+  review_sidecar_suffix: ".generated"
+
+  # Service organization
+  services_dir: src/congressgov/services/
+  extensions_dir: src/congressgov/services/extensions/
+
+extensions:
+  # Extension method generation settings
+  use_template_pattern: true
+  register_methods: true
+  generate_query_builders: true
+  generate_convenience_methods: true
+
+  # Query builder settings
+  query_builder_class: _query_builder.CollectionQuery
+  field_mapping_class: _query_builder.FieldMapping
+
+registry:
+  # Model registry generation settings
+  auto_generate_mappings: true
+  include_expansion_mappings: true
+  cache_models: true
+
+  # Generated artifact (hand-written model_registry.py stays protected)
+  registry_file: src/congressgov/services/core/model_registry_generated.py
+
+client_compat:
+  allow_unmatched: false
+
+entity_mappings:
+  path: codegen/config/entity_mappings.yaml
+  use_as_fallback: true
+
+formatting:
+  # Code formatting settings
+  use_ruff: true
+  use_isort: true
+
+  # Ruff configuration
+  ruff_line_length: 120
+
+  # isort configuration
+  isort_profile: black
+  isort_multi_line: 3
+  isort_include_trailing_comma: true
+  isort_force_grid_wrap: 0
+  isort_use_parentheses: true
+  isort_ensure_newline_before_comments: true
+
+logging:
+  # Logging configuration
+  level: INFO
+  format: "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+  file: codegen.log
+  console: true
+
+# Paths/codegen must never overwrite (hand-maintained or optional-feature packages)
+protected_paths:
+  - src/congressgov/services/async_api/bill.py
+  - src/congressgov/services/async_api/amendment.py
+  - src/congressgov/services/async_api/member.py
+  - src/congressgov/services/async_api/committee.py
+  - src/congressgov/services/async_api/hearing.py
+  - src/congressgov/services/async_api/nomination.py
+  - src/congressgov/services/async_api/treaty.py
+  - src/congressgov/services/async_api/house_vote.py
+  - src/congressgov/services/async_api/summaries.py
+  - src/congressgov/services/async_api/crsreport.py
+  - src/congressgov/services/async_api/house_communication.py
+  - src/congressgov/services/async_api/senate_communication.py
+  - src/congressgov/services/async_api/committee_meeting.py
+  - src/congressgov/services/async_api/committee_report.py
+  - src/congressgov/services/async_api/committee_print.py
+  - src/congressgov/services/async_api/congress.py
+  - src/congressgov/services/async_api/house_requirement.py
+  - src/congressgov/services/async_api/congressional_record.py
+  - src/congressgov/services/async_api/daily_congressional_record.py
+  - src/congressgov/services/async_api/bound_congressional_record.py
+  - src/congressgov/services/async_api/_base.py
+  - src/congressgov/services/async_api/__init__.py
+  - src/congressgov/services/core/api_service.py
+  - src/congressgov/services/core/async_api_service.py
+  - src/congressgov/services/core/async_cached_api_service.py
+  - src/congressgov/services/core/async_method_registry.py
+  - src/congressgov/services/core/cached_api_service.py
+  - src/congressgov/services/core/database.py
+  - src/congressgov/services/core/dispatch.py
+  - src/congressgov/services/core/gateway.py
+  - src/congressgov/services/core/model_registry.py
+  - src/congressgov/services/core/search.py
+  - src/congressgov/services/core/service.py
+  - src/congressgov/services/core/storage.py
+  - src/congressgov/services/core/url_resolver.py
+  - src/congressgov/services/core/url_routes_generated.py
+  - src/congressgov/services/core/request_store/
+  - src/congressgov/services/core/workspace/
+  - src/congressgov/services/core/backends/
+  - src/congressgov/services/core/storage_lanes/
+  - src/congressgov/services/core/store_registry/
+  - src/congressgov/services/core/policies/
+  - src/congressgov/storage/
+  - src/congressgov/services/core/url_resolver.py
+  - src/congressgov/services/core/url_routes_generated.py
+  - src/congressgov/services/core/request_store/
+  - src/congressgov/services/core/validation.py
+  - src/congressgov/services/batch/
+  - src/congressgov/services/export/
+  - src/congressgov/services/caching/
+  - src/congressgov/services/rate_limiting/
+  - src/congressgov/services/bill.py
+  - src/congressgov/services/extensions/bill.py
+  - src/congressgov/services/amendment.py
+  - src/congressgov/services/extensions/amendments.py
+  - src/congressgov/services/actions.py
+  - src/congressgov/services/extensions/actions.py
+  - src/congressgov/services/member.py
+  - src/congressgov/services/extensions/members.py
+  - src/congressgov/services/committee.py
+  - src/congressgov/services/extensions/committees.py
+  - src/congressgov/services/hearing.py
+  - src/congressgov/services/nomination.py
+  - src/congressgov/services/treaty.py
+  - src/congressgov/services/house_vote.py
+  - src/congressgov/services/summaries.py
+  - src/congressgov/services/crsreport.py
+  - src/congressgov/services/house_communication.py
+  - src/congressgov/services/senate_communication.py
+  - src/congressgov/services/committee_meeting.py
+  - src/congressgov/services/committee_report.py
+  - src/congressgov/services/committee_print.py
+  - src/congressgov/services/congress.py
+  - src/congressgov/services/house_requirement.py
+  - src/congressgov/services/congressional_record.py
+  - src/congressgov/services/daily_congressional_record.py
+  - src/congressgov/services/bound_congressional_record.py
+  - src/congressgov/services/extensions/hearings.py
+  - src/congressgov/services/extensions/committee_meetings.py
+  - src/congressgov/services/extensions/committee_reports.py
+  - src/congressgov/services/extensions/committee_prints.py
+  - src/congressgov/services/extensions/summaries.py
+  - src/congressgov/services/extensions/house_communications.py
+  - src/congressgov/services/extensions/house_votes.py
+  - src/congressgov/services/extensions/senate_communications.py
+  - src/congressgov/services/extensions/nominations.py
+  - src/congressgov/services/extensions/treaties.py
+  - src/congressgov/models/entities/bill.py
+  - src/congressgov/models/entities/member.py
+  - src/congressgov/models/entities/amendment.py
+  - src/congressgov/models/entities/actions.py
+  - src/congressgov/models/entities/treaty.py
+  - src/congressgov/models/documents/hearing.py
+  - src/congressgov/models/nominations/nomination.py
+  - src/congressgov/models/communications/house_vote.py
+  - src/congressgov/models/documents/crs_reports.py
+  - src/congressgov/models/communications/house_communication.py
+  - src/congressgov/models/communications/senate_communication.py
+  - src/congressgov/models/meetings/meeting.py
+  - src/congressgov/models/documents/committee_report.py
+  - src/congressgov/models/documents/committee_print.py
+  - src/congressgov/models/entities/congress.py
+  - src/congressgov/models/communications/house_requirement.py
+  - src/congressgov/models/documents/congressional_record.py
+  - src/congressgov/models/documents/bound_congressional_record.py
+  - src/congressgov/models/committees/committee.py
+  - src/congressgov/models/actions/
+

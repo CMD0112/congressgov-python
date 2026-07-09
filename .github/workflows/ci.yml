@@ -1,0 +1,155 @@
+name: CI
+
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+    branches: [main, master]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Set up Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: "3.13"
+
+      - name: Install Poetry
+        uses: snok/install-poetry@v1
+        with:
+          version: "2.1.3"
+          virtualenvs-create: true
+          virtualenvs-in-project: true
+
+      - name: Install dependencies
+        run: poetry install --no-interaction --with dev,cache,export,batch,codegen,graph,viz
+
+      - name: Ruff
+        run: poetry run ruff check .
+
+      - name: Deptry
+        run: poetry run deptry .
+
+      - name: Mypy (services)
+        run: |
+          poetry run mypy \
+            src/congressgov/services/client_factory.py \
+            src/congressgov/services/core/url_resolver.py \
+            src/congressgov/services/extensions/congress.py \
+            src/congressgov/services/extensions/async/congress.py \
+            src/congressgov/services/protocols/congress.py \
+            src/congressgov/services/protocols/async_congress.py
+
+      - name: Unit tests
+        run: poetry run python -m pytest tests/ -q
+
+      - name: Import smoke
+        run: |
+          poetry run python -c "
+          from congressgov import Bill, Member
+          from congressgov._client.api.member import member_details_sync, member_sponsorship_list_async
+          from congressgov._client.api.bill import bill_details_sync
+          print('import smoke ok')
+          "
+
+  codegen:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Set up Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: "3.13"
+
+      - name: Install Poetry
+        uses: snok/install-poetry@v1
+        with:
+          version: "2.1.3"
+          virtualenvs-create: true
+          virtualenvs-in-project: true
+
+      - name: Install dependencies
+        run: poetry install --no-interaction --with dev,codegen
+
+      - name: Merge OpenAPI spec
+        run: poetry run python -m codegen.scripts.merge_openapi_annotations
+
+      - name: Validate OpenAPI spec
+        run: poetry run python -m codegen validate-spec
+
+      - name: Audit client compat
+        run: poetry run python -m codegen.scripts.audit_client_compat
+
+      - name: API coverage matrix
+        run: poetry run python -m codegen.scripts.api_coverage_matrix --check --check-service-methods
+
+      - name: Client regen drift check
+        run: |
+          poetry run python -m codegen generate-client
+          if [ -n "$(git status --porcelain src/congressgov/_client)" ]; then
+            echo "::error::src/congressgov/_client differs after generate-client + emit-client-compat"
+            git diff --stat src/congressgov/_client/
+            exit 1
+          fi
+
+      - name: Full-tree regen drift check
+        run: |
+          poetry run python -m codegen generate-all
+          if [ -n "$(git status --porcelain)" ]; then
+            echo "::error::Working tree differs after generate-all"
+            git diff --stat
+            exit 1
+          fi
+
+  install:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Set up Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: "3.13"
+
+      - name: Install Poetry
+        uses: snok/install-poetry@v1
+        with:
+          version: "2.1.3"
+          virtualenvs-create: true
+          virtualenvs-in-project: true
+
+      - name: Build wheel
+        run: poetry build
+
+      - name: Core wheel smoke test
+        run: |
+          python -m venv /tmp/congressgov-core-venv
+          /tmp/congressgov-core-venv/bin/pip install --upgrade pip
+          /tmp/congressgov-core-venv/bin/pip install dist/*.whl
+          cd /tmp
+          /tmp/congressgov-core-venv/bin/python -c "
+          import congressgov
+          import congressgov.models
+          from congressgov import Bill, get_client_from_env
+          from congressgov.async_api import AsyncBill
+          assert congressgov.__version__
+          print('core ok', congressgov.__version__)
+          "
+          ! /tmp/congressgov-core-venv/bin/python -c "import codegen" 2>/dev/null
+
+      - name: Full extras smoke test
+        run: |
+          WHEEL=$(ls dist/*.whl | head -1)
+          /tmp/congressgov-core-venv/bin/pip install "${WHEEL}[all]"
+          cd /tmp
+          /tmp/congressgov-core-venv/bin/python -c "
+          from congressgov import BatchProcessor, DataExporter, CacheConfig
+          print('extras ok', BatchProcessor, DataExporter, CacheConfig)
+          "

@@ -1,0 +1,22 @@
+{
+  "default_policy": "moderate",
+  "closed_congress_permanent": true,
+  "overrides": {},
+  "rules": [
+    {"pattern": "^/bill/?$", "policy": "dynamic"},
+    {"pattern": "^/member/?$", "policy": "dynamic"},
+    {"pattern": "^/amendment/?$", "policy": "dynamic"},
+    {"pattern": "^/committee/?$", "policy": "stable"},
+    {"pattern": "^/congress/?$", "policy": "static"},
+    {"pattern": "^/law/?$", "policy": "static"},
+    {"pattern": "^/member/[^/]+/(?:sponsored|cosponsored)-legislation", "policy": "dynamic"},
+    {"pattern": "^/member/[^/]+$", "policy": "stable"},
+    {"pattern": "^/bill/[^/]+/[^/]+/[^/]+/", "policy": "moderate"},
+    {"pattern": "^/bill/[^/]+/[^/]+/[^/]+$", "policy": "moderate"},
+    {"pattern": "^/amendment/", "policy": "moderate"},
+    {"pattern": "^/committee/", "policy": "stable"},
+    {"pattern": "^/nomination/", "policy": "moderate"},
+    {"pattern": "^/house-vote/", "policy": "static"},
+    {"pattern": "^/senate-vote/", "policy": "static"}
+  ]
+}

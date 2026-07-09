@@ -1,0 +1,2606 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>__PAGE_TITLE__</title>
+  <style>
+    :root {
+      --bg-deep: #080c18;
+      --bg: #0b1020;
+      --surface: #0f172a;
+      --panel: rgba(30, 41, 59, 0.88);
+      --panel-2: rgba(15, 23, 42, 0.92);
+      --border: rgba(148, 163, 184, 0.16);
+      --border-strong: rgba(148, 163, 184, 0.28);
+      --text: #e2e8f0;
+      --muted: #94a3b8;
+      --accent: #3b82f6;
+      --accent-soft: rgba(59, 130, 246, 0.18);
+      --success: #34d399;
+      --warning: #fbbf24;
+      --sidebar-w: 360px;
+      --topbar-h: 3.25rem;
+      --status-h: 1.85rem;
+      --radius: 0.55rem;
+      --shadow: 0 12px 40px rgba(0, 0, 0, 0.35);
+    }
+
+    *, *::before, *::after { box-sizing: border-box; }
+    html, body { height: 100%; }
+    body {
+      margin: 0;
+      font-family: Inter, "Segoe UI", system-ui, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      overflow: hidden;
+    }
+
+    button, input, select { font: inherit; color: inherit; }
+    button { cursor: pointer; }
+    kbd {
+      display: inline-block;
+      padding: 0.05rem 0.35rem;
+      border-radius: 0.25rem;
+      background: rgba(51, 65, 85, 0.85);
+      border: 1px solid var(--border-strong);
+      font-size: 0.68rem;
+      font-weight: 500;
+    }
+
+    #app {
+      display: grid;
+      grid-template-rows: var(--topbar-h) 1fr var(--status-h);
+      grid-template-columns: 1fr auto;
+      height: 100vh;
+      background: var(--bg-deep);
+    }
+    #app.settings-collapsed { grid-template-columns: 1fr 0; }
+    #app.focus-mode { grid-template-columns: 1fr; }
+    #app.focus-mode #settingsPanel { display: none; }
+
+    /* ── Top command bar ── */
+    #topBar {
+      grid-column: 1 / -1;
+      display: flex;
+      align-items: center;
+      gap: 0.65rem;
+      padding: 0 0.75rem;
+      background: var(--panel-2);
+      border-bottom: 1px solid var(--border);
+      min-width: 0;
+    }
+    #topBar .brand {
+      display: flex;
+      flex-direction: column;
+      min-width: 0;
+      max-width: 14rem;
+      flex-shrink: 0;
+    }
+    #pageTitle {
+      font-size: 0.92rem;
+      font-weight: 700;
+      margin: 0;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      line-height: 1.2;
+    }
+    #viewHint {
+      font-size: 0.68rem;
+      color: var(--muted);
+      margin: 0;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .view-tabs {
+      display: flex;
+      gap: 0.2rem;
+      padding: 0.2rem;
+      background: rgba(15, 23, 42, 0.75);
+      border: 1px solid var(--border);
+      border-radius: 999px;
+      flex-shrink: 0;
+    }
+    .view-tabs button {
+      margin: 0;
+      padding: 0.35rem 0.65rem;
+      font-size: 0.72rem;
+      font-weight: 600;
+      background: transparent;
+      border: none;
+      border-radius: 999px;
+      color: var(--muted);
+      white-space: nowrap;
+    }
+    .view-tabs button.active {
+      background: var(--accent);
+      color: #f8fafc;
+      box-shadow: 0 2px 8px rgba(59, 130, 246, 0.35);
+    }
+    .view-tabs button kbd { display: none; }
+
+    .toolbar-search {
+      flex: 1;
+      min-width: 8rem;
+      max-width: 22rem;
+      position: relative;
+    }
+    .toolbar-search input {
+      width: 100%;
+      padding: 0.45rem 0.65rem 0.45rem 2rem;
+      border-radius: var(--radius);
+      border: 1px solid var(--border);
+      background: rgba(15, 23, 42, 0.85);
+    }
+    .toolbar-search::before {
+      content: "⌕";
+      position: absolute;
+      left: 0.6rem;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--muted);
+      font-size: 0.85rem;
+      pointer-events: none;
+    }
+    #searchResults {
+      position: absolute;
+      top: calc(100% + 0.35rem);
+      left: 0;
+      right: 0;
+      z-index: 40;
+      background: var(--panel-2);
+      border: 1px solid var(--border-strong);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      max-height: 16rem;
+      overflow: auto;
+      font-size: 0.8rem;
+    }
+    #searchResults button {
+      display: block;
+      width: 100%;
+      text-align: left;
+      padding: 0.45rem 0.65rem;
+      background: transparent;
+      border: none;
+      border-bottom: 1px solid var(--border);
+      font-weight: 500;
+    }
+    #searchResults button:hover { background: rgba(59, 130, 246, 0.12); }
+
+    .toolbar-actions {
+      display: flex;
+      gap: 0.35rem;
+      flex-shrink: 0;
+    }
+    .toolbar-actions button {
+      padding: 0.4rem 0.65rem;
+      border-radius: var(--radius);
+      border: 1px solid var(--border);
+      background: rgba(30, 41, 59, 0.9);
+      font-size: 0.75rem;
+      font-weight: 600;
+      white-space: nowrap;
+    }
+    .toolbar-actions button.primary { background: var(--accent); border-color: var(--accent); color: #fff; }
+    .toolbar-actions button.icon-btn { padding: 0.4rem 0.55rem; min-width: 2rem; }
+
+    /* ── Main canvas ── */
+    #mainView {
+      position: relative;
+      min-height: 0;
+      background: var(--surface);
+      overflow: hidden;
+    }
+    .view-panel { display: none; position: absolute; inset: 0; overflow: auto; z-index: 0; }
+    .view-panel.active { display: block; z-index: 2; }
+    #graphPanel { overflow: hidden; }
+    #graphPanel.graph-hidden { visibility: hidden; pointer-events: none; }
+    #graph { position: absolute; inset: 0; width: 100%; height: 100%; }
+
+    #selectionDock {
+      position: absolute;
+      left: 0.75rem;
+      bottom: 0.75rem;
+      z-index: 12;
+      max-width: min(24rem, calc(100% - 1.5rem));
+      background: rgba(15, 23, 42, 0.94);
+      border: 1px solid var(--border-strong);
+      border-radius: var(--radius);
+      padding: 0.65rem 0.75rem;
+      font-size: 0.8rem;
+      line-height: 1.45;
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(8px);
+    }
+    #selectionDock.empty { opacity: 0.72; }
+    #selectionActions { display: flex; gap: 0.35rem; margin-top: 0.45rem; }
+    #selectionActions button {
+      flex: 1;
+      padding: 0.35rem 0.5rem;
+      font-size: 0.72rem;
+      font-weight: 600;
+      border-radius: var(--radius);
+      border: 1px solid var(--border);
+      background: var(--accent-soft);
+      color: #dbeafe;
+    }
+    #selectionActions button:hover { background: rgba(59, 130, 246, 0.32); }
+
+    #egoHud {
+      position: absolute;
+      top: 0.75rem;
+      left: 0.75rem;
+      z-index: 13;
+      width: min(22rem, calc(100% - 1.5rem));
+      background: rgba(15, 23, 42, 0.94);
+      border: 1px solid var(--border-strong);
+      border-radius: var(--radius);
+      padding: 0.65rem 0.75rem;
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(8px);
+      font-size: 0.78rem;
+      line-height: 1.4;
+    }
+    #egoHud[hidden] { display: none; }
+    .ego-hud-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      gap: 0.5rem;
+      margin-bottom: 0.35rem;
+    }
+    .ego-hud-head strong {
+      font-size: 0.68rem;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      color: var(--muted);
+    }
+    #egoHudStats { color: #cbd5e1; font-size: 0.72rem; font-variant-numeric: tabular-nums; }
+    #egoHudCenter {
+      font-size: 0.88rem;
+      font-weight: 600;
+      color: #fbbf24;
+      margin-bottom: 0.45rem;
+      line-height: 1.3;
+    }
+    .ego-hud-hops { margin-bottom: 0.4rem; }
+    .ego-hud-hops > span { font-size: 0.68rem; display: block; margin-bottom: 0.25rem; }
+    .hop-chips { display: flex; gap: 0.3rem; }
+    .hop-chips button {
+      flex: 1;
+      padding: 0.32rem 0.25rem;
+      font-size: 0.68rem;
+      font-weight: 600;
+      border-radius: var(--radius);
+      border: 1px solid var(--border);
+      background: rgba(30, 41, 59, 0.9);
+      color: #cbd5e1;
+    }
+    .hop-chips button.active {
+      background: var(--accent);
+      border-color: var(--accent);
+      color: #fff;
+    }
+    #egoHudHint { font-size: 0.7rem; margin-bottom: 0.4rem; min-height: 2em; }
+    .ego-neighbor-list { display: flex; flex-wrap: wrap; gap: 0.3rem; max-height: 5.5rem; overflow: auto; }
+    .ego-neighbor-list button {
+      padding: 0.2rem 0.45rem;
+      font-size: 0.68rem;
+      border-radius: 999px;
+      border: 1px solid var(--border);
+      background: rgba(30, 41, 59, 0.85);
+      color: #e2e8f0;
+      max-width: 100%;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+    .ego-neighbor-list button:hover { border-color: #fbbf24; color: #fbbf24; }
+
+    #searchResults .result-row { display: flex; gap: 0.25rem; align-items: stretch; }
+    #searchResults .result-row button:first-child { flex: 1; }
+    #searchResults .result-ego {
+      width: auto;
+      padding: 0.45rem 0.55rem;
+      font-size: 0.68rem;
+      font-weight: 700;
+      color: #fbbf24;
+    }
+
+    #egoCenterSearch {
+      width: 100%;
+      padding: 0.4rem 0.5rem;
+      margin-bottom: 0.35rem;
+      border-radius: var(--radius);
+      border: 1px solid var(--border);
+      background: rgba(15, 23, 42, 0.85);
+      font-size: 0.76rem;
+    }
+    #legendDock {
+      position: absolute;
+      top: 0.75rem;
+      right: 0.75rem;
+      z-index: 11;
+      width: min(18rem, calc(100% - 1.5rem));
+      max-height: calc(100% - 1.5rem);
+      overflow: auto;
+      background: rgba(15, 23, 42, 0.92);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(6px);
+    }
+    #legendDock summary {
+      cursor: pointer;
+      padding: 0.55rem 0.75rem;
+      font-size: 0.72rem;
+      font-weight: 700;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      color: var(--muted);
+      list-style: none;
+    }
+    #legendDock summary::-webkit-details-marker { display: none; }
+    #legendDock .legend-doc { padding: 0 0.75rem 0.75rem; border: none; margin: 0; background: transparent; }
+
+    #tooltip {
+      position: absolute;
+      pointer-events: none;
+      background: rgba(15, 23, 42, 0.96);
+      border: 1px solid var(--border-strong);
+      border-radius: var(--radius);
+      padding: 0.45rem 0.6rem;
+      font-size: 0.78rem;
+      display: none;
+      max-width: 280px;
+      z-index: 30;
+      box-shadow: var(--shadow);
+    }
+
+    #matrixCanvas { display: block; width: 100%; height: 100%; cursor: crosshair; }
+    .table-toolbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 0.75rem;
+      padding: 0.65rem 0.85rem;
+      border-bottom: 1px solid var(--border);
+      background: rgba(15, 23, 42, 0.65);
+      font-size: 0.8rem;
+      color: var(--muted);
+      flex-wrap: wrap;
+    }
+    .table-scroll { padding: 0; height: calc(100% - 2.75rem); overflow: auto; }
+    .data-table { width: 100%; border-collapse: collapse; font-size: 0.82rem; }
+    .data-table th, .data-table td { text-align: left; padding: 0.45rem 0.75rem; border-bottom: 1px solid var(--border); }
+    .data-table th {
+      position: sticky;
+      top: 0;
+      background: var(--surface);
+      color: var(--muted);
+      font-weight: 600;
+      font-size: 0.72rem;
+      letter-spacing: 0.03em;
+      text-transform: uppercase;
+      cursor: pointer;
+      user-select: none;
+    }
+    .data-table th:hover { color: var(--text); }
+    .data-table th.sorted-asc::after { content: " ▲"; font-size: 0.6rem; }
+    .data-table th.sorted-desc::after { content: " ▼"; font-size: 0.6rem; }
+    .data-table tbody tr { cursor: pointer; }
+    .data-table tbody tr:hover { background: rgba(59, 130, 246, 0.08); }
+    .data-table tbody tr.active { background: var(--accent-soft); }
+    .cross-party-badge { color: #c084fc; font-size: 0.78rem; }
+
+    /* ── Settings drawer ── */
+    #settingsPanel {
+      width: var(--sidebar-w);
+      min-width: 0;
+      background: var(--panel-2);
+      border-left: 1px solid var(--border);
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+    #settingsPanel .drawer-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0.55rem 0.75rem;
+      border-bottom: 1px solid var(--border);
+      font-size: 0.72rem;
+      font-weight: 700;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      color: var(--muted);
+      flex-shrink: 0;
+    }
+    #settingsScroll {
+      flex: 1;
+      overflow: auto;
+      padding: 0.5rem;
+    }
+    #settingsResizer {
+      position: absolute;
+      left: -3px;
+      top: 0;
+      bottom: 0;
+      width: 6px;
+      cursor: col-resize;
+      z-index: 5;
+    }
+    #settingsPanel { position: relative; }
+
+    .settings-section {
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      margin-bottom: 0.45rem;
+      background: rgba(30, 41, 59, 0.45);
+      overflow: hidden;
+    }
+    .settings-section[hidden] { display: none; }
+    .settings-section > summary {
+      cursor: pointer;
+      padding: 0.55rem 0.7rem;
+      font-size: 0.72rem;
+      font-weight: 700;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      color: #cbd5e1;
+      list-style: none;
+      user-select: none;
+    }
+    .settings-section > summary::-webkit-details-marker { display: none; }
+    .settings-section > summary::after {
+      content: "▾";
+      float: right;
+      color: var(--muted);
+      transition: transform 0.15s ease;
+    }
+    .settings-section:not([open]) > summary::after { transform: rotate(-90deg); }
+    .section-body { padding: 0 0.7rem 0.7rem; }
+
+    .field { margin-bottom: 0.65rem; }
+    .field:last-child { margin-bottom: 0; }
+    .field label, .field > .field-label {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      font-size: 0.78rem;
+      color: #cbd5e1;
+      margin-bottom: 0.3rem;
+    }
+    .field input[type="search"],
+    .field input[type="range"],
+    .field select {
+      width: 100%;
+      padding: 0.45rem 0.55rem;
+      border-radius: var(--radius);
+      border: 1px solid var(--border);
+      background: rgba(15, 23, 42, 0.85);
+    }
+    .field input[type="range"] { padding: 0.25rem 0; }
+    .range-value { color: var(--muted); font-size: 0.75rem; font-variant-numeric: tabular-nums; }
+
+    .chip-row, .checkbox-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.35rem;
+    }
+    .chip-row label, .checkbox-row label {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.3rem;
+      padding: 0.25rem 0.5rem;
+      border-radius: 999px;
+      border: 1px solid var(--border);
+      background: rgba(15, 23, 42, 0.65);
+      font-size: 0.75rem;
+      cursor: pointer;
+      margin: 0;
+      width: auto;
+    }
+    .chip-row input, .checkbox-row input { width: auto; margin: 0; }
+
+    .btn-row {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 0.35rem;
+      margin-bottom: 0.45rem;
+    }
+    .btn-row.cols-3 { grid-template-columns: repeat(3, 1fr); }
+    .btn-row button {
+      margin: 0;
+      padding: 0.42rem 0.35rem;
+      font-size: 0.74rem;
+      font-weight: 600;
+      border-radius: var(--radius);
+      border: 1px solid var(--border);
+      background: rgba(51, 65, 85, 0.85);
+    }
+    .btn-row button.primary { background: var(--accent); border-color: var(--accent); color: #fff; }
+    .btn-row button:last-child { margin-bottom: 0; }
+
+    .layout-hint, .muted { color: var(--muted); font-size: 0.74rem; line-height: 1.4; }
+    .layout-hint { margin: 0.25rem 0 0.5rem; min-height: 2.4em; }
+    .panel-note {
+      padding: 0.5rem 0.6rem;
+      border-radius: var(--radius);
+      background: rgba(15, 23, 42, 0.55);
+      border: 1px solid var(--border);
+      font-size: 0.76rem;
+      line-height: 1.4;
+      margin-bottom: 0.5rem;
+    }
+    .panel-note.warn { border-color: rgba(251, 191, 36, 0.35); color: #fde68a; }
+    .relationships { font-size: 0.76rem; max-height: 10rem; overflow: auto; }
+    .relationships table { width: 100%; border-collapse: collapse; }
+    .relationships th, .relationships td { text-align: left; padding: 0.2rem 0.1rem; border-bottom: 1px solid var(--border); }
+    .relationships tbody tr { cursor: pointer; }
+    .relationships tbody tr:hover { background: rgba(59, 130, 246, 0.1); }
+    .filter-scroll { max-height: 7rem; overflow: auto; padding-right: 0.15rem; }
+
+    .legend-swatch-row { display: flex; flex-wrap: wrap; gap: 0.35rem 0.55rem; margin-bottom: 0.35rem; }
+    .legend-swatch { display: inline-flex; align-items: center; gap: 0.3rem; font-size: 0.74rem; }
+    .legend-swatch i { width: 0.65rem; height: 0.65rem; border-radius: 999px; flex-shrink: 0; }
+    .legend-doc h3 { margin: 0.5rem 0 0.25rem; font-size: 0.68rem; letter-spacing: 0.04em; text-transform: uppercase; color: var(--muted); }
+    .legend-doc p { margin: 0 0 0.35rem; font-size: 0.74rem; color: #cbd5e1; }
+    .legend-gradient { height: 0.45rem; border-radius: 999px; background: linear-gradient(90deg, rgb(80,44,255), rgb(255,139,255)); border: 1px solid var(--border); margin: 0.25rem 0; }
+    .legend-gradient-labels { display: flex; justify-content: space-between; font-size: 0.68rem; color: var(--muted); }
+    .legend-edge-sample { display: flex; align-items: center; gap: 0.45rem; font-size: 0.72rem; margin-bottom: 0.25rem; }
+    .legend-edge-sample span.line { height: 3px; width: 2rem; border-radius: 999px; }
+    .legend-size-row { display: flex; align-items: flex-end; gap: 0.5rem; margin: 0.25rem 0; }
+    .legend-size-row i { border-radius: 999px; background: #64748b; }
+
+    /* ── Status bar ── */
+    #statusBar {
+      grid-column: 1 / -1;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 0.75rem;
+      padding: 0 0.75rem;
+      background: rgba(8, 12, 24, 0.95);
+      border-top: 1px solid var(--border);
+      font-size: 0.68rem;
+      color: var(--muted);
+      min-width: 0;
+    }
+    #meta { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  </style>
+  <script src="__GRAPHOLOGY_CDN__"></script>
+  <script src="__SIGMA_CDN__"></script>
+</head>
+<body>
+  <div id="app">
+    <header id="topBar">
+      <div class="brand">
+        <h1 id="pageTitle">__PAGE_TITLE__</h1>
+        <p id="viewHint"></p>
+      </div>
+      <div class="view-tabs" id="viewTabs" role="tablist" aria-label="View mode">
+        <button type="button" data-view="graph" class="active" aria-selected="true" title="Graph (1)">Graph<kbd>1</kbd></button>
+        <button type="button" data-view="matrix" title="Matrix (2)">Matrix<kbd>2</kbd></button>
+        <button type="button" data-view="ranked" title="Ranked (3)">Ranked<kbd>3</kbd></button>
+        <button type="button" data-view="ego" title="Ego (4)">Ego<kbd>4</kbd></button>
+        <button type="button" data-view="members" title="Members (5)">Members<kbd>5</kbd></button>
+      </div>
+      <div class="toolbar-search">
+        <input id="search" type="search" placeholder="Search member name or bioguide ID ( / )" autocomplete="off" aria-label="Search members" />
+        <div id="searchResults" hidden></div>
+      </div>
+      <div class="toolbar-actions">
+        <button id="viewEgoBtn" type="button" title="View ego network for selected member (e)">Ego ▸</button>
+        <button id="fitGraph" type="button" class="primary" title="Fit visible graph (f)">Fit</button>
+        <button id="clearFocus" type="button" title="Clear selection (Esc)">Clear</button>
+        <button id="toggleSettings" type="button" class="icon-btn" title="Toggle settings panel (s)">⚙</button>
+        <button id="focusMode" type="button" class="icon-btn" title="Focus mode — hide settings (.)">⛶</button>
+      </div>
+    </header>
+
+    <main id="mainView">
+      <section id="graphPanel" class="view-panel active">
+        <div id="graph"></div>
+        <div id="tooltip"></div>
+        <div id="egoHud" hidden>
+          <div class="ego-hud-head">
+            <strong>Ego network</strong>
+            <span id="egoHudStats"></span>
+          </div>
+          <div id="egoHudCenter"></div>
+          <div class="ego-hud-hops">
+            <span class="muted">Neighborhood depth</span>
+            <div class="hop-chips" id="egoHopChips">
+              <button type="button" data-hops="1">1 · Direct ties</button>
+              <button type="button" data-hops="2">2 · Friends of friends</button>
+              <button type="button" data-hops="3">3 · Wide net</button>
+            </div>
+          </div>
+          <p id="egoHudHint" class="muted"></p>
+          <div id="egoHudNeighbors" class="ego-neighbor-list"></div>
+        </div>
+        <details id="legendDock" open>
+          <summary>Legend</summary>
+          <div class="panel legend-doc" id="legendDoc" aria-live="polite"></div>
+        </details>
+        <div id="selectionDock" class="empty">
+          <div id="selection">Hover or click a node or edge.</div>
+          <div id="selectionActions" hidden>
+            <button id="selectionViewEgo" type="button">View ego network</button>
+          </div>
+        </div>
+      </section>
+      <section id="matrixPanel" class="view-panel">
+        <canvas id="matrixCanvas" aria-label="Adjacency matrix heatmap"></canvas>
+      </section>
+      <section id="rankedPanel" class="view-panel">
+        <div class="table-toolbar" id="rankedMeta"></div>
+        <div class="table-scroll" id="rankedTableContainer"></div>
+      </section>
+      <section id="membersPanel" class="view-panel">
+        <div class="table-toolbar" id="membersMeta"></div>
+        <div class="table-scroll" id="membersTableContainer"></div>
+      </section>
+    </main>
+
+    <aside id="settingsPanel" aria-label="Explorer settings">
+      <div id="settingsResizer" title="Drag to resize"></div>
+      <div class="drawer-head">
+        <span>Controls</span>
+        <button id="collapseSettings" type="button" class="icon-btn" title="Collapse panel">✕</button>
+      </div>
+      <div id="settingsScroll">
+        <div class="panel-note" id="warnings"></div>
+        <div class="panel-note relationships" id="relationships" hidden></div>
+
+        <details class="settings-section" id="layoutControls" open data-views="graph,ego">
+          <summary>Layout</summary>
+          <div class="section-body">
+            <div class="field">
+              <label for="layoutMode">Arrangement</label>
+              <select id="layoutMode" aria-label="Layout mode">
+                <optgroup label="Precomputed">
+                  <option value="server">Server (force/spring from export)</option>
+                </optgroup>
+                <optgroup label="Party structure">
+                  <option value="partyShells">Party shells (concentric rings)</option>
+                  <option value="partyColumns">Party columns (D · I · R)</option>
+                </optgroup>
+                <optgroup label="Member attributes">
+                  <option value="stateClusters">State clusters</option>
+                  <option value="chamberSplit">Chamber split (House | Senate)</option>
+                  <option value="degreeRings">Degree rings (activity bands)</option>
+                  <option value="sponsorFlow">Sponsor flow (out → in)</option>
+                </optgroup>
+                <optgroup label="Geometric">
+                  <option value="circular">Circular</option>
+                  <option value="alphabetical">Alphabetical arc</option>
+                  <option value="spiral">Spiral</option>
+                  <option value="grid">Grid</option>
+                </optgroup>
+              </select>
+            </div>
+            <p class="layout-hint" id="layoutHint"></p>
+            <div class="btn-row">
+              <button id="applyLayout" type="button">Re-apply layout</button>
+              <button id="resetView" type="button">Reset camera</button>
+            </div>
+          </div>
+        </details>
+
+        <details class="settings-section" id="egoControls" open hidden data-views="ego">
+          <summary>Ego network</summary>
+          <div class="section-body">
+            <p class="muted" style="margin:0 0 0.5rem;">Pick a center member or click someone in the graph, then press <kbd>e</kbd> or <strong>Ego ▸</strong>.</p>
+            <div class="field">
+              <label for="egoCenterSearch">Find center</label>
+              <input id="egoCenterSearch" type="search" placeholder="Filter by name or state…" autocomplete="off" />
+              <select id="egoCenter" size="6" style="height:8.5rem;"></select>
+            </div>
+            <button id="useFocusedMember" type="button" style="display:block;width:100%;margin-bottom:0.5rem;padding:0.45rem;border-radius:var(--radius);border:1px solid var(--border);background:rgba(51,65,85,0.85);font-weight:600;font-size:0.76rem;">Use selected member</button>
+            <div class="field">
+              <label for="egoHops">Neighborhood hops <span class="range-value" id="egoHopsValue">1</span></label>
+              <input id="egoHops" type="range" min="1" max="3" step="1" value="1" />
+            </div>
+          </div>
+        </details>
+
+        <details class="settings-section" open>
+          <summary>Filters</summary>
+          <div class="section-body">
+            <div class="field">
+              <label for="minEdgeWeight">Min edge weight <span class="range-value" id="minEdgeWeightValue">1</span></label>
+              <input id="minEdgeWeight" type="range" min="1" max="1" step="1" value="1" />
+            </div>
+            <div class="field">
+              <label for="minCentrality">Min centrality <span class="range-value" id="minCentralityValue">0.00</span></label>
+              <input id="minCentrality" type="range" min="0" max="1" step="0.01" value="0" />
+            </div>
+            <div class="chip-row" style="margin-bottom:0.5rem;">
+              <label><input id="crossPartyOnly" type="checkbox" /> Cross-party only</label>
+              <label><input id="hideIsolated" type="checkbox" /> Hide isolated nodes</label>
+            </div>
+            <div class="field">
+              <span class="field-label">Party</span>
+              <div id="partyFilters" class="chip-row"></div>
+            </div>
+            <div class="field">
+              <span class="field-label">Chamber</span>
+              <div id="chamberFilters" class="chip-row">
+                <label><input type="checkbox" value="house" checked /> House</label>
+                <label><input type="checkbox" value="senate" checked /> Senate</label>
+                <label><input type="checkbox" value="other" checked /> Other</label>
+              </div>
+            </div>
+            <div class="field">
+              <span class="field-label">State</span>
+              <div id="stateFilters" class="chip-row filter-scroll"></div>
+            </div>
+          </div>
+        </details>
+
+        <details class="settings-section" open>
+          <summary>Display</summary>
+          <div class="section-body">
+            <div class="field">
+              <label for="colorMode">Node color</label>
+              <select id="colorMode">
+                <option value="party">Party</option>
+                <option value="community">Community</option>
+                <option value="centrality">Centrality</option>
+              </select>
+            </div>
+            <div class="field">
+              <label for="edgeOpacity">Edge opacity <span class="range-value" id="edgeOpacityValue">0.5</span></label>
+              <input id="edgeOpacity" type="range" min="0.05" max="0.95" step="0.01" value="0.5" />
+            </div>
+            <div class="field">
+              <label for="nodeSizeScale">Node size <span class="range-value" id="nodeSizeScaleValue">1.00×</span></label>
+              <input id="nodeSizeScale" type="range" min="0.4" max="2" step="0.05" value="1" />
+            </div>
+            <div class="field">
+              <label for="edgeSizeScale">Edge thickness <span class="range-value" id="edgeSizeScaleValue">1.00×</span></label>
+              <input id="edgeSizeScale" type="range" min="0.3" max="2.5" step="0.05" value="1" />
+            </div>
+            <div class="chip-row">
+              <label><input id="showLabels" type="checkbox" /> Show all labels</label>
+              <label><input id="neighborHighlight" type="checkbox" checked /> Neighbor highlight</label>
+            </div>
+          </div>
+        </details>
+
+        <details class="settings-section">
+          <summary>Presets &amp; export</summary>
+          <div class="section-body">
+            <div class="btn-row cols-3 preset-row">
+              <button type="button" data-preset="readable">Readable</button>
+              <button type="button" data-preset="dense">Dense</button>
+              <button type="button" data-preset="cross-party">Cross-party</button>
+              <button type="button" data-preset="high-centrality">High influence</button>
+              <button type="button" data-preset="active-only">Active only</button>
+              <button type="button" data-preset="reset">Reset all</button>
+            </div>
+            <button id="exportJson" type="button" style="width:100%;padding:0.5rem;border-radius:var(--radius);border:1px solid var(--border);background:rgba(51,65,85,0.9);font-weight:600;font-size:0.78rem;">Export filtered view JSON</button>
+          </div>
+        </details>
+      </div>
+    </aside>
+
+    <footer id="statusBar">
+      <span id="meta"></span>
+      <span class="muted"><kbd>/</kbd> search · <kbd>e</kbd> ego · <kbd>f</kbd> fit · <kbd>s</kbd> settings · <kbd>1–5</kbd> views</span>
+    </footer>
+  </div>
+
+  <script>
+    const payload = __PAYLOAD_JSON__;
+    const graphPayload = payload.graph;
+    const renderConfig = payload.renderConfig;
+    const controlDefaults = payload.controls || {};
+    const assessment = payload.assessment || {};
+    const topRelationships = payload.topRelationships || [];
+    const viewPayloads = payload.views || {};
+    const matrixView = viewPayloads.matrix || { rows: [], labels: {}, cells: [], truncated: false, totalNodes: 0 };
+    const rankedEdges = viewPayloads.rankedEdges || [];
+    const membersView = viewPayloads.members || [];
+
+    const graph = new graphology.Graph({ type: "directed" });
+    graphPayload.nodes.forEach((node) => {
+      graph.addNode(node.key, node.attributes);
+    });
+    graphPayload.edges.forEach((edge) => {
+      if (!graph.hasEdge(edge.key)) {
+        graph.addEdgeWithKey(edge.key, edge.source, edge.target, edge.attributes);
+      }
+    });
+
+    const container = document.getElementById("graph");
+    const tooltip = document.getElementById("tooltip");
+    const selection = document.getElementById("selection");
+    const selectionDock = document.getElementById("selectionDock");
+    const metaPanel = document.getElementById("meta");
+    const appRoot = document.getElementById("app");
+    const maxEdgeWeight = controlDefaults.maxEdgeWeight || 1;
+    const defaultEdgeOpacity = controlDefaults.defaultEdgeOpacity || renderConfig.edgeOpacity || 0.55;
+    const availableParties = controlDefaults.parties || ["D", "R", "I", "Unknown"];
+    const availableStates = [...new Set(
+      graphPayload.nodes
+        .map((node) => node.attributes?.state)
+        .filter((state) => state)
+    )].sort();
+
+    const filterDefaults = {
+      minEdgeWeight: controlDefaults.minEdgeWeight || 1,
+      edgeOpacity: defaultEdgeOpacity,
+      crossPartyOnly: false,
+      partyFilter: new Set(availableParties),
+      chamberFilter: new Set(["house", "senate", "other"]),
+      stateFilter: new Set(availableStates),
+      minCentrality: 0,
+      hideIsolated: false,
+      nodeSizeScale: 1,
+      edgeSizeScale: 1,
+    };
+
+    const uiState = {
+      minEdgeWeight: filterDefaults.minEdgeWeight,
+      edgeOpacity: filterDefaults.edgeOpacity,
+      showLabels: !renderConfig.hideLabels,
+      crossPartyOnly: filterDefaults.crossPartyOnly,
+      neighborHighlight: renderConfig.enableHoverHighlight !== false,
+      partyFilter: new Set(filterDefaults.partyFilter),
+      chamberFilter: new Set(filterDefaults.chamberFilter),
+      stateFilter: new Set(filterDefaults.stateFilter),
+      minCentrality: filterDefaults.minCentrality,
+      hideIsolated: filterDefaults.hideIsolated,
+      nodeSizeScale: filterDefaults.nodeSizeScale,
+      edgeSizeScale: filterDefaults.edgeSizeScale,
+      membersSort: { key: "totalDegree", dir: "desc" },
+      pinnedNode: null,
+      pinnedEdge: null,
+      viewMode: "graph",
+      layoutMode: "server",
+      egoCenter: null,
+      egoHops: 1,
+      settingsOpen: true,
+      focusMode: false,
+    };
+
+    let colorMode = renderConfig.nodeColorMode;
+    let hoveredNode = null;
+    let egoNeighborhood = new Set();
+    const maxNodeSize = renderConfig.maxNodeSize || 14;
+    const maxEdgeSize = renderConfig.maxEdgeSize || 1.2;
+    const coordinateSpread = renderConfig.coordinateSpread || 1;
+    const layoutCenter = 0.5;
+
+    function layoutRadiusForCount(nodeCount) {
+      const ref = 25;
+      const base = 0.38 * Math.sqrt(Math.max(nodeCount, 1) / ref);
+      return Math.min(coordinateSpread * 0.46, Math.max(0.22, base * coordinateSpread));
+    }
+
+    function layoutSpan() {
+      return Math.max(0.8, coordinateSpread * 0.8);
+    }
+
+    function nodeDisplayLabel(attrs, key) {
+      return attrs.fullLabel || attrs.label || key;
+    }
+
+    function escapeHtml(value) {
+      return String(value ?? "")
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;");
+    }
+
+    function chamberKey(attrs) {
+      const chamber = String(attrs.chamber || "").toLowerCase();
+      if (chamber === "house") return "house";
+      if (chamber === "senate") return "senate";
+      return "other";
+    }
+
+    function syncSelectionDock() {
+      const nodeId = uiState.pinnedNode || hoveredNode;
+      const empty = !nodeId && !uiState.pinnedEdge;
+      selectionDock.classList.toggle("empty", empty);
+      const actions = document.getElementById("selectionActions");
+      if (actions) {
+        actions.hidden = !nodeId || uiState.viewMode === "ego";
+      }
+    }
+
+    function setEgoHops(hops) {
+      uiState.egoHops = Math.min(3, Math.max(1, Number(hops) || 1));
+      const egoHopsInput = document.getElementById("egoHops");
+      const egoHopsValue = document.getElementById("egoHopsValue");
+      if (egoHopsInput) egoHopsInput.value = String(uiState.egoHops);
+      if (egoHopsValue) egoHopsValue.textContent = String(uiState.egoHops);
+      recomputeEgoNeighborhood();
+      if (uiState.viewMode === "ego") applyEgoLayout();
+      updateEgoHud();
+      refreshGraph();
+    }
+
+    function egoNeighborWeights(centerId) {
+      const weights = new Map();
+      if (!centerId || !graph.hasNode(centerId)) return weights;
+      graph.forEachEdge((edgeKey, attrs, source, target) => {
+        if (source !== centerId && target !== centerId) return;
+        const other = source === centerId ? target : source;
+        weights.set(other, (weights.get(other) || 0) + (attrs.weight || 0));
+      });
+      return weights;
+    }
+
+    function updateEgoHud() {
+      const hud = document.getElementById("egoHud");
+      if (!hud) return;
+      if (uiState.viewMode !== "ego") {
+        hud.hidden = true;
+        return;
+      }
+      hud.hidden = false;
+
+      const centerId = uiState.egoCenter;
+      const attrs = centerId && graph.hasNode(centerId) ? graph.getNodeAttributes(centerId) : null;
+      document.getElementById("egoHudCenter").textContent = attrs
+        ? nodeDisplayLabel(attrs, centerId)
+        : "No center selected";
+
+      let visibleNodes = 0;
+      let visibleEdges = 0;
+      graph.forEachNode((key) => { if (nodeVisible(key)) visibleNodes += 1; });
+      graph.forEachEdge((key, edgeAttrs) => { if (edgeVisible(key, edgeAttrs)) visibleEdges += 1; });
+      document.getElementById("egoHudStats").textContent =
+        `${visibleNodes} members · ${visibleEdges} ties`;
+
+      document.querySelectorAll("#egoHopChips button").forEach((button) => {
+        button.classList.toggle("active", Number(button.dataset.hops) === uiState.egoHops);
+      });
+
+      const totalDegree = (attrs?.weightedInDegree || 0) + (attrs?.weightedOutDegree || 0);
+      const hint = document.getElementById("egoHudHint");
+      if (!attrs) {
+        hint.textContent = "Choose a center member from the list or toolbar.";
+      } else if (totalDegree === 0) {
+        hint.textContent = "No sponsorship ties in this slice — try another member or add more bills.";
+      } else if (visibleNodes <= 1) {
+        hint.textContent = "Only the center is visible — increase hops or relax sidebar filters.";
+      } else {
+        hint.textContent = "Click any member to recenter · double-click in Graph view to jump here";
+      }
+
+      const neighbors = document.getElementById("egoHudNeighbors");
+      if (!centerId || !graph.hasNode(centerId)) {
+        neighbors.innerHTML = "";
+        return;
+      }
+      const weights = egoNeighborWeights(centerId);
+      const ranked = [...weights.entries()]
+        .sort((a, b) => b[1] - a[1])
+        .slice(0, 10);
+      neighbors.innerHTML = ranked.length
+        ? ranked.map(([id, weight]) => {
+            const nAttrs = graph.getNodeAttributes(id);
+            const short = nodeDisplayLabel(nAttrs, id).replace(/^Rep\. |^Sen\. /, "");
+            return `<button type="button" data-ego-neighbor="${escapeHtml(id)}" title="${escapeHtml(nodeDisplayLabel(nAttrs, id))}">${escapeHtml(short)} (${weight})</button>`;
+          }).join("")
+        : `<span class="muted">No direct ties</span>`;
+      neighbors.querySelectorAll("[data-ego-neighbor]").forEach((button) => {
+        button.addEventListener("click", () => setEgoCenter(button.dataset.egoNeighbor));
+      });
+    }
+
+    function setEgoCenter(memberId, { layout = true } = {}) {
+      if (!memberId || !graph.hasNode(memberId)) return false;
+      uiState.egoCenter = memberId;
+      const select = document.getElementById("egoCenter");
+      if (select) {
+        if (![...select.options].some((opt) => opt.value === memberId)) {
+          filterEgoCenterOptions(document.getElementById("egoCenterSearch")?.value || "");
+        }
+        select.value = memberId;
+      }
+      uiState.pinnedNode = null;
+      uiState.pinnedEdge = null;
+      recomputeEgoNeighborhood();
+      if (uiState.viewMode === "ego" && layout) applyEgoLayout();
+      selection.innerHTML = describeNode(memberId);
+      syncSelectionDock();
+      updateEgoHud();
+      refreshGraph();
+      return true;
+    }
+
+    function openEgoForMember(memberId) {
+      if (!memberId || !graph.hasNode(memberId)) return false;
+      setEgoCenter(memberId, { layout: false });
+      if (uiState.viewMode !== "ego") {
+        switchView("ego");
+      } else {
+        applyEgoLayout();
+        updateEgoHud();
+      }
+      return true;
+    }
+
+    function activeMemberForEgo() {
+      return uiState.pinnedNode || hoveredNode || uiState.egoCenter;
+    }
+
+    let egoCenterOptionsCache = [];
+
+    function filterEgoCenterOptions(query) {
+      const select = document.getElementById("egoCenter");
+      if (!select || !egoCenterOptionsCache.length) return;
+      const needle = String(query || "").trim().toLowerCase();
+      const filtered = needle
+        ? egoCenterOptionsCache.filter((item) =>
+            item.searchText.includes(needle) || item.id.toLowerCase().includes(needle))
+        : egoCenterOptionsCache;
+      const previous = uiState.egoCenter;
+      select.innerHTML = filtered.map((item) =>
+        `<option value="${escapeHtml(item.id)}">${escapeHtml(item.label)}</option>`
+      ).join("");
+      if (previous && filtered.some((item) => item.id === previous)) {
+        select.value = previous;
+      } else if (filtered.length) {
+        select.value = filtered[0].id;
+      }
+    }
+
+    function syncSettingsChrome() {
+      appRoot.classList.toggle("settings-collapsed", !uiState.settingsOpen);
+      appRoot.classList.toggle("focus-mode", uiState.focusMode);
+    }
+
+    function setSettingsOpen(open) {
+      uiState.settingsOpen = open;
+      if (open) uiState.focusMode = false;
+      syncSettingsChrome();
+    }
+
+    function setFocusMode(enabled) {
+      uiState.focusMode = enabled;
+      if (enabled) uiState.settingsOpen = false;
+      syncSettingsChrome();
+      if (isGraphView()) requestAnimationFrame(() => renderer.resize());
+    }
+
+    function isGraphView(mode = uiState.viewMode) {
+      return mode === "graph" || mode === "ego";
+    }
+
+    function syncViewSettings(mode = uiState.viewMode) {
+      document.querySelectorAll("[data-views]").forEach((section) => {
+        const allowed = (section.dataset.views || "").split(",").map((v) => v.trim());
+        section.hidden = !allowed.includes(mode);
+      });
+    }
+
+    function syncGraphPanelVisibility(mode = uiState.viewMode) {
+      const graphPanel = document.getElementById("graphPanel");
+      const showGraph = isGraphView(mode);
+      graphPanel.classList.toggle("graph-hidden", !showGraph);
+      graphPanel.setAttribute("aria-hidden", showGraph ? "false" : "true");
+      container.style.pointerEvents = showGraph ? "auto" : "none";
+      if (showGraph) {
+        requestAnimationFrame(() => renderer.resize());
+      }
+    }
+
+    let alternateViewFrame = null;
+    function scheduleAlternateViewRender() {
+      if (alternateViewFrame != null) {
+        cancelAnimationFrame(alternateViewFrame);
+      }
+      alternateViewFrame = requestAnimationFrame(() => {
+        alternateViewFrame = null;
+        const mode = uiState.viewMode;
+        if (mode === "matrix") drawMatrix();
+        else if (mode === "ranked") renderRankedTable();
+        else if (mode === "members") renderMembersTable();
+      });
+    }
+
+    const VIEW_HINTS = {
+      graph: "Force-directed graph. Drag nodes, click to focus, use layout controls to rearrange.",
+      matrix: "Adjacency heatmap sorted by party. Hover cells for edge weight details.",
+      ranked: "Top edges by weight, filtered by current sidebar settings.",
+      ego: "Local network around one member (gold center). Click members to recenter; use hop chips for depth.",
+      members: "Member leaderboard by total degree. Click a row to open ego view.",
+    };
+
+    const LAYOUT_HINTS = {
+      server: "Original coordinates from the exported graph (spring/force layout computed at build time).",
+      partyShells: "Each party on its own concentric ring — useful for seeing within-party structure.",
+      partyColumns: "Democrats, independents, and Republicans in separate vertical columns.",
+      stateClusters: "Members grouped by state abbreviation in regional mini-clusters.",
+      chamberSplit: "House members on the left, Senate on the right (when chamber is known).",
+      degreeRings: "Concentric rings by total sponsorship activity — active members toward the outside.",
+      sponsorFlow: "High out-degree (sponsors) on the left, high in-degree (cosponsors) on the right.",
+      circular: "Even spacing around a circle — good baseline for small graphs.",
+      alphabetical: "Members sorted A→Z along a circular arc.",
+      spiral: "Archimedean spiral ordered by label — spreads dense graphs without overlap.",
+      grid: "Uniform grid — readable for tables and screenshots.",
+    };
+
+    const PARTY_LABELS = { D: "Democrat", R: "Republican", I: "Independent", Unknown: "Unknown / other" };
+
+    function renderLayoutHint() {
+      const hint = LAYOUT_HINTS[uiState.layoutMode] || "";
+      const layoutKey = graphPayload.layoutKey ? ` Export key: ${graphPayload.layoutKey}.` : "";
+      document.getElementById("layoutHint").textContent = hint + (uiState.layoutMode === "server" ? layoutKey : "");
+    }
+
+    function renderLegend() {
+      const panel = document.getElementById("legendDoc");
+      const partyColors = renderConfig.partyColors || {};
+      const communityColors = renderConfig.communityColors || [];
+      const labelThreshold = renderConfig.labelMinCentrality ?? 0.35;
+      const arrowNote = renderConfig.showEdgeArrows
+        ? "Arrows point sponsor → cosponsor."
+        : "Directed sponsor → cosponsor ties (arrows off).";
+
+      let colorSection = "";
+      if (colorMode === "party") {
+        const swatches = availableParties.map((party) => {
+          const color = partyColors[party] || partyColors.Unknown || "#64748b";
+          const label = PARTY_LABELS[party] || party;
+          return `<span class="legend-swatch"><i style="background:${color}"></i>${label}</span>`;
+        }).join("");
+        colorSection = `
+          <h3>Node color · Party</h3>
+          <p>Member node fill reflects current party affiliation from Congress.gov.</p>
+          <div class="legend-swatch-row">${swatches}</div>`;
+      } else if (colorMode === "community") {
+        const seen = new Set();
+        const swatches = [];
+        graph.forEachNode((key, attrs) => {
+          const community = attrs.community || "c0";
+          if (seen.has(community) || swatches.length >= 8) return;
+          seen.add(community);
+          const index = [...community].reduce((sum, ch) => sum + ch.charCodeAt(0), 0) % communityColors.length;
+          const color = communityColors[index] || "#64748b";
+          swatches.push(`<span class="legend-swatch"><i style="background:${color}"></i>${community}</span>`);
+        });
+        colorSection = `
+          <h3>Node color · Community</h3>
+          <p>Greedy modularity clusters from cosponsorship ties — members who cosponsor together share hues.</p>
+          <div class="legend-swatch-row">${swatches.join("") || '<span class="muted">No communities computed.</span>'}</div>`;
+      } else {
+        colorSection = `
+          <h3>Node color · Centrality</h3>
+          <p>Normalized influence score (0–1) from weighted degree in this slice.</p>
+          <div class="legend-gradient-labels"><span>Low influence</span><span>High influence</span></div>
+          <div class="legend-gradient"></div>`;
+      }
+
+      const small = Math.max(4, maxNodeSize * 0.35);
+      const medium = Math.max(6, maxNodeSize * 0.65);
+      const large = maxNodeSize;
+
+      panel.innerHTML = `
+        ${colorSection}
+        <h3>Node size &amp; labels</h3>
+        <p>Labels use <span class="muted">Rep./Sen. Last, First [Party-State-District]</span> when metadata is available. Disc diameter scales with centrality (not raw degree). Labels appear when centrality ≥ ${labelThreshold.toFixed(2)} or when “Show labels” overrides.</p>
+        <div class="legend-size-row">
+          <i style="width:${small}px;height:${small}px"></i>
+          <i style="width:${medium}px;height:${medium}px"></i>
+          <i style="width:${large}px;height:${large}px"></i>
+          <span>low → high</span>
+        </div>
+        <h3>Edges</h3>
+        <p>${arrowNote} Thickness uses log-scaled bill count (weight). Opacity follows the sidebar slider.</p>
+        <div class="legend-edge-row">
+          <div class="legend-edge-sample">
+            <span class="line" style="background:rgba(100,116,139,0.85);height:2px"></span>
+            <span>Same-party tie</span>
+          </div>
+          <div class="legend-edge-sample">
+            <span class="line" style="background:rgba(147,51,234,0.85);height:4px"></span>
+            <span>Cross-party tie (purple)</span>
+          </div>
+        </div>
+        <h3>Focus &amp; selection</h3>
+        <p>
+          <span class="legend-swatch"><i style="background:#fbbf24"></i>Ego center</span>
+          <span class="legend-swatch"><i style="background:#f8fafc;border:1px solid #64748b"></i>Pinned node</span>
+          <span class="legend-swatch"><i style="background:#334155"></i>Dimmed (neighbor highlight)</span>
+        </p>
+        <p class="muted" style="margin:0">Edge weight = shared bills in slice · cross-party weight = bipartisan bill count.</p>`;
+    }
+
+    const viewPanels = {
+      graph: document.getElementById("graphPanel"),
+      matrix: document.getElementById("matrixPanel"),
+      ranked: document.getElementById("rankedPanel"),
+      ego: document.getElementById("graphPanel"),
+      members: document.getElementById("membersPanel"),
+    };
+
+    function activeNode() {
+      return uiState.pinnedNode || hoveredNode;
+    }
+
+    function pickDefaultEgoCenter() {
+      const sorted = [...membersView].sort((a, b) => (b.totalDegree || 0) - (a.totalDegree || 0));
+      const candidate = sorted.find((member) => graph.hasNode(member.id) && (member.totalDegree || 0) > 0)
+        || sorted.find((member) => graph.hasNode(member.id));
+      if (!candidate) return;
+      uiState.egoCenter = candidate.id;
+      const select = document.getElementById("egoCenter");
+      if (select) select.value = candidate.id;
+    }
+
+    function recomputeEgoNeighborhood() {
+      egoNeighborhood = new Set();
+      if (uiState.viewMode !== "ego" || !uiState.egoCenter || !graph.hasNode(uiState.egoCenter)) return;
+      egoNeighborhood.add(uiState.egoCenter);
+      let frontier = new Set([uiState.egoCenter]);
+      for (let hop = 0; hop < uiState.egoHops; hop += 1) {
+        const next = new Set();
+        frontier.forEach((node) => {
+          graph.forEachNeighbor(node, (neighbor) => {
+            if (!egoNeighborhood.has(neighbor)) {
+              egoNeighborhood.add(neighbor);
+              next.add(neighbor);
+            }
+          });
+        });
+        frontier = next;
+      }
+    }
+
+    function egoHopDistances() {
+      const hops = new Map();
+      if (!uiState.egoCenter || !graph.hasNode(uiState.egoCenter)) return hops;
+      hops.set(uiState.egoCenter, 0);
+      let frontier = new Set([uiState.egoCenter]);
+      for (let hop = 1; hop <= uiState.egoHops; hop += 1) {
+        const next = new Set();
+        frontier.forEach((node) => {
+          graph.forEachNeighbor(node, (neighbor) => {
+            if (!hops.has(neighbor)) {
+              hops.set(neighbor, hop);
+              next.add(neighbor);
+            }
+          });
+        });
+        frontier = next;
+      }
+      return hops;
+    }
+
+    function applyEgoLayout() {
+      if (uiState.viewMode !== "ego" || !uiState.egoCenter || !graph.hasNode(uiState.egoCenter)) return;
+      recomputeEgoNeighborhood();
+      const hops = egoHopDistances();
+      const byHop = {};
+      egoNeighborhood.forEach((node) => {
+        const hop = hops.get(node) ?? uiState.egoHops;
+        if (!byHop[hop]) byHop[hop] = [];
+        byHop[hop].push(node);
+      });
+
+      graph.setNodeAttribute(uiState.egoCenter, "x", layoutCenter);
+      graph.setNodeAttribute(uiState.egoCenter, "y", layoutCenter);
+
+      Object.keys(byHop).forEach((hopKey) => {
+        const hop = Number(hopKey);
+        if (hop === 0) return;
+        const ringNodes = byHop[hop];
+        const radius = (0.07 + hop * 0.11) * Math.min(coordinateSpread, 1.15);
+        ringNodes.forEach((key, index) => {
+          const angle = (index / Math.max(ringNodes.length, 1)) * Math.PI * 2 - Math.PI / 2;
+          graph.setNodeAttribute(key, "x", layoutCenter + Math.cos(angle) * radius);
+          graph.setNodeAttribute(key, "y", layoutCenter + Math.sin(angle) * radius);
+        });
+      });
+
+      if (isGraphView()) {
+        renderer.refresh();
+        requestAnimationFrame(() => fitGraph());
+      }
+    }
+
+    function edgePassesFilters(edgeKey, attrs, endpoints) {
+      const [source, target] = endpoints || graph.extremities(edgeKey);
+      const sourceParty = graph.getNodeAttributes(source).party || "Unknown";
+      const targetParty = graph.getNodeAttributes(target).party || "Unknown";
+      if (!uiState.partyFilter.has(sourceParty) || !uiState.partyFilter.has(targetParty)) return false;
+      if ((attrs.weight || 0) < uiState.minEdgeWeight) return false;
+      if (uiState.crossPartyOnly && !(attrs.crossPartyWeight || 0)) return false;
+      return true;
+    }
+
+    function edgeVisible(edgeKey, attrs, endpoints) {
+      if (!edgePassesFilters(edgeKey, attrs, endpoints)) return false;
+      if (uiState.viewMode === "ego") {
+        const [source, target] = endpoints || graph.extremities(edgeKey);
+        if (!egoNeighborhood.has(source) || !egoNeighborhood.has(target)) return false;
+      }
+      return true;
+    }
+
+    function nodeVisible(node) {
+      const attrs = graph.getNodeAttributes(node);
+      if (uiState.viewMode === "ego") {
+        if (node === uiState.egoCenter) return true;
+        if (!egoNeighborhood.has(node)) return false;
+      }
+      const party = attrs.party || "Unknown";
+      if (!uiState.partyFilter.has(party)) return false;
+      if (!uiState.chamberFilter.has(chamberKey(attrs))) return false;
+      const state = attrs.state || "";
+      if (uiState.stateFilter.size > 0 && state && !uiState.stateFilter.has(state)) return false;
+      if (uiState.minCentrality > 0 && (attrs.centrality || 0) < uiState.minCentrality) return false;
+      if (uiState.hideIsolated) {
+        const total = (attrs.weightedInDegree || 0) + (attrs.weightedOutDegree || 0);
+        if (total === 0) return false;
+      }
+      return true;
+    }
+
+    function updateMeta() {
+      let visibleNodes = 0;
+      let visibleEdges = 0;
+      graph.forEachNode((key) => {
+        if (nodeVisible(key)) visibleNodes += 1;
+      });
+      graph.forEachEdge((key, attrs) => {
+        if (edgeVisible(key, attrs)) visibleEdges += 1;
+      });
+      const viewLabel = uiState.viewMode;
+      const tier = assessment.tier || "unknown";
+      metaPanel.textContent =
+        `${visibleNodes}/${graphPayload.nodes.length} nodes · ${visibleEdges}/${graphPayload.edges.length} edges · ${viewLabel} · ${tier}${graphPayload.graphKey ? ` · ${graphPayload.graphKey}` : ""}`;
+    }
+
+    function nodeColor(attributes) {
+      if (colorMode === "community") {
+        const community = attributes.community || "c0";
+        const index = [...community].reduce((sum, ch) => sum + ch.charCodeAt(0), 0) % renderConfig.communityColors.length;
+        return renderConfig.communityColors[index];
+      }
+      if (colorMode === "centrality") {
+        const value = attributes.centrality || 0;
+        const channel = Math.round(80 + value * 175);
+        return `rgb(${channel}, ${Math.round(channel * 0.55)}, 255)`;
+      }
+      return renderConfig.partyColors[attributes.party] || renderConfig.partyColors.Unknown;
+    }
+
+    function describeNode(key) {
+      const attrs = graph.getNodeAttributes(key);
+      return `<strong>${nodeDisplayLabel(attrs, key)}</strong><br>
+        Party: ${attrs.party || "?"} · State: ${attrs.state || "?"}<br>
+        In: ${attrs.weightedInDegree || 0} · Out: ${attrs.weightedOutDegree || 0}<br>
+        Centrality: ${(attrs.centrality || 0).toFixed(2)} · Community: ${attrs.community || "?"}`;
+    }
+
+    function describeEdge(key) {
+      const attrs = graph.getEdgeAttributes(key);
+      const [source, target] = graph.extremities(key);
+      const sourceLabel = nodeDisplayLabel(graph.getNodeAttributes(source), source);
+      const targetLabel = nodeDisplayLabel(graph.getNodeAttributes(target), target);
+      return `<strong>${sourceLabel} → ${targetLabel}</strong><br>
+        Weight: ${attrs.weight || 0} · Bills: ${attrs.billCount || 0}<br>
+        Cross-party weight: ${attrs.crossPartyWeight || 0}`;
+    }
+
+    function applyNodeReducer(node, data) {
+      const next = Object.assign({}, data);
+      const focusNodeKey = activeNode();
+
+      if (!nodeVisible(node)) {
+        next.hidden = true;
+        return next;
+      }
+
+      next.color = nodeColor(data);
+      const baseSize = Math.min(maxNodeSize, Math.max(2, data.size || 4));
+      next.size = baseSize * uiState.nodeSizeScale;
+      next.label = "";
+      if (uiState.showLabels) {
+        next.label = nodeDisplayLabel(data, node);
+      } else if (data.label) {
+        next.label = data.label;
+      }
+
+      if (uiState.viewMode === "ego" && node === uiState.egoCenter) {
+        next.color = "#fbbf24";
+        next.size = Math.min(maxNodeSize * 1.25, (next.size || 4) * 1.3);
+        next.zIndex = 3;
+        next.label = uiState.showLabels ? nodeDisplayLabel(data, node) : (next.label || nodeDisplayLabel(data, node));
+      }
+
+      const skipNeighborDim = uiState.viewMode === "ego";
+      if (!skipNeighborDim && uiState.neighborHighlight && focusNodeKey && node !== focusNodeKey
+        && !graph.hasEdge(focusNodeKey, node) && !graph.hasEdge(node, focusNodeKey) && !graph.areNeighbors(focusNodeKey, node)) {
+        next.color = "#334155";
+        next.label = "";
+        next.zIndex = 0;
+      } else if (focusNodeKey && node !== uiState.egoCenter) {
+        next.zIndex = 1;
+      }
+      if (uiState.pinnedNode === node && !(uiState.viewMode === "ego" && node === uiState.egoCenter)) {
+        next.color = "#f8fafc";
+        next.zIndex = 2;
+      }
+      return next;
+    }
+
+    function applyEdgeReducer(edge, data) {
+      const next = Object.assign({}, data);
+      const [source, target] = graph.extremities(edge);
+      const focusNodeKey = activeNode();
+
+      if (!edgeVisible(edge, data, [source, target])) {
+        next.hidden = true;
+        return next;
+      }
+
+      next.size = Math.min(maxEdgeSize, Math.max(0.12, data.size || 0.3)) * uiState.edgeSizeScale;
+      const crossParty = (data.crossPartyWeight || 0) > 0;
+      const alpha = focusNodeKey ? Math.min(0.95, uiState.edgeOpacity + 0.35) : uiState.edgeOpacity;
+      next.color = crossParty ? `rgba(147, 51, 234, ${alpha})` : `rgba(100, 116, 139, ${alpha})`;
+
+      if (uiState.viewMode !== "ego" && uiState.neighborHighlight && focusNodeKey) {
+        const visible = source === focusNodeKey || target === focusNodeKey;
+        next.hidden = !visible;
+        next.color = visible ? next.color : "rgba(30, 41, 59, 0.08)";
+        next.zIndex = visible ? 1 : 0;
+      }
+      if (uiState.pinnedEdge === edge) {
+        next.color = "#fbbf24";
+        next.size = Math.min(maxEdgeSize * 1.4, next.size * 1.5);
+        next.zIndex = 3;
+      }
+      return next;
+    }
+
+    const labelDensity = renderConfig.densityMode === "compact" ? 0.01 : (renderConfig.densityMode === "balanced" ? 0.04 : 0.07);
+    const renderer = new Sigma(graph, container, {
+      renderEdgeLabels: false,
+      defaultEdgeType: renderConfig.showEdgeArrows ? "arrow" : "line",
+      labelDensity,
+      labelGridCellSize: 80,
+      labelRenderedSizeThreshold: 8,
+      enableEdgeEvents: true,
+      nodeReducer: (node, data) => applyNodeReducer(node, data),
+      edgeReducer: (edge, data) => applyEdgeReducer(edge, data),
+    });
+
+    function refreshGraph() {
+      recomputeEgoNeighborhood();
+      updateMeta();
+      syncGraphPanelVisibility();
+      if (uiState.viewMode === "ego") updateEgoHud();
+      if (isGraphView()) {
+        renderer.refresh();
+      } else {
+        scheduleAlternateViewRender();
+      }
+    }
+
+    function focusNode(node, { zoom = 0.3, pin = true } = {}) {
+      if (!graph.hasNode(node)) return;
+      uiState.pinnedNode = pin ? node : uiState.pinnedNode;
+      uiState.pinnedEdge = null;
+      selection.innerHTML = describeNode(node);
+      syncSelectionDock();
+      const attrs = graph.getNodeAttributes(node);
+      if (uiState.viewMode === "graph" || uiState.viewMode === "ego") {
+        renderer.getCamera().animate({ x: attrs.x, y: attrs.y, ratio: zoom }, { duration: 500 });
+      }
+      refreshGraph();
+    }
+
+    function relationshipEdgeKey(edge) {
+      if (edge.edgeKey && graph.hasEdge(edge.edgeKey)) return edge.edgeKey;
+      if (graph.hasDirectedEdge(edge.source, edge.target)) return graph.directedEdge(edge.source, edge.target);
+      return null;
+    }
+
+    function focusEdge(edgeKey) {
+      if (!graph.hasEdge(edgeKey)) return;
+      uiState.pinnedEdge = edgeKey;
+      const [source, target] = graph.extremities(edgeKey);
+      uiState.pinnedNode = source;
+      selection.innerHTML = describeEdge(edgeKey);
+      syncSelectionDock();
+      if (uiState.viewMode === "graph" || uiState.viewMode === "ego") {
+        const sourceAttrs = graph.getNodeAttributes(source);
+        const targetAttrs = graph.getNodeAttributes(target);
+        const centerX = (sourceAttrs.x + targetAttrs.x) / 2;
+        const centerY = (sourceAttrs.y + targetAttrs.y) / 2;
+        renderer.getCamera().animate({ x: centerX, y: centerY, ratio: 0.45 }, { duration: 500 });
+      }
+      refreshGraph();
+    }
+
+    function clearFocus() {
+      hoveredNode = null;
+      uiState.pinnedNode = null;
+      uiState.pinnedEdge = null;
+      selection.textContent = "Hover or click a node or edge.";
+      syncSelectionDock();
+      refreshGraph();
+    }
+
+    function fitGraph() {
+      if (!isGraphView()) return;
+      let minX = Infinity;
+      let minY = Infinity;
+      let maxX = -Infinity;
+      let maxY = -Infinity;
+      let count = 0;
+      graph.forEachNode((key, attrs) => {
+        if (!nodeVisible(key)) return;
+        if (attrs.x == null || attrs.y == null) return;
+        minX = Math.min(minX, attrs.x);
+        minY = Math.min(minY, attrs.y);
+        maxX = Math.max(maxX, attrs.x);
+        maxY = Math.max(maxY, attrs.y);
+        count += 1;
+      });
+      if (!count) return;
+      const padding = 0.08;
+      const width = Math.max(maxX - minX, 0.05);
+      const height = Math.max(maxY - minY, 0.05);
+      renderer.getCamera().animate({
+        x: (minX + maxX) / 2,
+        y: (minY + maxY) / 2,
+        ratio: Math.max(width, height) * (1 + padding),
+      }, { duration: 450 });
+    }
+
+    function visibleLayoutNodes() {
+      const nodes = [];
+      graph.forEachNode((key, attrs) => {
+        if (uiState.partyFilter.has(attrs.party || "Unknown")) {
+          nodes.push({ key, attrs });
+        }
+      });
+      return nodes;
+    }
+
+    function placeGroupOnCircle(keys, centerX, centerY, radius) {
+      keys.forEach((key, index) => {
+        const angle = (index / Math.max(keys.length, 1)) * Math.PI * 2 - Math.PI / 2;
+        graph.setNodeAttribute(key, "x", centerX + Math.cos(angle) * radius);
+        graph.setNodeAttribute(key, "y", centerY + Math.sin(angle) * radius);
+      });
+    }
+
+    function applyLayout(mode) {
+      const nodes = visibleLayoutNodes();
+      if (!nodes.length) return;
+
+      const padding = 0.1;
+      const span = layoutSpan();
+
+      if (mode === "server") {
+        nodes.forEach(({ key, attrs }) => {
+          graph.setNodeAttribute(key, "x", attrs.layoutX != null ? attrs.layoutX : attrs.x);
+          graph.setNodeAttribute(key, "y", attrs.layoutY != null ? attrs.layoutY : attrs.y);
+        });
+      } else if (mode === "circular") {
+        const radius = layoutRadiusForCount(nodes.length);
+        nodes.forEach(({ key }, index) => {
+          const angle = (index / nodes.length) * Math.PI * 2 - Math.PI / 2;
+          graph.setNodeAttribute(key, "x", layoutCenter + Math.cos(angle) * radius);
+          graph.setNodeAttribute(key, "y", layoutCenter + Math.sin(angle) * radius);
+        });
+      } else if (mode === "alphabetical") {
+        const sorted = [...nodes].sort((a, b) =>
+          nodeDisplayLabel(a.attrs, a.key).localeCompare(nodeDisplayLabel(b.attrs, b.key))
+        );
+        const radius = layoutRadiusForCount(sorted.length);
+        sorted.forEach(({ key }, index) => {
+          const angle = (index / sorted.length) * Math.PI * 2 - Math.PI / 2;
+          graph.setNodeAttribute(key, "x", layoutCenter + Math.cos(angle) * radius);
+          graph.setNodeAttribute(key, "y", layoutCenter + Math.sin(angle) * radius);
+        });
+      } else if (mode === "spiral") {
+        const sorted = [...nodes].sort((a, b) =>
+          nodeDisplayLabel(a.attrs, a.key).localeCompare(nodeDisplayLabel(b.attrs, b.key))
+        );
+        const maxRadius = layoutRadiusForCount(sorted.length);
+        sorted.forEach(({ key }, index) => {
+          const t = index / Math.max(sorted.length - 1, 1);
+          const angle = t * Math.PI * 6 - Math.PI / 2;
+          const radius = (0.06 + t * 0.36) * maxRadius;
+          graph.setNodeAttribute(key, "x", layoutCenter + Math.cos(angle) * radius);
+          graph.setNodeAttribute(key, "y", layoutCenter + Math.sin(angle) * radius);
+        });
+      } else if (mode === "partyShells") {
+        const partyOrder = ["D", "R", "I", "Unknown"];
+        const groups = {};
+        nodes.forEach(({ key, attrs }) => {
+          const party = attrs.party || "Unknown";
+          if (!groups[party]) groups[party] = [];
+          groups[party].push(key);
+        });
+        const orderedParties = [...partyOrder.filter((p) => groups[p]), ...Object.keys(groups).filter((p) => !partyOrder.includes(p))];
+        orderedParties.forEach((party, shellIndex) => {
+          const group = groups[party];
+          const shellRadius = (0.12 + shellIndex * 0.14) * coordinateSpread;
+          placeGroupOnCircle(group, layoutCenter, layoutCenter, shellRadius);
+        });
+      } else if (mode === "partyColumns") {
+        const partyOrder = ["D", "I", "R", "Unknown"];
+        const groups = {};
+        nodes.forEach(({ key, attrs }) => {
+          const party = attrs.party || "Unknown";
+          if (!groups[party]) groups[party] = [];
+          groups[party].push(key);
+        });
+        const activeParties = partyOrder.filter((p) => groups[p]).concat(
+          Object.keys(groups).filter((p) => !partyOrder.includes(p))
+        );
+        const colWidth = span / Math.max(activeParties.length, 1);
+        const origin = layoutCenter - span / 2;
+        activeParties.forEach((party, colIndex) => {
+          const group = groups[party];
+          const xCenter = origin + colIndex * colWidth + colWidth / 2;
+          group.forEach((key, rowIndex) => {
+            const rowHeight = span / Math.max(group.length, 1);
+            graph.setNodeAttribute(key, "x", xCenter);
+            graph.setNodeAttribute(key, "y", origin + rowIndex * rowHeight + rowHeight / 2);
+          });
+        });
+      } else if (mode === "stateClusters") {
+        const groups = {};
+        nodes.forEach(({ key, attrs }) => {
+          const state = attrs.state || "??";
+          if (!groups[state]) groups[state] = [];
+          groups[state].push(key);
+        });
+        const states = Object.keys(groups).sort();
+        const cols = Math.ceil(Math.sqrt(states.length));
+        const rows = Math.ceil(states.length / cols);
+        const cellW = span / cols;
+        const cellH = span / rows;
+        const origin = layoutCenter - span / 2;
+        states.forEach((state, index) => {
+          const col = index % cols;
+          const row = Math.floor(index / cols);
+          const cx = origin + col * cellW + cellW / 2;
+          const cy = origin + row * cellH + cellH / 2;
+          const radius = Math.min(cellW, cellH) * 0.32;
+          placeGroupOnCircle(groups[state], cx, cy, radius);
+        });
+      } else if (mode === "chamberSplit") {
+        const groups = { house: [], senate: [], other: [] };
+        nodes.forEach(({ key, attrs }) => {
+          const chamber = String(attrs.chamber || "").toLowerCase();
+          if (chamber === "house") groups.house.push(key);
+          else if (chamber === "senate") groups.senate.push(key);
+          else groups.other.push(key);
+        });
+        const bandWidth = span / 3;
+        const origin = layoutCenter - span / 2;
+        placeGroupOnCircle(groups.house, origin + bandWidth * 0.5, layoutCenter, 0.28 * coordinateSpread);
+        placeGroupOnCircle(groups.other, layoutCenter, layoutCenter, 0.18 * coordinateSpread);
+        placeGroupOnCircle(groups.senate, origin + bandWidth * 2.5, layoutCenter, 0.28 * coordinateSpread);
+      } else if (mode === "degreeRings") {
+        const scored = nodes.map(({ key, attrs }) => ({
+          key,
+          total: (attrs.weightedInDegree || 0) + (attrs.weightedOutDegree || 0),
+        }));
+        scored.sort((a, b) => a.total - b.total);
+        const ringCount = Math.min(5, Math.max(2, Math.ceil(Math.sqrt(nodes.length))));
+        scored.forEach(({ key }, index) => {
+          const ring = Math.floor((index / scored.length) * ringCount);
+          const ringRadius = (0.1 + (ring / Math.max(ringCount - 1, 1)) * 0.32) * coordinateSpread;
+          const angle = (index * 2.399963) % (Math.PI * 2);
+          graph.setNodeAttribute(key, "x", layoutCenter + Math.cos(angle) * ringRadius);
+          graph.setNodeAttribute(key, "y", layoutCenter + Math.sin(angle) * ringRadius);
+        });
+      } else if (mode === "sponsorFlow") {
+        const scored = nodes.map(({ key, attrs }) => ({
+          key,
+          out: attrs.weightedOutDegree || 0,
+          in: attrs.weightedInDegree || 0,
+        }));
+        scored.sort((a, b) => (b.out - b.in) - (a.out - a.in));
+        const mid = Math.floor(scored.length / 2);
+        const left = scored.slice(0, mid);
+        const right = scored.slice(mid);
+        const origin = layoutCenter - span / 2;
+        left.forEach(({ key }, index) => {
+          const rowHeight = span / Math.max(left.length, 1);
+          graph.setNodeAttribute(key, "x", origin + 0.12 * coordinateSpread);
+          graph.setNodeAttribute(key, "y", origin + index * rowHeight + rowHeight / 2);
+        });
+        right.forEach(({ key }, index) => {
+          const rowHeight = span / Math.max(right.length, 1);
+          graph.setNodeAttribute(key, "x", origin + span - 0.12 * coordinateSpread);
+          graph.setNodeAttribute(key, "y", origin + index * rowHeight + rowHeight / 2);
+        });
+      } else if (mode === "grid") {
+        const cols = Math.ceil(Math.sqrt(nodes.length));
+        const origin = layoutCenter - span / 2;
+        nodes.forEach(({ key }, index) => {
+          const row = Math.floor(index / cols);
+          const col = index % cols;
+          const cellW = span / Math.max(cols, 1);
+          const rows = Math.ceil(nodes.length / cols);
+          const cellH = span / Math.max(rows, 1);
+          graph.setNodeAttribute(key, "x", origin + col * cellW + cellW / 2);
+          graph.setNodeAttribute(key, "y", origin + row * cellH + cellH / 2);
+        });
+      }
+
+      uiState.layoutMode = mode;
+      document.getElementById("layoutMode").value = mode;
+      renderLayoutHint();
+      if (uiState.viewMode === "graph" || uiState.viewMode === "ego") {
+        renderer.refresh();
+        fitGraph();
+      }
+    }
+
+    function applyFilterPreset(name) {
+      if (name === "readable") {
+        const raisedMin = Math.max(uiState.minEdgeWeight, Math.ceil(maxEdgeWeight * 0.35));
+        uiState.minEdgeWeight = Math.min(raisedMin, maxEdgeWeight);
+        uiState.edgeOpacity = Math.min(uiState.edgeOpacity, 0.22);
+        uiState.nodeSizeScale = 1.1;
+        uiState.edgeSizeScale = 0.85;
+      } else if (name === "dense") {
+        uiState.minEdgeWeight = Math.max(2, Math.ceil(maxEdgeWeight * 0.2));
+        uiState.edgeOpacity = 0.12;
+        uiState.nodeSizeScale = 0.75;
+        uiState.edgeSizeScale = 0.6;
+        uiState.showLabels = false;
+      } else if (name === "cross-party") {
+        uiState.crossPartyOnly = true;
+      } else if (name === "high-centrality") {
+        uiState.minCentrality = 0.45;
+      } else if (name === "active-only") {
+        uiState.hideIsolated = true;
+      } else if (name === "reset") {
+        uiState.minEdgeWeight = filterDefaults.minEdgeWeight;
+        uiState.edgeOpacity = filterDefaults.edgeOpacity;
+        uiState.crossPartyOnly = filterDefaults.crossPartyOnly;
+        uiState.partyFilter = new Set(filterDefaults.partyFilter);
+        uiState.chamberFilter = new Set(filterDefaults.chamberFilter);
+        uiState.stateFilter = new Set(filterDefaults.stateFilter);
+        uiState.minCentrality = filterDefaults.minCentrality;
+        uiState.hideIsolated = filterDefaults.hideIsolated;
+        uiState.nodeSizeScale = filterDefaults.nodeSizeScale;
+        uiState.edgeSizeScale = filterDefaults.edgeSizeScale;
+        uiState.showLabels = !renderConfig.hideLabels;
+        syncFilterControls();
+      }
+      if (name !== "reset") syncFilterControls();
+      refreshGraph();
+    }
+
+    function syncFilterControls() {
+      document.getElementById("minEdgeWeight").value = String(uiState.minEdgeWeight);
+      document.getElementById("minEdgeWeightValue").textContent = String(uiState.minEdgeWeight);
+      document.getElementById("edgeOpacity").value = String(uiState.edgeOpacity);
+      document.getElementById("edgeOpacityValue").textContent = uiState.edgeOpacity.toFixed(2);
+      document.getElementById("minCentrality").value = String(uiState.minCentrality);
+      document.getElementById("minCentralityValue").textContent = uiState.minCentrality.toFixed(2);
+      document.getElementById("nodeSizeScale").value = String(uiState.nodeSizeScale);
+      document.getElementById("nodeSizeScaleValue").textContent = `${uiState.nodeSizeScale.toFixed(2)}×`;
+      document.getElementById("edgeSizeScale").value = String(uiState.edgeSizeScale);
+      document.getElementById("edgeSizeScaleValue").textContent = `${uiState.edgeSizeScale.toFixed(2)}×`;
+      document.getElementById("crossPartyOnly").checked = uiState.crossPartyOnly;
+      document.getElementById("hideIsolated").checked = uiState.hideIsolated;
+      document.getElementById("showLabels").checked = uiState.showLabels;
+      document.querySelectorAll("#partyFilters input").forEach((input) => {
+        input.checked = uiState.partyFilter.has(input.value);
+      });
+      document.querySelectorAll("#chamberFilters input").forEach((input) => {
+        input.checked = uiState.chamberFilter.has(input.value);
+      });
+      document.querySelectorAll("#stateFilters input").forEach((input) => {
+        input.checked = uiState.stateFilter.has(input.value);
+      });
+    }
+
+    function collectFilteredGraph() {
+      const nodes = [];
+      const edges = [];
+      graph.forEachNode((key, attrs) => {
+        if (!nodeVisible(key)) return;
+        nodes.push({ key, attributes: { ...attrs } });
+      });
+      const visibleNodeKeys = new Set(nodes.map((n) => n.key));
+      graph.forEachEdge((key, attrs, source, target) => {
+        if (!edgeVisible(key, attrs, [source, target])) return;
+        if (!visibleNodeKeys.has(source) || !visibleNodeKeys.has(target)) return;
+        edges.push({ key, source, target, attributes: { ...attrs } });
+      });
+      return {
+        viewMode: uiState.viewMode,
+        filters: {
+          minEdgeWeight: uiState.minEdgeWeight,
+          edgeOpacity: uiState.edgeOpacity,
+          crossPartyOnly: uiState.crossPartyOnly,
+          parties: [...uiState.partyFilter],
+          chambers: [...uiState.chamberFilter],
+          states: [...uiState.stateFilter],
+          minCentrality: uiState.minCentrality,
+          hideIsolated: uiState.hideIsolated,
+          nodeSizeScale: uiState.nodeSizeScale,
+          edgeSizeScale: uiState.edgeSizeScale,
+        },
+        ego: uiState.viewMode === "ego" ? { center: uiState.egoCenter, hops: uiState.egoHops } : null,
+        graph: { nodes, edges },
+        exportedAt: new Date().toISOString(),
+      };
+    }
+
+    function exportFilteredJson() {
+      const data = collectFilteredGraph();
+      const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
+      const url = URL.createObjectURL(blob);
+      const anchor = document.createElement("a");
+      anchor.href = url;
+      anchor.download = `network-filtered-${uiState.viewMode}.json`;
+      anchor.click();
+      URL.revokeObjectURL(url);
+    }
+
+    function updateViewHint() {
+      document.getElementById("viewHint").textContent = VIEW_HINTS[uiState.viewMode] || "";
+    }
+
+    function switchView(mode) {
+      if (!viewPanels[mode]) return;
+      const prevMode = uiState.viewMode;
+      uiState.viewMode = mode;
+      document.querySelectorAll("#viewTabs button").forEach((button) => {
+        const active = button.dataset.view === mode;
+        button.classList.toggle("active", active);
+        button.setAttribute("aria-selected", active ? "true" : "false");
+      });
+
+      const uniquePanels = new Set(Object.values(viewPanels));
+      uniquePanels.forEach((panel) => panel.classList.remove("active"));
+      viewPanels[mode].classList.add("active");
+
+      if (prevMode === "ego" && mode !== "ego") {
+        applyLayout("server");
+      }
+
+      if (mode === "ego") {
+        setSettingsOpen(true);
+        const egoSection = document.getElementById("egoControls");
+        if (egoSection) egoSection.open = true;
+        hoveredNode = null;
+        uiState.pinnedNode = null;
+        uiState.pinnedEdge = null;
+        if (!uiState.egoCenter || !graph.hasNode(uiState.egoCenter)) {
+          const fallback = activeMemberForEgo();
+          if (fallback && graph.hasNode(fallback)) {
+            uiState.egoCenter = fallback;
+          } else {
+            pickDefaultEgoCenter();
+          }
+        }
+        const select = document.getElementById("egoCenter");
+        if (select && uiState.egoCenter) select.value = uiState.egoCenter;
+        recomputeEgoNeighborhood();
+        applyEgoLayout();
+        if (uiState.egoCenter && graph.hasNode(uiState.egoCenter)) {
+          selection.innerHTML = describeNode(uiState.egoCenter);
+          syncSelectionDock();
+        }
+        updateEgoHud();
+      }
+
+      syncViewSettings(mode);
+
+      updateViewHint();
+      refreshGraph();
+
+      if (isGraphView(mode) && mode !== "ego") {
+        requestAnimationFrame(() => fitGraph());
+      }
+    }
+
+    function filteredRankedEdges() {
+      return rankedEdges.filter((edge) => {
+        const sourceParty = graph.hasNode(edge.source) ? (graph.getNodeAttributes(edge.source).party || "Unknown") : "Unknown";
+        const targetParty = graph.hasNode(edge.target) ? (graph.getNodeAttributes(edge.target).party || "Unknown") : "Unknown";
+        if (!uiState.partyFilter.has(sourceParty) || !uiState.partyFilter.has(targetParty)) return false;
+        if ((edge.weight || 0) < uiState.minEdgeWeight) return false;
+        if (uiState.crossPartyOnly && !(edge.crossPartyWeight || 0)) return false;
+        return true;
+      });
+    }
+
+    function filteredMembers() {
+      return membersView
+        .filter((member) => uiState.partyFilter.has(member.party || "Unknown"))
+        .filter((member) => {
+          if (!graph.hasNode(member.id)) return true;
+          const attrs = graph.getNodeAttributes(member.id);
+          if (!uiState.chamberFilter.has(chamberKey(attrs))) return false;
+          const state = attrs.state || member.state || "";
+          if (uiState.stateFilter.size > 0 && state && !uiState.stateFilter.has(state)) return false;
+          if (uiState.minCentrality > 0 && (member.centrality || 0) < uiState.minCentrality) return false;
+          if (uiState.hideIsolated && (member.totalDegree || 0) === 0) return false;
+          return true;
+        })
+        .sort((a, b) => {
+          const { key, dir } = uiState.membersSort;
+          const av = a[key] ?? 0;
+          const bv = b[key] ?? 0;
+          if (typeof av === "string") {
+            return dir === "asc"
+              ? String(av).localeCompare(String(bv))
+              : String(bv).localeCompare(String(av));
+          }
+          return dir === "asc" ? av - bv : bv - av;
+        });
+    }
+
+    const MEMBER_COLUMNS = [
+      { key: "label", label: "Member" },
+      { key: "party", label: "Party" },
+      { key: "state", label: "State" },
+      { key: "inDegree", label: "In" },
+      { key: "outDegree", label: "Out" },
+      { key: "totalDegree", label: "Total" },
+      { key: "centrality", label: "Centrality" },
+    ];
+
+    function renderRankedTable() {
+      const rows = filteredRankedEdges();
+      document.getElementById("rankedMeta").textContent =
+        `${rows.length} of ${rankedEdges.length} ranked edges match current filters.`;
+      document.getElementById("rankedTableContainer").innerHTML = rows.length ? `
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Source</th>
+              <th>Target</th>
+              <th>Weight</th>
+              <th>Cross-party</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${rows.map((edge, index) => `
+              <tr data-edge-key="${escapeHtml(edge.edgeKey || "")}" data-edge-source="${escapeHtml(edge.source || "")}" data-edge-target="${escapeHtml(edge.target || "")}">
+                <td>${index + 1}</td>
+                <td title="${escapeHtml(edge.source)}">${escapeHtml(edge.sourceLabel || edge.source)}</td>
+                <td title="${escapeHtml(edge.target)}">${escapeHtml(edge.targetLabel || edge.target)}</td>
+                <td>${edge.weight}</td>
+                <td>${edge.crossPartyWeight ? `<span class="cross-party-badge">${edge.crossPartyWeight}</span>` : "—"}</td>
+              </tr>
+            `).join("")}
+          </tbody>
+        </table>` : `<div class="muted">No edges match the current filters.</div>`;
+
+      document.getElementById("rankedTableContainer").querySelectorAll("tbody tr").forEach((row) => {
+        row.addEventListener("click", () => {
+          const edgeKey = relationshipEdgeKey({
+            edgeKey: row.dataset.edgeKey,
+            source: row.dataset.edgeSource,
+            target: row.dataset.edgeTarget,
+          }) || row.dataset.edgeKey;
+          if (edgeKey && graph.hasEdge(edgeKey)) {
+            switchView("graph");
+            focusEdge(edgeKey);
+          }
+        });
+      });
+    }
+
+    function renderMembersTable() {
+      const rows = filteredMembers();
+      const sort = uiState.membersSort;
+      document.getElementById("membersMeta").textContent =
+        `${rows.length} of ${membersView.length} members · click a row for ego view`;
+      document.getElementById("membersTableContainer").innerHTML = rows.length ? `
+        <table class="data-table">
+          <thead>
+            <tr>
+              ${MEMBER_COLUMNS.map((col) => `
+                <th data-sort-key="${col.key}" class="${sort.key === col.key ? (sort.dir === "asc" ? "sorted-asc" : "sorted-desc") : ""}">${col.label}</th>
+              `).join("")}
+            </tr>
+          </thead>
+          <tbody>
+            ${rows.map((member) => `
+              <tr data-member-id="${escapeHtml(member.id)}">
+                <td title="${escapeHtml(member.id)}">${escapeHtml(member.label)}</td>
+                <td>${escapeHtml(member.party)}</td>
+                <td>${escapeHtml(member.state || "—")}</td>
+                <td>${member.inDegree}</td>
+                <td>${member.outDegree}</td>
+                <td>${member.totalDegree}</td>
+                <td>${(member.centrality || 0).toFixed(2)}</td>
+              </tr>
+            `).join("")}
+          </tbody>
+        </table>` : `<div class="muted" style="padding:1rem;">No members match the current filters.</div>`;
+
+      document.getElementById("membersTableContainer").querySelectorAll("th[data-sort-key]").forEach((header) => {
+        header.addEventListener("click", () => {
+          const key = header.dataset.sortKey;
+          if (uiState.membersSort.key === key) {
+            uiState.membersSort.dir = uiState.membersSort.dir === "asc" ? "desc" : "asc";
+          } else {
+            uiState.membersSort = { key, dir: key === "label" || key === "party" || key === "state" ? "asc" : "desc" };
+          }
+          renderMembersTable();
+        });
+      });
+
+      document.getElementById("membersTableContainer").querySelectorAll("tbody tr").forEach((row) => {
+        row.addEventListener("click", () => {
+          const memberId = row.dataset.memberId;
+          if (!memberId || !graph.hasNode(memberId)) return;
+          openEgoForMember(memberId);
+        });
+      });
+    }
+
+    const matrixCanvas = document.getElementById("matrixCanvas");
+    const matrixCtx = matrixCanvas.getContext("2d");
+    let matrixHover = null;
+
+    function resizeMatrixCanvas() {
+      const rect = matrixCanvas.parentElement.getBoundingClientRect();
+      const dpr = window.devicePixelRatio || 1;
+      matrixCanvas.width = Math.max(1, Math.floor(rect.width * dpr));
+      matrixCanvas.height = Math.max(1, Math.floor(rect.height * dpr));
+      matrixCanvas.style.width = `${rect.width}px`;
+      matrixCanvas.style.height = `${rect.height}px`;
+      matrixCtx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    }
+
+    function drawMatrix() {
+      resizeMatrixCanvas();
+      const rows = matrixView.rows || [];
+      const cells = matrixView.cells || [];
+      const size = rows.length;
+      const width = matrixCanvas.clientWidth;
+      const height = matrixCanvas.clientHeight;
+      const margin = { top: 48, left: 120, right: 24, bottom: 24 };
+      const plotW = Math.max(width - margin.left - margin.right, 1);
+      const plotH = Math.max(height - margin.top - margin.bottom, 1);
+      const cellW = size ? plotW / size : plotW;
+      const cellH = size ? plotH / size : plotH;
+
+      matrixCtx.fillStyle = "#0f172a";
+      matrixCtx.fillRect(0, 0, width, height);
+
+      if (!size) {
+        matrixCtx.fillStyle = "#94a3b8";
+        matrixCtx.font = "14px Inter, Segoe UI, sans-serif";
+        matrixCtx.fillText("No matrix data for this slice.", margin.left, margin.top);
+        return;
+      }
+
+      const filteredCells = cells.filter((cell) => {
+        const sourceParty = graph.hasNode(cell.row) ? (graph.getNodeAttributes(cell.row).party || "Unknown") : "Unknown";
+        const targetParty = graph.hasNode(cell.column) ? (graph.getNodeAttributes(cell.column).party || "Unknown") : "Unknown";
+        if (!uiState.partyFilter.has(sourceParty) || !uiState.partyFilter.has(targetParty)) return false;
+        if ((cell.weight || 0) < uiState.minEdgeWeight) return false;
+        if (uiState.crossPartyOnly && !(cell.crossPartyWeight || 0)) return false;
+        return true;
+      });
+
+      const maxWeight = Math.max(...filteredCells.map((c) => c.weight || 0), 1);
+
+      filteredCells.forEach((cell) => {
+        const x = margin.left + cell.columnIndex * cellW;
+        const y = margin.top + cell.rowIndex * cellH;
+        const intensity = (cell.weight || 0) / maxWeight;
+        const crossParty = (cell.crossPartyWeight || 0) > 0;
+        matrixCtx.fillStyle = crossParty
+          ? `rgba(192, 132, 252, ${0.15 + intensity * 0.75})`
+          : `rgba(100, 116, 139, ${0.12 + intensity * 0.65})`;
+        matrixCtx.fillRect(x + 0.5, y + 0.5, Math.max(cellW - 1, 1), Math.max(cellH - 1, 1));
+      });
+
+      matrixCtx.strokeStyle = "rgba(148, 163, 184, 0.12)";
+      for (let i = 0; i <= size; i += 1) {
+        matrixCtx.beginPath();
+        matrixCtx.moveTo(margin.left + i * cellW, margin.top);
+        matrixCtx.lineTo(margin.left + i * cellW, margin.top + plotH);
+        matrixCtx.stroke();
+        matrixCtx.beginPath();
+        matrixCtx.moveTo(margin.left, margin.top + i * cellH);
+        matrixCtx.lineTo(margin.left + plotW, margin.top + i * cellH);
+        matrixCtx.stroke();
+      }
+
+      matrixCtx.fillStyle = "#cbd5e1";
+      matrixCtx.font = "11px Inter, Segoe UI, sans-serif";
+      rows.forEach((rowKey, index) => {
+        const label = (matrixView.labels && matrixView.labels[rowKey]) || rowKey;
+        const short = label.length > 16 ? `${label.slice(0, 15)}…` : label;
+        matrixCtx.fillText(short, 8, margin.top + index * cellH + cellH / 2 + 4);
+      });
+
+      matrixCtx.fillStyle = "#94a3b8";
+      matrixCtx.font = "12px Inter, Segoe UI, sans-serif";
+      let meta = `${filteredCells.length} cells · ${size}×${size}`;
+      if (matrixView.truncated) meta += ` (truncated from ${matrixView.totalNodes})`;
+      matrixCtx.fillText(meta, margin.left, 20);
+
+      if (matrixHover) {
+        const { cell } = matrixHover;
+        const rowLabel = (matrixView.labels && matrixView.labels[cell.row]) || cell.row;
+        const colLabel = (matrixView.labels && matrixView.labels[cell.column]) || cell.column;
+        selection.innerHTML = `<strong>${rowLabel} → ${colLabel}</strong><br>
+          Weight: ${cell.weight} · Cross-party: ${cell.crossPartyWeight || 0}`;
+      }
+    }
+
+    matrixCanvas.addEventListener("mousemove", (event) => {
+      if (uiState.viewMode !== "matrix") return;
+      const rows = matrixView.rows || [];
+      const size = rows.length;
+      if (!size) return;
+      const rect = matrixCanvas.getBoundingClientRect();
+      const margin = { top: 48, left: 120, right: 24, bottom: 24 };
+      const plotW = Math.max(rect.width - margin.left - margin.right, 1);
+      const plotH = Math.max(rect.height - margin.top - margin.bottom, 1);
+      const cellW = plotW / size;
+      const cellH = plotH / size;
+      const x = event.clientX - rect.left - margin.left;
+      const y = event.clientY - rect.top - margin.top;
+      if (x < 0 || y < 0 || x >= plotW || y >= plotH) {
+        matrixHover = null;
+        return;
+      }
+      const col = Math.floor(x / cellW);
+      const row = Math.floor(y / cellH);
+      const rowKey = rows[row];
+      const colKey = rows[col];
+      const match = (matrixView.cells || []).find((cell) =>
+        cell.rowIndex === row && cell.columnIndex === col
+        && edgePassesFilters("tmp", { weight: cell.weight, crossPartyWeight: cell.crossPartyWeight }, [cell.row, cell.column])
+      );
+      matrixHover = match ? { cell: match, rowKey, colKey } : null;
+      drawMatrix();
+    });
+
+    matrixCanvas.addEventListener("mouseleave", () => {
+      matrixHover = null;
+    });
+
+    function populateEgoCenterSelect() {
+      const select = document.getElementById("egoCenter");
+      const sorted = [...membersView].sort((a, b) => {
+        const degreeDelta = (b.totalDegree || 0) - (a.totalDegree || 0);
+        return degreeDelta !== 0 ? degreeDelta : String(a.label).localeCompare(String(b.label));
+      });
+      egoCenterOptionsCache = sorted.map((member) => ({
+        id: member.id,
+        label: `${member.label} (${member.party}) · ${member.totalDegree || 0} ties`,
+        searchText: `${member.label} ${member.party} ${member.state || ""}`.toLowerCase(),
+      }));
+      filterEgoCenterOptions(document.getElementById("egoCenterSearch")?.value || "");
+      if (!uiState.egoCenter || !sorted.some((member) => member.id === uiState.egoCenter)) {
+        pickDefaultEgoCenter();
+      } else if (select) {
+        select.value = uiState.egoCenter;
+      }
+    }
+
+    const warningsPanel = document.getElementById("warnings");
+    const warningLines = [];
+    if (Array.isArray(assessment.warnings)) warningLines.push(...assessment.warnings);
+    if (Array.isArray(assessment.recommended_actions)) warningLines.push(...assessment.recommended_actions);
+    if (graphPayload.limits && graphPayload.limits.was_truncated) {
+      warningLines.unshift(`Truncated to ${graphPayload.limits.shown_edges} of ${graphPayload.limits.edge_count_before_limit} edges.`);
+    }
+    warningsPanel.className = warningLines.length ? "panel-note warn" : "panel-note muted";
+    warningsPanel.innerHTML = warningLines.length
+      ? warningLines.map((line) => `<div>• ${line}</div>`).join("")
+      : "No density warnings for this slice.";
+
+    const relationshipsPanel = document.getElementById("relationships");
+    if (topRelationships.length && (assessment.recommended_view === "matrix" || graphPayload.edges.length >= 750)) {
+      relationshipsPanel.hidden = false;
+      relationshipsPanel.innerHTML = `
+        <strong>Top relationships</strong>
+        <div class="muted" style="margin: 0.35rem 0 0.5rem">Click a row to focus that tie in the graph.</div>
+        <table>
+          <thead><tr><th>Source</th><th>Target</th><th>Wt</th></tr></thead>
+          <tbody>
+            ${topRelationships.map((edge, index) => `
+              <tr data-edge-index="${index}">
+                <td title="${edge.source}">${edge.sourceLabel || edge.source}</td>
+                <td title="${edge.target}">${edge.targetLabel || edge.target}</td>
+                <td>${edge.weight}</td>
+              </tr>
+            `).join("")}
+          </tbody>
+        </table>`;
+      relationshipsPanel.querySelectorAll("tbody tr").forEach((row) => {
+        row.addEventListener("click", () => {
+          relationshipsPanel.querySelectorAll("tbody tr").forEach((other) => other.classList.remove("active"));
+          row.classList.add("active");
+          const edge = topRelationships[Number(row.dataset.edgeIndex)];
+          const edgeKey = relationshipEdgeKey(edge);
+          if (edgeKey) {
+            switchView("graph");
+            focusEdge(edgeKey);
+          }
+        });
+      });
+    }
+
+    const partyFilters = document.getElementById("partyFilters");
+    availableParties.forEach((party) => {
+      const label = document.createElement("label");
+      label.innerHTML = `<input type="checkbox" value="${party}" checked /> ${party}`;
+      partyFilters.appendChild(label);
+      label.querySelector("input").addEventListener("change", (event) => {
+        if (event.target.checked) uiState.partyFilter.add(party);
+        else uiState.partyFilter.delete(party);
+        refreshGraph();
+      });
+    });
+
+    const stateFilters = document.getElementById("stateFilters");
+    availableStates.forEach((state) => {
+      const label = document.createElement("label");
+      label.innerHTML = `<input type="checkbox" value="${state}" checked /> ${state}`;
+      stateFilters.appendChild(label);
+      label.querySelector("input").addEventListener("change", (event) => {
+        if (event.target.checked) uiState.stateFilter.add(state);
+        else uiState.stateFilter.delete(state);
+        refreshGraph();
+      });
+    });
+
+    document.querySelectorAll("#chamberFilters input").forEach((input) => {
+      input.addEventListener("change", (event) => {
+        const value = event.target.value;
+        if (event.target.checked) uiState.chamberFilter.add(value);
+        else uiState.chamberFilter.delete(value);
+        refreshGraph();
+      });
+    });
+
+    const minEdgeWeightInput = document.getElementById("minEdgeWeight");
+    const minEdgeWeightValue = document.getElementById("minEdgeWeightValue");
+    minEdgeWeightInput.max = String(maxEdgeWeight);
+    minEdgeWeightInput.value = String(uiState.minEdgeWeight);
+    minEdgeWeightValue.textContent = String(uiState.minEdgeWeight);
+    minEdgeWeightInput.addEventListener("input", (event) => {
+      uiState.minEdgeWeight = Number(event.target.value);
+      minEdgeWeightValue.textContent = String(uiState.minEdgeWeight);
+      refreshGraph();
+    });
+
+    const edgeOpacityInput = document.getElementById("edgeOpacity");
+    const edgeOpacityValue = document.getElementById("edgeOpacityValue");
+    edgeOpacityInput.value = String(defaultEdgeOpacity);
+    edgeOpacityValue.textContent = Number(defaultEdgeOpacity).toFixed(2);
+    edgeOpacityInput.addEventListener("input", (event) => {
+      uiState.edgeOpacity = Number(event.target.value);
+      edgeOpacityValue.textContent = uiState.edgeOpacity.toFixed(2);
+      refreshGraph();
+    });
+
+    document.getElementById("showLabels").checked = uiState.showLabels;
+    document.getElementById("hideIsolated").addEventListener("change", (event) => {
+      uiState.hideIsolated = event.target.checked;
+      refreshGraph();
+    });
+
+    const minCentralityInput = document.getElementById("minCentrality");
+    const minCentralityValue = document.getElementById("minCentralityValue");
+    minCentralityInput.addEventListener("input", (event) => {
+      uiState.minCentrality = Number(event.target.value);
+      minCentralityValue.textContent = uiState.minCentrality.toFixed(2);
+      refreshGraph();
+    });
+
+    const nodeSizeScaleInput = document.getElementById("nodeSizeScale");
+    const nodeSizeScaleValue = document.getElementById("nodeSizeScaleValue");
+    nodeSizeScaleInput.addEventListener("input", (event) => {
+      uiState.nodeSizeScale = Number(event.target.value);
+      nodeSizeScaleValue.textContent = `${uiState.nodeSizeScale.toFixed(2)}×`;
+      refreshGraph();
+    });
+
+    const edgeSizeScaleInput = document.getElementById("edgeSizeScale");
+    const edgeSizeScaleValue = document.getElementById("edgeSizeScaleValue");
+    edgeSizeScaleInput.addEventListener("input", (event) => {
+      uiState.edgeSizeScale = Number(event.target.value);
+      edgeSizeScaleValue.textContent = `${uiState.edgeSizeScale.toFixed(2)}×`;
+      refreshGraph();
+    });
+
+    document.getElementById("toggleSettings").addEventListener("click", () => {
+      setSettingsOpen(!uiState.settingsOpen);
+    });
+    document.getElementById("collapseSettings").addEventListener("click", () => {
+      setSettingsOpen(false);
+    });
+    document.getElementById("focusMode").addEventListener("click", () => {
+      setFocusMode(!uiState.focusMode);
+    });
+
+    (function initSettingsResize() {
+      const panel = document.getElementById("settingsPanel");
+      const resizer = document.getElementById("settingsResizer");
+      let dragging = false;
+      resizer.addEventListener("mousedown", (event) => {
+        dragging = true;
+        event.preventDefault();
+      });
+      window.addEventListener("mousemove", (event) => {
+        if (!dragging) return;
+        const width = Math.min(520, Math.max(260, window.innerWidth - event.clientX));
+        document.documentElement.style.setProperty("--sidebar-w", `${width}px`);
+      });
+      window.addEventListener("mouseup", () => { dragging = false; });
+    })();
+
+    document.getElementById("showLabels").addEventListener("change", (event) => {
+      uiState.showLabels = event.target.checked;
+      refreshGraph();
+    });
+
+    document.getElementById("crossPartyOnly").addEventListener("change", (event) => {
+      uiState.crossPartyOnly = event.target.checked;
+      refreshGraph();
+    });
+
+    const neighborHighlightInput = document.getElementById("neighborHighlight");
+    neighborHighlightInput.checked = uiState.neighborHighlight;
+    neighborHighlightInput.addEventListener("change", (event) => {
+      uiState.neighborHighlight = event.target.checked;
+      if (!uiState.neighborHighlight) hoveredNode = null;
+      refreshGraph();
+    });
+
+    renderer.on("enterNode", ({ node, event }) => {
+      if (uiState.viewMode !== "graph" && uiState.viewMode !== "ego") return;
+      if (uiState.neighborHighlight && !uiState.pinnedNode) {
+        hoveredNode = node;
+        refreshGraph();
+      }
+      tooltip.style.display = "block";
+      tooltip.style.left = `${event.x + 12}px`;
+      tooltip.style.top = `${event.y + 12}px`;
+      tooltip.innerHTML = describeNode(node);
+      selection.innerHTML = describeNode(node);
+      syncSelectionDock();
+    });
+
+    renderer.on("leaveNode", () => {
+      if (uiState.viewMode !== "graph" && uiState.viewMode !== "ego") return;
+      if (uiState.neighborHighlight && !uiState.pinnedNode) {
+        hoveredNode = null;
+        refreshGraph();
+      }
+      tooltip.style.display = "none";
+    });
+
+    renderer.on("clickNode", ({ node }) => {
+      if (uiState.viewMode === "ego") {
+        setEgoCenter(node);
+        return;
+      }
+      if (uiState.viewMode !== "graph") return;
+      focusNode(node, { zoom: 0.35, pin: true });
+    });
+
+    renderer.on("doubleClickNode", ({ node }) => {
+      if (uiState.viewMode === "graph" || uiState.viewMode === "ego") {
+        openEgoForMember(node);
+      }
+    });
+
+    renderer.on("clickEdge", ({ edge }) => {
+      if (uiState.viewMode !== "graph" && uiState.viewMode !== "ego") return;
+      focusEdge(edge);
+    });
+
+    document.getElementById("colorMode").value = colorMode;
+    document.getElementById("colorMode").addEventListener("change", (event) => {
+      colorMode = event.target.value;
+      renderLegend();
+      refreshGraph();
+    });
+
+    document.getElementById("resetView").addEventListener("click", () => {
+      clearFocus();
+      if (!isGraphView()) switchView("graph");
+      renderer.getCamera().animate({ x: 0.5, y: 0.5, ratio: 1 }, { duration: 400 });
+    });
+
+    document.getElementById("fitGraph").addEventListener("click", () => {
+      if (!isGraphView()) switchView("graph");
+      fitGraph();
+    });
+    document.getElementById("clearFocus").addEventListener("click", clearFocus);
+
+    document.querySelectorAll("#viewTabs button").forEach((button) => {
+      button.addEventListener("click", () => switchView(button.dataset.view));
+    });
+
+    document.getElementById("layoutMode").value = uiState.layoutMode;
+    document.getElementById("applyLayout").addEventListener("click", () => {
+      applyLayout(document.getElementById("layoutMode").value);
+    });
+    document.getElementById("layoutMode").addEventListener("change", (event) => {
+      applyLayout(event.target.value);
+    });
+
+    document.querySelectorAll(".preset-row button").forEach((button) => {
+      button.addEventListener("click", () => applyFilterPreset(button.dataset.preset));
+    });
+
+    document.getElementById("exportJson").addEventListener("click", exportFilteredJson);
+
+    document.getElementById("egoCenter").addEventListener("change", (event) => {
+      setEgoCenter(event.target.value);
+    });
+
+    document.getElementById("egoCenterSearch")?.addEventListener("input", (event) => {
+      filterEgoCenterOptions(event.target.value);
+    });
+
+    document.querySelectorAll("#egoHopChips button").forEach((button) => {
+      button.addEventListener("click", () => setEgoHops(Number(button.dataset.hops)));
+    });
+
+    document.getElementById("viewEgoBtn").addEventListener("click", () => {
+      const memberId = activeMemberForEgo();
+      if (memberId) openEgoForMember(memberId);
+    });
+
+    document.getElementById("selectionViewEgo").addEventListener("click", () => {
+      const memberId = uiState.pinnedNode || hoveredNode;
+      if (memberId) openEgoForMember(memberId);
+    });
+
+    document.getElementById("useFocusedMember").addEventListener("click", () => {
+      const focused = uiState.pinnedNode || hoveredNode;
+      if (focused && graph.hasNode(focused)) {
+        setEgoCenter(focused);
+      }
+    });
+
+    const egoHopsInput = document.getElementById("egoHops");
+    const egoHopsValue = document.getElementById("egoHopsValue");
+    egoHopsInput.addEventListener("input", (event) => {
+      setEgoHops(Number(event.target.value));
+    });
+
+    const searchInput = document.getElementById("search");
+    const searchResults = document.getElementById("searchResults");
+
+    function renderSearchResults(query) {
+      if (!query) {
+        searchResults.hidden = true;
+        searchResults.innerHTML = "";
+        return;
+      }
+      const matches = [];
+      graph.forEachNode((key, attrs) => {
+        if (matches.length >= 8) return;
+        if (key.toLowerCase().includes(query) || nodeDisplayLabel(attrs, key).toLowerCase().includes(query)) {
+          matches.push({ key, label: nodeDisplayLabel(attrs, key), party: attrs.party || "?" });
+        }
+      });
+      if (!matches.length) {
+        searchResults.hidden = false;
+        searchResults.innerHTML = `<div class="muted">No members match "${query}".</div>`;
+        return;
+      }
+      searchResults.hidden = false;
+      searchResults.innerHTML = matches.map((match) => `
+        <div class="result-row">
+          <button type="button" data-node="${match.key}">
+            ${escapeHtml(match.label)} <span class="muted">(${escapeHtml(match.party)})</span>
+          </button>
+          <button type="button" class="result-ego" data-node-ego="${match.key}" title="View ego network">Ego</button>
+        </div>
+      `).join("");
+      searchResults.querySelectorAll("button[data-node]").forEach((button) => {
+        button.addEventListener("click", () => {
+          if (uiState.viewMode !== "graph" && uiState.viewMode !== "ego") switchView("graph");
+          focusNode(button.dataset.node, { zoom: 0.3, pin: true });
+          searchResults.hidden = true;
+        });
+      });
+      searchResults.querySelectorAll("button[data-node-ego]").forEach((button) => {
+        button.addEventListener("click", () => {
+          openEgoForMember(button.dataset.nodeEgo);
+          searchResults.hidden = true;
+          searchInput.blur();
+        });
+      });
+    }
+
+    searchInput.addEventListener("input", (event) => {
+      renderSearchResults(event.target.value.trim().toLowerCase());
+    });
+
+    searchInput.addEventListener("keydown", (event) => {
+      if (event.key !== "Enter") return;
+      const firstMatch = searchResults.querySelector("button[data-node]");
+      if (firstMatch) {
+        if (uiState.viewMode !== "graph" && uiState.viewMode !== "ego") switchView("graph");
+        focusNode(firstMatch.dataset.node, { zoom: 0.3, pin: true });
+      }
+    });
+
+    const VIEW_KEYS = { 1: "graph", 2: "matrix", 3: "ranked", 4: "ego", 5: "members" };
+
+    document.addEventListener("keydown", (event) => {
+      const tag = (event.target && event.target.tagName) || "";
+      const typing = tag === "INPUT" || tag === "TEXTAREA" || tag === "SELECT" || event.target.isContentEditable;
+
+      if (event.key === "/" && !typing) {
+        event.preventDefault();
+        searchInput.focus();
+        searchInput.select();
+        return;
+      }
+      if (typing && event.key !== "Escape") return;
+
+      if (event.key === "f" && !typing) {
+        event.preventDefault();
+        if (!isGraphView()) switchView("graph");
+        fitGraph();
+      } else if (event.key === "e" && !typing) {
+        event.preventDefault();
+        const memberId = activeMemberForEgo();
+        if (memberId) openEgoForMember(memberId);
+      } else if (event.key === "s" && !typing) {
+        event.preventDefault();
+        setSettingsOpen(!uiState.settingsOpen);
+      } else if (event.key === "." && !typing) {
+        event.preventDefault();
+        setFocusMode(!uiState.focusMode);
+      } else if (event.key === "Escape") {
+        clearFocus();
+        if (document.activeElement === searchInput) searchInput.blur();
+      } else if (VIEW_KEYS[event.key]) {
+        event.preventDefault();
+        switchView(VIEW_KEYS[event.key]);
+      }
+    });
+
+    window.addEventListener("resize", () => {
+      if (uiState.viewMode === "matrix") scheduleAlternateViewRender();
+      else if (isGraphView()) renderer.resize();
+    });
+
+    populateEgoCenterSelect();
+    syncSettingsChrome();
+    syncViewSettings();
+    syncGraphPanelVisibility();
+    syncSelectionDock();
+    updateViewHint();
+    renderLegend();
+    renderLayoutHint();
+    recomputeEgoNeighborhood();
+    updateMeta();
+    fitGraph();
+  </script>
+</body>
+</html>

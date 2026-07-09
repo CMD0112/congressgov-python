@@ -1,0 +1,1264 @@
+# Codegen annotation overlay (20 codegen entities: pilot, tier-2/3/4/5, tier-3b, communications).
+# Merged onto congressgov_openapi_base.yaml via: poetry run merge-openapi-spec
+# Do not use this file directly with generate-all — use openapi_spec.yaml (merged output).
+
+openapi: 3.0.3
+info:
+  title: Congress.gov API
+  description: API for accessing Congressional data from Congress.gov
+  version: 3.0.0
+  contact:
+    name: Congress.gov API Support
+    url: https://api.congress.gov/
+    email: api-support@congress.gov
+
+servers:
+- url: https://api.congress.gov/v3
+  description: Production server
+
+security:
+- ApiKey: []
+
+paths:
+  # === BILL ENDPOINTS ===
+  /bill:
+    get:
+      x-entity-name: Bill
+      x-endpoint-role: list
+      x-api-function: bill_list_all_sync
+      x-model-config:
+        base-class: Model
+        collection-class: Bills
+        items-field: bills
+        module-path: congressgov.models.entities.bill
+        service-path: congressgov.services.bill
+        extension-path: congressgov.services.extensions.bill
+      x-parameter-mappings:
+        offset: offset
+        limit: limit
+        from_date_time: [ "from_date_time", "fromDateTime" ]
+        to_date_time: [ "to_date_time", "toDateTime" ]
+
+  /bill/{congress}/{billType}/{billNumber}:
+    get:
+      summary: Get bill details
+      description: Returns detailed information for a specified bill
+      operationId: getBillDetails
+      parameters:
+      - name: congress
+        in: path
+        required: true
+        schema:
+          type: integer
+          minimum: 102
+          maximum: 118
+        description: The number of the Congress
+        example: 118
+      - name: billType
+        in: path
+        required: true
+        schema:
+          type: string
+          enum: [ hr, s, hjres, sjres, hconres, sconres, hres, sres ]
+        description: The type of bill
+        example: hr
+      - name: billNumber
+        in: path
+        required: true
+        schema:
+          type: integer
+          minimum: 1
+        description: The bill number
+        example: 1
+      - name: format
+        in: query
+        required: false
+        schema:
+          type: string
+          enum: [ json, xml ]
+          default: json
+        description: Response format
+      responses:
+        '200':
+          description: Bill details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BillResponse'
+
+      # === CUSTOM ANNOTATIONS ===
+      x-entity-name: Bill
+      x-endpoint-role: primary
+      x-api-function: bill_details_sync
+      x-model-config:
+        base-class: Model
+        collection-class: Bills
+        items-field: bills
+        module-path: congressgov.models.entities.bill
+        service-path: congressgov.services.bill
+        extension-path: congressgov.services.extensions.bill
+
+      x-expansion-mappings:
+        actions:
+          endpoint: /bill/{congress}/{billType}/{billNumber}/actions
+          api-function: bill_actions_sync
+          model: Actions
+          description: "Get actions taken on this bill"
+        amendments:
+          endpoint: /bill/{congress}/{billType}/{billNumber}/amendments
+          api-function: bill_amendments_sync
+          model: Amendments
+          description: "Get amendments to this bill"
+        committees:
+          endpoint: /bill/{congress}/{billType}/{billNumber}/committees
+          api-function: bill_committees_sync
+          model: Committees
+          description: "Get committees associated with this bill"
+        cosponsors:
+          endpoint: /bill/{congress}/{billType}/{billNumber}/cosponsors
+          api-function: bill_cosponsors_sync
+          model: Cosponsors
+          description: "Get cosponsors of this bill"
+        relatedBills:
+          endpoint: /bill/{congress}/{billType}/{billNumber}/relatedbills
+          api-function: bill_relatedbills_sync
+          model: Bills
+          description: "Get bills related to this bill"
+        subjects:
+          endpoint: /bill/{congress}/{billType}/{billNumber}/subjects
+          api-function: bill_subjects_sync
+          model: Subject
+          description: "Get subjects associated with this bill"
+        summaries:
+          endpoint: /bill/{congress}/{billType}/{billNumber}/summaries
+          api-function: bill_summaries_sync
+          model: Summaries
+          description: "Get summaries of this bill"
+        textVersions:
+          endpoint: /bill/{congress}/{billType}/{billNumber}/text
+          api-function: bill_text_sync
+          model: TextVersions
+          description: "Get text versions of this bill"
+        titles:
+          endpoint: /bill/{congress}/{billType}/{billNumber}/titles
+          api-function: bill_titles_sync
+          model: Titles
+          description: "Get titles of this bill"
+
+      x-field-mappings:
+        type:
+          enum: LegislationType
+          shorthand: true
+          variations: [ "hr", "s", "hjres", "sjres", "hconres", "sconres", "hres", "sres" ]
+          description: "Bill type with shorthand support"
+        originChamber:
+          enum: Chamber
+          shorthand: true
+          variations: [ "house", "h", "senate", "s" ]
+          description: "Chamber of origin with shorthand support"
+
+      x-parameter-mappings:
+        congress: congress
+        bill_type: [ "bill_type", "type", "billType" ]
+        bill_number: [ "bill_number", "number", "billNumber" ]
+
+      x-extension-methods:
+      - name: enacted
+        filter: { isEnacted: true }
+        description: "Get bills that have been enacted into law"
+      - name: house_bills
+        filter: { originChamber: "House" }
+        description: "Get bills originating from the House"
+      - name: senate_bills
+        filter: { originChamber: "Senate" }
+        description: "Get bills originating from the Senate"
+      - name: by_type
+        param: bill_type
+        filter-field: type
+        description: "Filter bills by type (hr, s, etc.)"
+      - name: by_congress
+        param: congress
+        filter-field: congress
+        description: "Filter bills by Congress number"
+
+  /bill/{congress}/{billType}/{billNumber}/actions:
+    get:
+      summary: Get bill actions
+      description: Returns actions taken on a specified bill
+      operationId: getBillActions
+      parameters:
+      - name: congress
+        in: path
+        required: true
+        schema:
+          type: integer
+      - name: billType
+        in: path
+        required: true
+        schema:
+          type: string
+      - name: billNumber
+        in: path
+        required: true
+        schema:
+          type: integer
+      responses:
+        '200':
+          description: Bill actions
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ActionsResponse'
+
+      x-entity-name: Actions
+      x-model-config:
+        base-class: Model
+        collection-class: Actions
+        items-field: actions
+        module-path: congressgov.models.actions.action
+        service-path: congressgov.services.actions
+        extension-path: congressgov.services.extensions.actions
+
+  # === AMENDMENT ENDPOINTS ===
+  /amendment:
+    get:
+      x-entity-name: Amendment
+      x-endpoint-role: list
+      x-api-function: amendment_sync
+      x-model-config:
+        base-class: Model
+        collection-class: Amendments
+        items-field: amendments
+        module-path: congressgov.models.entities.amendment
+        service-path: congressgov.services.amendment
+        extension-path: congressgov.services.extensions.amendments
+      x-parameter-mappings:
+        offset: offset
+        limit: limit
+        from_date_time: [ "from_date_time", "fromDateTime" ]
+        to_date_time: [ "to_date_time", "toDateTime" ]
+
+  /amendment/{congress}/{amendmentType}/{amendmentNumber}:
+    get:
+      summary: Get amendment details
+      description: Returns detailed information for a specified amendment
+      operationId: getAmendmentDetails
+      parameters:
+      - name: congress
+        in: path
+        required: true
+        schema:
+          type: integer
+      - name: amendmentType
+        in: path
+        required: true
+        schema:
+          type: string
+          enum: [ hamdt, samdt ]
+      - name: amendmentNumber
+        in: path
+        required: true
+        schema:
+          type: string
+      responses:
+        '200':
+          description: Amendment details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AmendmentResponse'
+
+      x-entity-name: Amendment
+      x-endpoint-role: primary
+      x-api-function: amendment_details_sync
+      x-model-config:
+        base-class: Model
+        collection-class: Amendments
+        items-field: amendments
+        module-path: congressgov.models.entities.amendment
+        service-path: congressgov.services.amendment
+        extension-path: congressgov.services.extensions.amendments
+
+      x-expansion-mappings:
+        actions:
+          endpoint: /amendment/{congress}/{amendmentType}/{amendmentNumber}/actions
+          api-function: amendment_actions_sync
+          model: Actions
+        amendments:
+          endpoint: /amendment/{congress}/{amendmentType}/{amendmentNumber}/amendments
+          api-function: amendment_amendments_sync
+          model: Amendments
+        cosponsors:
+          endpoint: /amendment/{congress}/{amendmentType}/{amendmentNumber}/cosponsors
+          api-function: amendment_cosponsors_sync
+          model: Cosponsors
+        textVersions:
+          endpoint: /amendment/{congress}/{amendmentType}/{amendmentNumber}/text
+          api-function: amendment_text_sync
+          model: TextVersions
+
+      x-field-mappings:
+        type:
+          enum: AmendmentType
+          shorthand: true
+          variations: [ "hamdt", "samdt" ]
+
+      x-parameter-mappings:
+        congress: congress
+        amendment_type: [ "amendment_type", "type" ]
+        amendment_number: [ "amendment_number", "number" ]
+
+      x-extension-methods:
+      - name: house_amendments
+        filter: { type: "hamdt" }
+        description: "Get House amendments"
+      - name: senate_amendments
+        filter: { type: "samdt" }
+        description: "Get Senate amendments"
+
+  # === MEMBER ENDPOINTS ===
+  /member:
+    get:
+      x-entity-name: Member
+      x-endpoint-role: list
+      x-api-function: member_list_sync
+      x-model-config:
+        base-class: Model
+        collection-class: Members
+        items-field: members
+        module-path: congressgov.models.entities.member
+        service-path: congressgov.services.member
+        extension-path: congressgov.services.extensions.members
+      x-parameter-mappings:
+        offset: offset
+        limit: limit
+        from_date_time: [ "from_date_time", "fromDateTime" ]
+        to_date_time: [ "to_date_time", "toDateTime" ]
+        current_member: [ "current_member", "currentMember" ]
+
+  /member/{bioguideId}:
+    get:
+      summary: Get member details
+      description: Returns detailed information for a specified member
+      operationId: getMemberDetails
+      parameters:
+      - name: bioguideId
+        in: path
+        required: true
+        schema:
+          type: string
+        description: The bioguide ID of the member
+        example: A000374
+      responses:
+        '200':
+          description: Member details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MemberResponse'
+
+      x-entity-name: Member
+      x-endpoint-role: primary
+      x-api-function: member_details_sync
+      x-model-config:
+        base-class: Model
+        collection-class: Members
+        items-field: members
+        module-path: congressgov.models.entities.member
+        service-path: congressgov.services.member
+        extension-path: congressgov.services.extensions.members
+
+      x-field-mappings:
+        state:
+          enum: StateCode
+          shorthand: true
+        party:
+          enum: PartyCode
+          shorthand: true
+        chamber:
+          enum: Chamber
+          shorthand: true
+
+      x-parameter-mappings:
+        bioguide_id: bioguide_id
+        state: state
+        district: district
+
+      x-extension-methods:
+      - name: by_state
+        param: state
+        filter-field: state
+        description: "Filter members by state"
+      - name: by_party
+        param: party
+        filter-field: party
+        description: "Filter members by party"
+      - name: by_chamber
+        param: chamber
+        filter-field: chamber
+        description: "Filter members by chamber"
+      - name: senators
+        filter: { chamber: "Senate" }
+        description: "Get all senators"
+      - name: representatives
+        filter: { chamber: "House" }
+        description: "Get all representatives"
+
+  # === COMMITTEE ENDPOINTS (pilot) ===
+  /committee:
+    get:
+      x-entity-name: Committee
+      x-endpoint-role: list
+      x-api-function: committee_list_sync
+      x-model-config:
+        base-class: Model
+        collection-class: Committees
+        items-field: committees
+        module-path: congressgov.models.committees.committee
+        service-path: congressgov.services.committee
+        extension-path: congressgov.services.extensions.committees
+      x-parameter-mappings:
+        chamber: chamber
+        committee_code: [ "committee_code", "committeeCode" ]
+      x-field-mappings:
+        chamber:
+          enum: Chamber
+          shorthand: true
+      x-extension-methods:
+      - name: by_chamber
+        param: chamber
+        filter-field: chamber
+        description: "Filter committees by chamber"
+
+  /committee/{chamber}/{committeeCode}:
+    get:
+      x-entity-name: Committee
+      x-endpoint-role: primary
+      x-api-function: committee_details_sync
+      x-model-config:
+        base-class: Model
+        collection-class: Committees
+        items-field: committees
+        module-path: congressgov.models.committees.committee
+        service-path: congressgov.services.committee
+        extension-path: congressgov.services.extensions.committees
+      x-parameter-mappings:
+        chamber: chamber
+        committee_code: [ "committee_code", "committeeCode" ]
+      x-field-mappings:
+        chamber:
+          enum: Chamber
+          shorthand: true
+
+  # === HEARING ENDPOINTS (tier-2) ===
+  /hearing:
+    get:
+      x-entity-name: Hearing
+      x-endpoint-role: list
+      x-api-function: hearing_list_sync
+      x-model-config:
+        base-class: Model
+        collection-class: Hearings
+        items-field: hearings
+        module-path: congressgov.models.documents.hearing
+        service-path: congressgov.services.hearing
+        extension-path: congressgov.services.extensions.hearings
+      x-parameter-mappings:
+        offset: offset
+        limit: limit
+        congress: congress
+        chamber: chamber
+
+  /hearing/{congress}/{chamber}/{jacketNumber}:
+    get:
+      x-entity-name: Hearing
+      x-endpoint-role: primary
+      x-api-function: hearing_detail_sync
+      x-model-config:
+        base-class: Model
+        collection-class: Hearings
+        items-field: hearings
+        module-path: congressgov.models.documents.hearing
+        service-path: congressgov.services.hearing
+        extension-path: congressgov.services.extensions.hearings
+      x-field-mappings:
+        chamber:
+          enum: Chamber
+          shorthand: true
+      x-parameter-mappings:
+        congress: congress
+        chamber: chamber
+        jacket_number: [ "jacket_number", "jacketNumber" ]
+
+  # === NOMINATION ENDPOINTS (tier-2) ===
+  /nomination:
+    get:
+      x-entity-name: Nomination
+      x-endpoint-role: list
+      x-api-function: nomination_list_sync
+      x-model-config:
+        base-class: Model
+        collection-class: Nominations
+        items-field: nominations
+        module-path: congressgov.models.nominations.nomination
+        service-path: congressgov.services.nomination
+        extension-path: congressgov.services.extensions.nominations
+      x-parameter-mappings:
+        offset: offset
+        limit: limit
+        congress: congress
+
+  /nomination/{congress}/{nominationNumber}:
+    get:
+      x-entity-name: Nomination
+      x-endpoint-role: primary
+      x-api-function: nomination_detail_sync
+      x-model-config:
+        base-class: Model
+        collection-class: Nominations
+        items-field: nominations
+        module-path: congressgov.models.nominations.nomination
+        service-path: congressgov.services.nomination
+        extension-path: congressgov.services.extensions.nominations
+      x-expansion-mappings:
+        actions:
+          endpoint: /nomination/{congress}/{nominationNumber}/actions
+          api-function: nomination_actions_sync
+          model: Actions
+        committees:
+          endpoint: /nomination/{congress}/{nominationNumber}/committees
+          api-function: nomination_committees_sync
+          model: Committees
+        hearings:
+          endpoint: /nomination/{congress}/{nominationNumber}/hearings
+          api-function: nomination_hearings_sync
+          model: Hearings
+      x-parameter-mappings:
+        congress: congress
+        nomination_number: [ "nomination_number", "nominationNumber", "number" ]
+
+  # === TREATY ENDPOINTS (tier-2) ===
+  /treaty:
+    get:
+      x-entity-name: Treaty
+      x-endpoint-role: list
+      x-api-function: treaty_list_sync
+      x-model-config:
+        base-class: Model
+        collection-class: Treaties
+        items-field: treaties
+        module-path: congressgov.models.entities.treaty
+        service-path: congressgov.services.treaty
+        extension-path: congressgov.services.extensions.treaties
+      x-parameter-mappings:
+        offset: offset
+        limit: limit
+        congress: congress
+
+  /treaty/{congress}/{treatyNumber}:
+    get:
+      x-entity-name: Treaty
+      x-endpoint-role: primary
+      x-api-function: treaty_detail_sync
+      x-model-config:
+        base-class: Model
+        collection-class: Treaties
+        items-field: treaties
+        module-path: congressgov.models.entities.treaty
+        service-path: congressgov.services.treaty
+        extension-path: congressgov.services.extensions.treaties
+      x-expansion-mappings:
+        actions:
+          endpoint: /treaty/{congress}/{treatyNumber}/actions
+          api-function: treaty_actions_sync
+          model: Actions
+        committee:
+          endpoint: /treaty/{congress}/{treatyNumber}/committees
+          api-function: treaty_committee_sync
+          model: Committees
+      x-parameter-mappings:
+        congress: congress
+        treaty_number: [ "treaty_number", "treatyNumber", "number" ]
+
+  # === HOUSE VOTE ENDPOINTS (tier-3) ===
+  /house-vote:
+    get:
+      x-entity-name: HouseVote
+      x-endpoint-role: list
+      x-api-function: house_vote_list_sync
+      x-model-config:
+        base-class: Model
+        collection-class: HouseVotes
+        items-field: houseRollCallVotes
+        module-path: congressgov.models.communications.house_vote
+        service-path: congressgov.services.house_vote
+        extension-path: congressgov.services.extensions.house_votes
+      x-parameter-mappings:
+        offset: offset
+        limit: limit
+        congress: congress
+
+  /house-vote/{congress}/{session}/{voteNumber}:
+    get:
+      x-entity-name: HouseVote
+      x-endpoint-role: primary
+      x-api-function: house_vote_details_sync
+      x-model-config:
+        base-class: Model
+        collection-class: HouseVotes
+        items-field: houseRollCallVotes
+        module-path: congressgov.models.communications.house_vote
+        service-path: congressgov.services.house_vote
+        extension-path: congressgov.services.extensions.house_votes
+      x-parameter-mappings:
+        congress: congress
+        session: session
+        vote_number: [ "vote_number", "voteNumber" ]
+
+  # === SUMMARIES ENDPOINTS (tier-3b, search-only) ===
+  /summaries:
+    get:
+      x-entity-name: Summaries
+      x-endpoint-role: list
+      x-api-function: bill_summaries_all_sync
+      x-model-config:
+        base-class: Model
+        collection-class: Summaries
+        items-field: summaries
+        module-path: congressgov.models.entities.bill
+        service-path: congressgov.services.summaries
+        extension-path: congressgov.services.extensions.summaries
+      x-parameter-mappings:
+        offset: offset
+        limit: limit
+
+  # === CRS REPORT ENDPOINTS (tier-3b) ===
+  /crsreport:
+    get:
+      x-entity-name: CRSReport
+      x-endpoint-role: list
+      x-api-function: crsreport_sync
+      x-model-config:
+        base-class: Model
+        collection-class: CRSReports
+        items-field: crsReports
+        module-path: congressgov.models.documents.crs_reports
+        service-path: congressgov.services.crsreport
+      x-parameter-mappings:
+        offset: offset
+        limit: limit
+
+  /crsreport/{reportNumber}:
+    get:
+      x-entity-name: CRSReport
+      x-endpoint-role: primary
+      x-api-function: crsreport_details_sync
+      x-model-config:
+        base-class: Model
+        collection-class: CRSReports
+        items-field: crsReports
+        module-path: congressgov.models.documents.crs_reports
+        service-path: congressgov.services.crsreport
+      x-parameter-mappings:
+        report_number: [ "report_number", "reportNumber" ]
+
+  # === HOUSE COMMUNICATION ENDPOINTS (tier-3b) ===
+  /house-communication:
+    get:
+      x-entity-name: HouseCommunication
+      x-endpoint-role: list
+      x-api-function: house_communication_sync
+      x-model-config:
+        base-class: Model
+        collection-class: HouseCommunications
+        items-field: houseCommunications
+        module-path: congressgov.models.communications.house_communication
+        service-path: congressgov.services.house_communication
+        extension-path: congressgov.services.extensions.house_communications
+      x-parameter-mappings:
+        offset: offset
+        limit: limit
+        congress: congress
+
+  /house-communication/{congress}/{communicationType}/{communicationNumber}:
+    get:
+      x-entity-name: HouseCommunication
+      x-endpoint-role: primary
+      x-api-function: house_communication_detail_sync
+      x-model-config:
+        base-class: Model
+        collection-class: HouseCommunications
+        items-field: houseCommunications
+        module-path: congressgov.models.communications.house_communication
+        service-path: congressgov.services.house_communication
+        extension-path: congressgov.services.extensions.house_communications
+      x-parameter-mappings:
+        congress: congress
+        communication_type: [ "communication_type", "communicationType" ]
+        communication_number: [ "communication_number", "communicationNumber" ]
+
+  # === SENATE COMMUNICATION ENDPOINTS (tier-3b) ===
+  /senate-communication:
+    get:
+      x-entity-name: SenateCommunication
+      x-endpoint-role: list
+      x-api-function: senate_communication_sync
+      x-model-config:
+        base-class: Model
+        collection-class: SenateCommunications
+        items-field: senateCommunications
+        module-path: congressgov.models.communications.senate_communication
+        service-path: congressgov.services.senate_communication
+        extension-path: congressgov.services.extensions.senate_communications
+      x-parameter-mappings:
+        offset: offset
+        limit: limit
+        congress: congress
+
+  /senate-communication/{congress}/{communicationType}/{communicationNumber}:
+    get:
+      x-entity-name: SenateCommunication
+      x-endpoint-role: primary
+      x-api-function: senate_communication_detail_sync
+      x-model-config:
+        base-class: Model
+        collection-class: SenateCommunications
+        items-field: senateCommunications
+        module-path: congressgov.models.communications.senate_communication
+        service-path: congressgov.services.senate_communication
+        extension-path: congressgov.services.extensions.senate_communications
+      x-parameter-mappings:
+        congress: congress
+        communication_type: [ "communication_type", "communicationType" ]
+        communication_number: [ "communication_number", "communicationNumber" ]
+
+  # === COMMITTEE MEETING ENDPOINTS (tier-4) ===
+  /committee-meeting:
+    get:
+      x-entity-name: CommitteeMeeting
+      x-endpoint-role: list
+      x-api-function: committee_meeting_list_sync
+      x-model-config:
+        base-class: Model
+        collection-class: CommitteeMeetings
+        items-field: committeeMeetings
+        module-path: congressgov.models.meetings.meeting
+        service-path: congressgov.services.committee_meeting
+        extension-path: congressgov.services.extensions.committee_meetings
+      x-parameter-mappings:
+        offset: offset
+        limit: limit
+        congress: congress
+        chamber: chamber
+
+  /committee-meeting/{congress}/{chamber}/{eventId}:
+    get:
+      x-entity-name: CommitteeMeeting
+      x-endpoint-role: primary
+      x-api-function: committee_meeting_detail_sync
+      x-model-config:
+        base-class: Model
+        collection-class: CommitteeMeetings
+        items-field: committeeMeetings
+        module-path: congressgov.models.meetings.meeting
+        service-path: congressgov.services.committee_meeting
+        extension-path: congressgov.services.extensions.committee_meetings
+      x-field-mappings:
+        chamber:
+          enum: Chamber
+          shorthand: true
+      x-parameter-mappings:
+        congress: congress
+        chamber: chamber
+        event_id: [ "event_id", "eventId" ]
+
+  # === COMMITTEE REPORT ENDPOINTS (tier-4) ===
+  /committee-report:
+    get:
+      x-entity-name: CommitteeReport
+      x-endpoint-role: list
+      x-api-function: committee_reports_sync
+      x-model-config:
+        base-class: Model
+        collection-class: CommitteeReports
+        items-field: committeeReports
+        module-path: congressgov.models.documents.committee_report
+        service-path: congressgov.services.committee_report
+        extension-path: congressgov.services.extensions.committee_reports
+      x-parameter-mappings:
+        offset: offset
+        limit: limit
+        congress: congress
+
+  /committee-report/{congress}/{reportType}/{reportNumber}:
+    get:
+      x-entity-name: CommitteeReport
+      x-endpoint-role: primary
+      x-api-function: committee_report_details_sync
+      x-model-config:
+        base-class: Model
+        collection-class: CommitteeReports
+        items-field: committeeReports
+        module-path: congressgov.models.documents.committee_report
+        service-path: congressgov.services.committee_report
+        extension-path: congressgov.services.extensions.committee_reports
+      x-parameter-mappings:
+        congress: congress
+        report_type: [ "report_type", "reportType" ]
+        report_number: [ "report_number", "reportNumber" ]
+
+  # === COMMITTEE PRINT ENDPOINTS (tier-4) ===
+  /committee-print:
+    get:
+      x-entity-name: CommitteePrint
+      x-endpoint-role: list
+      x-api-function: committee_print_list_sync
+      x-model-config:
+        base-class: Model
+        collection-class: CommitteePrints
+        items-field: committeePrints
+        module-path: congressgov.models.documents.committee_print
+        service-path: congressgov.services.committee_print
+        extension-path: congressgov.services.extensions.committee_prints
+      x-parameter-mappings:
+        offset: offset
+        limit: limit
+        congress: congress
+        chamber: chamber
+
+  /committee-print/{congress}/{chamber}/{jacketNumber}:
+    get:
+      x-entity-name: CommitteePrint
+      x-endpoint-role: primary
+      x-api-function: committee_print_detail_sync
+      x-model-config:
+        base-class: Model
+        collection-class: CommitteePrints
+        items-field: committeePrints
+        module-path: congressgov.models.documents.committee_print
+        service-path: congressgov.services.committee_print
+        extension-path: congressgov.services.extensions.committee_prints
+      x-field-mappings:
+        chamber:
+          enum: Chamber
+          shorthand: true
+      x-parameter-mappings:
+        congress: congress
+        chamber: chamber
+        jacket_number: [ "jacket_number", "jacketNumber" ]
+
+  # === CONGRESS ENDPOINTS (tier-5) ===
+  /congress:
+    get:
+      x-entity-name: Congress
+      x-endpoint-role: list
+      x-api-function: congress_list_sync
+      x-model-config:
+        base-class: Model
+        collection-class: Congresses
+        items-field: congresses
+        module-path: congressgov.models.entities.congress
+        service-path: congressgov.services.congress
+      x-parameter-mappings:
+        offset: offset
+        limit: limit
+
+  /congress/{congress}:
+    get:
+      x-entity-name: Congress
+      x-endpoint-role: primary
+      x-api-function: congress_details_sync
+      x-model-config:
+        base-class: Model
+        collection-class: Congresses
+        items-field: congresses
+        module-path: congressgov.models.entities.congress
+        service-path: congressgov.services.congress
+      x-parameter-mappings:
+        congress: congress
+
+  # === HOUSE REQUIREMENT ENDPOINTS (tier-5) ===
+  /house-requirement:
+    get:
+      x-entity-name: HouseRequirement
+      x-endpoint-role: list
+      x-api-function: house_requirement_sync
+      x-model-config:
+        base-class: Model
+        collection-class: HouseRequirements
+        items-field: houseRequirements
+        module-path: congressgov.models.communications.house_requirement
+        service-path: congressgov.services.house_requirement
+      x-parameter-mappings:
+        offset: offset
+        limit: limit
+
+  /house-requirement/{requirementNumber}:
+    get:
+      x-entity-name: HouseRequirement
+      x-endpoint-role: primary
+      x-api-function: house_requirement_detail_sync
+      x-model-config:
+        base-class: Model
+        collection-class: HouseRequirements
+        items-field: houseRequirements
+        module-path: congressgov.models.communications.house_requirement
+        service-path: congressgov.services.house_requirement
+      x-parameter-mappings:
+        requirement_number: [ "requirement_number", "requirementNumber" ]
+
+  # === CONGRESSIONAL RECORD ENDPOINTS (tier-5, search-only) ===
+  /congressional-record:
+    get:
+      x-entity-name: CongressionalRecord
+      x-endpoint-role: list
+      x-api-function: congressional_record_list_sync
+      x-model-config:
+        base-class: Model
+        collection-class: DailyCongressionalRecord
+        items-field: Results
+        module-path: congressgov.models.documents.congressional_record
+        service-path: congressgov.services.congressional_record
+      x-parameter-mappings:
+        offset: offset
+        limit: limit
+
+  # === DAILY CONGRESSIONAL RECORD ENDPOINTS (tier-6) ===
+  /daily-congressional-record:
+    get:
+      x-entity-name: DailyCongressionalRecord
+      x-endpoint-role: list
+      x-api-function: daily_congressional_record_list_sync
+      x-model-config:
+        base-class: Model
+        collection-class: DailyCongressionalRecord
+        items-field: Results
+        module-path: congressgov.models.documents.congressional_record
+        service-path: congressgov.services.daily_congressional_record
+      x-parameter-mappings:
+        offset: offset
+        limit: limit
+
+  # === BOUND CONGRESSIONAL RECORD ENDPOINTS (tier-5, search-only) ===
+  /bound-congressional-record:
+    get:
+      x-entity-name: BoundCongressionalRecord
+      x-endpoint-role: list
+      x-api-function: bound_congressional_record_list_sync
+      x-model-config:
+        base-class: Model
+        collection-class: BoundCongressionalRecords
+        items-field: boundCongressionalRecord
+        module-path: congressgov.models.documents.bound_congressional_record
+        service-path: congressgov.services.bound_congressional_record
+      x-parameter-mappings:
+        offset: offset
+        limit: limit
+
+components:
+  securitySchemes:
+    ApiKey:
+      type: apiKey
+      in: header
+      name: X-API-Key
+      description: API key for authentication
+
+  schemas:
+    Bill:
+      type: object
+      description: A Congressional bill
+      properties:
+        congress:
+          type: integer
+          description: The Congress number
+          example: 118
+        type:
+          type: string
+          enum: [ hr, s, hjres, sjres, hconres, sconres, hres, sres ]
+          description: The bill type
+          example: hr
+        number:
+          type: integer
+          description: The bill number
+          example: 1
+        title:
+          type: string
+          description: The bill title
+          example: "For the relief of John Doe"
+        introducedDate:
+          type: string
+          format: date
+          description: Date the bill was introduced
+        originChamber:
+          type: string
+          enum: [ House, Senate ]
+          description: Chamber where the bill originated
+        isEnacted:
+          type: boolean
+          description: Whether the bill has been enacted into law
+        latestAction:
+          $ref: '#/components/schemas/LatestAction'
+        sponsors:
+          type: array
+          items:
+            $ref: '#/components/schemas/Sponsor'
+        actions:
+          $ref: '#/components/schemas/ActionsRef'
+        amendments:
+          $ref: '#/components/schemas/AmendmentsRef'
+        committees:
+          $ref: '#/components/schemas/CommitteesRef'
+        cosponsors:
+          $ref: '#/components/schemas/CosponsorsRef'
+        relatedBills:
+          $ref: '#/components/schemas/BillsRef'
+        subjects:
+          $ref: '#/components/schemas/SubjectsRef'
+        summaries:
+          $ref: '#/components/schemas/SummariesRef'
+        textVersions:
+          $ref: '#/components/schemas/TextVersionsRef'
+        titles:
+          $ref: '#/components/schemas/TitlesRef'
+
+    BillResponse:
+      type: object
+      properties:
+        bill:
+          $ref: '#/components/schemas/Bill'
+
+    Bills:
+      type: object
+      description: Collection of bills
+      properties:
+        bills:
+          type: array
+          items:
+            $ref: '#/components/schemas/Bill'
+
+    BillsResponse:
+      type: object
+      properties:
+        bills:
+          $ref: '#/components/schemas/Bills'
+        pagination:
+          $ref: '#/components/schemas/Pagination'
+
+    Amendment:
+      type: object
+      description: A Congressional amendment
+      properties:
+        congress:
+          type: integer
+          description: The Congress number
+        type:
+          type: string
+          enum: [ hamdt, samdt ]
+          description: The amendment type
+        number:
+          type: string
+          description: The amendment number
+        title:
+          type: string
+          description: The amendment title
+        introducedDate:
+          type: string
+          format: date
+          description: Date the amendment was introduced
+
+    AmendmentResponse:
+      type: object
+      properties:
+        amendment:
+          $ref: '#/components/schemas/Amendment'
+
+    Amendments:
+      type: object
+      description: Collection of amendments
+      properties:
+        amendments:
+          type: array
+          items:
+            $ref: '#/components/schemas/Amendment'
+
+    Member:
+      type: object
+      description: A member of Congress
+      properties:
+        bioguideId:
+          type: string
+          description: The bioguide ID
+          example: A000374
+        firstName:
+          type: string
+          description: First name
+        lastName:
+          type: string
+          description: Last name
+        fullName:
+          type: string
+          description: Full name
+        state:
+          type: string
+          description: State represented
+        district:
+          type: integer
+          description: District number (for House members)
+        party:
+          type: string
+          description: Political party
+        chamber:
+          type: string
+          enum: [ House, Senate ]
+          description: Chamber of Congress
+
+    MemberResponse:
+      type: object
+      properties:
+        member:
+          $ref: '#/components/schemas/Member'
+
+    Members:
+      type: object
+      description: Collection of members
+      properties:
+        members:
+          type: array
+          items:
+            $ref: '#/components/schemas/Member'
+
+    # === REFERENCE SCHEMAS ===
+    LatestAction:
+      type: object
+      properties:
+        actionDate:
+          type: string
+          format: date
+        text:
+          type: string
+
+    Sponsor:
+      type: object
+      properties:
+        bioguideId:
+          type: string
+        fullName:
+          type: string
+        party:
+          type: string
+        state:
+          type: string
+
+    ActionsRef:
+      type: object
+      properties:
+        count:
+          type: integer
+        url:
+          type: string
+
+    AmendmentsRef:
+      type: object
+      properties:
+        count:
+          type: integer
+        url:
+          type: string
+
+    CommitteesRef:
+      type: object
+      properties:
+        count:
+          type: integer
+        url:
+          type: string
+
+    CosponsorsRef:
+      type: object
+      properties:
+        count:
+          type: integer
+        url:
+          type: string
+
+    BillsRef:
+      type: object
+      properties:
+        count:
+          type: integer
+        url:
+          type: string
+
+    SubjectsRef:
+      type: object
+      properties:
+        count:
+          type: integer
+        url:
+          type: string
+
+    SummariesRef:
+      type: object
+      properties:
+        count:
+          type: integer
+        url:
+          type: string
+
+    TextVersionsRef:
+      type: object
+      properties:
+        count:
+          type: integer
+        url:
+          type: string
+
+    TitlesRef:
+      type: object
+      properties:
+        count:
+          type: integer
+        url:
+          type: string
+
+    Actions:
+      type: object
+      description: Collection of actions
+      properties:
+        actions:
+          type: array
+          items:
+            $ref: '#/components/schemas/Action'
+
+    Action:
+      type: object
+      description: A legislative action
+      properties:
+        actionDate:
+          type: string
+          format: date
+        text:
+          type: string
+        type:
+          type: string
+
+    ActionsResponse:
+      type: object
+      properties:
+        actions:
+          $ref: '#/components/schemas/Actions'
+        pagination:
+          $ref: '#/components/schemas/Pagination'
+
+    Pagination:
+      type: object
+      description: Pagination information
+      properties:
+        count:
+          type: integer
+        next:
+          type: string
+        previous:
+          type: string
+
+

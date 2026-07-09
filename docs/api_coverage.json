@@ -1,0 +1,1190 @@
+[
+  {
+    "method": "GET",
+    "path": "/amendment",
+    "tags": [
+      "amendments"
+    ],
+    "x_entity": "Amendment",
+    "x_api_function": "amendment_sync",
+    "coverage": "hand_service",
+    "notes": "annotated amendment_sync in core/search, core/url_routes_generated"
+  },
+  {
+    "method": "GET",
+    "path": "/amendment/{congress}",
+    "tags": [
+      "amendments"
+    ],
+    "x_entity": null,
+    "x_api_function": null,
+    "coverage": "hand_service",
+    "notes": "via amendment_congress_sync in core/search, core/url_routes_generated"
+  },
+  {
+    "method": "GET",
+    "path": "/amendment/{congress}/{amendmentType}",
+    "tags": [
+      "amendments"
+    ],
+    "x_entity": null,
+    "x_api_function": null,
+    "coverage": "hand_service",
+    "notes": "via amendment_list_sync in core/search, core/url_routes_generated"
+  },
+  {
+    "method": "GET",
+    "path": "/amendment/{congress}/{amendmentType}/{amendmentNumber}",
+    "tags": [
+      "amendments"
+    ],
+    "x_entity": "Amendment",
+    "x_api_function": "amendment_details_sync",
+    "coverage": "hand_service",
+    "notes": "annotated amendment_details_sync in amendment, core/url_routes_generated"
+  },
+  {
+    "method": "GET",
+    "path": "/amendment/{congress}/{amendmentType}/{amendmentNumber}/actions",
+    "tags": [
+      "amendments"
+    ],
+    "x_entity": null,
+    "x_api_function": null,
+    "coverage": "hand_service",
+    "notes": "via amendment_actions_sync in amendment, core/url_routes_generated, extensions/amendments"
+  },
+  {
+    "method": "GET",
+    "path": "/amendment/{congress}/{amendmentType}/{amendmentNumber}/amendments",
+    "tags": [
+      "amendments"
+    ],
+    "x_entity": null,
+    "x_api_function": null,
+    "coverage": "hand_service",
+    "notes": "via amendment_amendments_sync in amendment, core/url_routes_generated, extensions/amendments"
+  },
+  {
+    "method": "GET",
+    "path": "/amendment/{congress}/{amendmentType}/{amendmentNumber}/cosponsors",
+    "tags": [
+      "amendments"
+    ],
+    "x_entity": null,
+    "x_api_function": null,
+    "coverage": "hand_service",
+    "notes": "via amendment_cosponsors_sync in amendment, core/url_routes_generated, extensions/amendments"
+  },
+  {
+    "method": "GET",
+    "path": "/amendment/{congress}/{amendmentType}/{amendmentNumber}/text",
+    "tags": [
+      "amendments"
+    ],
+    "x_entity": null,
+    "x_api_function": null,
+    "coverage": "hand_service",
+    "notes": "via amendment_text_sync in amendment, core/url_routes_generated, extensions/amendments"
+  },
+  {
+    "method": "GET",
+    "path": "/bill",
+    "tags": [
+      "bill"
+    ],
+    "x_entity": "Bill",
+    "x_api_function": "bill_list_all_sync",
+    "coverage": "hand_service",
+    "notes": "annotated bill_list_all_sync in core/search, core/url_routes_generated"
+  },
+  {
+    "method": "GET",
+    "path": "/bill/{congress}",
+    "tags": [
+      "bill"
+    ],
+    "x_entity": null,
+    "x_api_function": null,
+    "coverage": "hand_service",
+    "notes": "via bill_list_by_congress_sync in core/search, core/url_routes_generated"
+  },
+  {
+    "method": "GET",
+    "path": "/bill/{congress}/{billType}",
+    "tags": [
+      "bill"
+    ],
+    "x_entity": null,
+    "x_api_function": null,
+    "coverage": "hand_service",
+    "notes": "via bill_list_by_type_sync in core/search, core/url_routes_generated"
+  },
+  {
+    "method": "GET",
+    "path": "/bill/{congress}/{billType}/{billNumber}",
+    "tags": [
+      "bill"
+    ],
+    "x_entity": "Bill",
+    "x_api_function": "bill_details_sync",
+    "coverage": "hand_service",
+    "notes": "annotated bill_details_sync in bill, core/url_routes_generated"
+  },
+  {
+    "method": "GET",
+    "path": "/bill/{congress}/{billType}/{billNumber}/actions",
+    "tags": [
+      "bill"
+    ],
+    "x_entity": "Actions",
+    "x_api_function": null,
+    "coverage": "hand_service",
+    "notes": "via bill_actions_sync in bill, core/url_routes_generated, extensions/bill"
+  },
+  {
+    "method": "GET",
+    "path": "/bill/{congress}/{billType}/{billNumber}/amendments",
+    "tags": [
+      "bill"
+    ],
+    "x_entity": null,
+    "x_api_function": null,
+    "coverage": "hand_service",
+    "notes": "via bill_amendments_sync in bill, core/url_routes_generated, extensions/bill"
+  },
+  {
+    "method": "GET",
+    "path": "/bill/{congress}/{billType}/{billNumber}/committees",
+    "tags": [
+      "bill"
+    ],
+    "x_entity": null,
+    "x_api_function": null,
+    "coverage": "hand_service",
+    "notes": "via bill_committees_sync in bill, core/url_routes_generated, extensions/bill"
+  },
+  {
+    "method": "GET",
+    "path": "/bill/{congress}/{billType}/{billNumber}/cosponsors",
+    "tags": [
+      "bill"
+    ],
+    "x_entity": null,
+    "x_api_function": null,
+    "coverage": "hand_service",
+    "notes": "via bill_cosponsors_sync in bill, core/url_routes_generated, extensions/bill"
+  },
+  {
+    "method": "GET",
+    "path": "/bill/{congress}/{billType}/{billNumber}/relatedbills",
+    "tags": [
+      "bill"
+    ],
+    "x_entity": null,
+    "x_api_function": null,
+    "coverage": "hand_service",
+    "notes": "via bill_relatedbills_sync in bill, core/url_routes_generated, extensions/bill"
+  },
+  {
+    "method": "GET",
+    "path": "/bill/{congress}/{billType}/{billNumber}/subjects",
+    "tags": [
+      "bill"
+    ],
+    "x_entity": null,
+    "x_api_function": null,
+    "coverage": "hand_service",
+    "notes": "via bill_subjects_sync in bill, core/url_routes_generated, extensions/bill"
+  },
+  {
+    "method": "GET",
+    "path": "/bill/{congress}/{billType}/{billNumber}/summaries",
+    "tags": [
+      "bill"
+    ],
+    "x_entity": null,
+    "x_api_function": null,
+    "coverage": "hand_service",
+    "notes": "via bill_summaries_sync in bill, core/url_routes_generated, extensions/bill"
+  },
+  {
+    "method": "GET",
+    "path": "/bill/{congress}/{billType}/{billNumber}/text",
+    "tags": [
+      "bill"
+    ],
+    "x_entity": null,
+    "x_api_function": null,
+    "coverage": "hand_service",
+    "notes": "via bill_text_sync in bill, core/url_routes_generated, extensions/bill"
+  },
+  {
+    "method": "GET",
+    "path": "/bill/{congress}/{billType}/{billNumber}/titles",
+    "tags": [
+      "bill"
+    ],
+    "x_entity": null,
+    "x_api_function": null,
+    "coverage": "hand_service",
+    "notes": "via bill_titles_sync in bill, core/url_routes_generated, extensions/bill"
+  },
+  {
+    "method": "GET",
+    "path": "/bound-congressional-record",
+    "tags": [
+      "bound-congressional-record"
+    ],
+    "x_entity": "BoundCongressionalRecord",
+    "x_api_function": "bound_congressional_record_list_sync",
+    "coverage": "hand_service",
+    "notes": "annotated bound_congressional_record_list_sync in core/search, core/url_routes_generated"
+  },
+  {
+    "method": "GET",
+    "path": "/bound-congressional-record/{year}",
+    "tags": [
+      "bound-congressional-record"
+    ],
+    "x_entity": null,
+    "x_api_function": null,
+    "coverage": "hand_service",
+    "notes": "hand.get_by_year on bound_congressional_record"
+  },
+  {
+    "method": "GET",
+    "path": "/bound-congressional-record/{year}/{month}",
+    "tags": [
+      "bound-congressional-record"
+    ],
+    "x_entity": null,
+    "x_api_function": null,
+    "coverage": "hand_service",
+    "notes": "hand.get_by_year_month on bound_congressional_record"
+  },
+  {
+    "method": "GET",
+    "path": "/bound-congressional-record/{year}/{month}/{day}",
+    "tags": [
+      "bound-congressional-record"
+    ],
+    "x_entity": null,
+    "x_api_function": null,
+    "coverage": "hand_service",
+    "notes": "hand.get_by_date on bound_congressional_record"
+  },
+  {
+    "method": "GET",
+    "path": "/committee",
+    "tags": [
+      "committee"
+    ],
+    "x_entity": "Committee",
+    "x_api_function": "committee_list_sync",
+    "coverage": "hand_service",
+    "notes": "annotated committee_list_sync in core/search, core/url_routes_generated"
+  },
+  {
+    "method": "GET",
+    "path": "/committee-meeting",
+    "tags": [
+      "committee-meeting"
+    ],
+    "x_entity": "CommitteeMeeting",
+    "x_api_function": "committee_meeting_list_sync",
+    "coverage": "hand_service",
+    "notes": "annotated committee_meeting_list_sync in core/search, core/url_routes_generated"
+  },
+  {
+    "method": "GET",
+    "path": "/committee-meeting/{congress}",
+    "tags": [
+      "committee-meeting"
+    ],
+    "x_entity": null,
+    "x_api_function": null,
+    "coverage": "hand_service",
+    "notes": "via committee_meeting_congress_sync in core/search, core/url_routes_generated"
+  },
+  {
+    "method": "GET",
+    "path": "/committee-meeting/{congress}/{chamber}",
+    "tags": [
+      "committee-meeting"
+    ],
+    "x_entity": null,
+    "x_api_function": null,
+    "coverage": "hand_service",
+    "notes": "via committee_meeting_congress_chamber_sync in core/search, core/url_routes_generated"
+  },
+  {
+    "method": "GET",
+    "path": "/committee-meeting/{congress}/{chamber}/{eventId}",
+    "tags": [
+      "committee-meeting"
+    ],
+    "x_entity": "CommitteeMeeting",
+    "x_api_function": "committee_meeting_detail_sync",
+    "coverage": "hand_service",
+    "notes": "annotated committee_meeting_detail_sync in committee_meeting, core/url_routes_generated"
+  },
+  {
+    "method": "GET",
+    "path": "/committee-print",
+    "tags": [
+      "committee-print"
+    ],
+    "x_entity": "CommitteePrint",
+    "x_api_function": "committee_print_list_sync",
+    "coverage": "hand_service",
+    "notes": "annotated committee_print_list_sync in core/search, core/url_routes_generated"
+  },
+  {
+    "method": "GET",
+    "path": "/committee-print/{congress}",
+    "tags": [
+      "committee-print"
+    ],
+    "x_entity": null,
+    "x_api_function": null,
+    "coverage": "hand_service",
+    "notes": "via committee_prints_by_congress_sync in core/search, core/url_routes_generated"
+  },
+  {
+    "method": "GET",
+    "path": "/committee-print/{congress}/{chamber}",
+    "tags": [
+      "committee-print"
+    ],
+    "x_entity": null,
+    "x_api_function": null,
+    "coverage": "hand_service",
+    "notes": "via committee_prints_by_congress_chamber_sync in core/search, core/url_routes_generated"
+  },
+  {
+    "method": "GET",
+    "path": "/committee-print/{congress}/{chamber}/{jacketNumber}",
+    "tags": [
+      "committee-print"
+    ],
+    "x_entity": "CommitteePrint",
+    "x_api_function": "committee_print_detail_sync",
+    "coverage": "hand_service",
+    "notes": "hand.get_text on committee_print"
+  },
+  {
+    "method": "GET",
+    "path": "/committee-print/{congress}/{chamber}/{jacketNumber}/text",
+    "tags": [
+      "committee-print"
+    ],
+    "x_entity": null,
+    "x_api_function": null,
+    "coverage": "hand_service",
+    "notes": "hand.get_text on committee_print"
+  },
+  {
+    "method": "GET",
+    "path": "/committee-report",
+    "tags": [
+      "committee-report"
+    ],
+    "x_entity": "CommitteeReport",
+    "x_api_function": "committee_reports_sync",
+    "coverage": "hand_service",
+    "notes": "annotated committee_reports_sync in core/search, core/url_routes_generated"
+  },
+  {
+    "method": "GET",
+    "path": "/committee-report/{congress}",
+    "tags": [
+      "committee-report"
+    ],
+    "x_entity": null,
+    "x_api_function": null,
+    "coverage": "hand_service",
+    "notes": "via committee_reports_by_congress_sync in core/search, core/url_routes_generated"
+  },
+  {
+    "method": "GET",
+    "path": "/committee-report/{congress}/{reportType}",
+    "tags": [
+      "committee-report"
+    ],
+    "x_entity": null,
+    "x_api_function": null,
+    "coverage": "hand_service",
+    "notes": "via committee_reports_by_congress_rpt_type_sync in core/search, core/url_routes_generated"
+  },
+  {
+    "method": "GET",
+    "path": "/committee-report/{congress}/{reportType}/{reportNumber}",
+    "tags": [
+      "committee-report"
+    ],
+    "x_entity": "CommitteeReport",
+    "x_api_function": "committee_report_details_sync",
+    "coverage": "hand_service",
+    "notes": "hand.get_text on committee_report"
+  },
+  {
+    "method": "GET",
+    "path": "/committee-report/{congress}/{reportType}/{reportNumber}/text",
+    "tags": [
+      "committee-report"
+    ],
+    "x_entity": null,
+    "x_api_function": null,
+    "coverage": "hand_service",
+    "notes": "hand.get_text on committee_report"
+  },
+  {
+    "method": "GET",
+    "path": "/committee/{chamber}",
+    "tags": [
+      "committee"
+    ],
+    "x_entity": null,
+    "x_api_function": null,
+    "coverage": "hand_service",
+    "notes": "via committee_list_by_chamber_sync in core/search, core/url_routes_generated"
+  },
+  {
+    "method": "GET",
+    "path": "/committee/{chamber}/{committeeCode}",
+    "tags": [
+      "committee"
+    ],
+    "x_entity": "Committee",
+    "x_api_function": "committee_details_sync",
+    "coverage": "hand_service",
+    "notes": "annotated committee_details_sync in committee, core/url_routes_generated"
+  },
+  {
+    "method": "GET",
+    "path": "/committee/{chamber}/{committeeCode}/bills",
+    "tags": [
+      "committee"
+    ],
+    "x_entity": null,
+    "x_api_function": null,
+    "coverage": "hand_service",
+    "notes": "via committee_bills_list_sync in committee, core/url_routes_generated, extensions/committees"
+  },
+  {
+    "method": "GET",
+    "path": "/committee/{chamber}/{committeeCode}/house-communication",
+    "tags": [
+      "committee"
+    ],
+    "x_entity": null,
+    "x_api_function": null,
+    "coverage": "hand_service",
+    "notes": "via house_communications_by_committee_sync in committee, core/url_routes_generated, extensions/committees"
+  },
+  {
+    "method": "GET",
+    "path": "/committee/{chamber}/{committeeCode}/nominations",
+    "tags": [
+      "committee"
+    ],
+    "x_entity": null,
+    "x_api_function": null,
+    "coverage": "hand_service",
+    "notes": "via nomination_by_committee_sync in committee, core/url_routes_generated, extensions/committees"
+  },
+  {
+    "method": "GET",
+    "path": "/committee/{chamber}/{committeeCode}/reports",
+    "tags": [
+      "committee"
+    ],
+    "x_entity": null,
+    "x_api_function": null,
+    "coverage": "hand_service",
+    "notes": "via committee_reports_by_committee_sync in committee, core/url_routes_generated, extensions/committees"
+  },
+  {
+    "method": "GET",
+    "path": "/committee/{chamber}/{committeeCode}/senate-communication",
+    "tags": [
+      "committee"
+    ],
+    "x_entity": null,
+    "x_api_function": null,
+    "coverage": "hand_service",
+    "notes": "via senate_communications_by_committee_sync in committee, core/url_routes_generated, extensions/committees"
+  },
+  {
+    "method": "GET",
+    "path": "/committee/{congress}",
+    "tags": [
+      "committee"
+    ],
+    "x_entity": null,
+    "x_api_function": null,
+    "coverage": "hand_service",
+    "notes": "via committee_list_by_chamber_sync in core/search, core/url_routes_generated"
+  },
+  {
+    "method": "GET",
+    "path": "/committee/{congress}/{chamber}",
+    "tags": [
+      "committee"
+    ],
+    "x_entity": null,
+    "x_api_function": null,
+    "coverage": "hand_service",
+    "notes": "via committee_details_sync in committee, core/url_routes_generated"
+  },
+  {
+    "method": "GET",
+    "path": "/committee/{congress}/{chamber}/{committeeCode}",
+    "tags": [
+      "committee"
+    ],
+    "x_entity": null,
+    "x_api_function": null,
+    "coverage": "hand_service",
+    "notes": "hand.get_by_congress on committee"
+  },
+  {
+    "method": "GET",
+    "path": "/congress",
+    "tags": [
+      "congress"
+    ],
+    "x_entity": "Congress",
+    "x_api_function": "congress_list_sync",
+    "coverage": "hand_service",
+    "notes": "annotated congress_list_sync in congress, core/search, core/url_routes_generated"
+  },
+  {
+    "method": "GET",
+    "path": "/congress/current",
+    "tags": [
+      "congress"
+    ],
+    "x_entity": null,
+    "x_api_function": null,
+    "coverage": "hand_service",
+    "notes": "via congress_current_list_sync in congress, core/search, core/url_routes_generated"
+  },
+  {
+    "method": "GET",
+    "path": "/congress/{congress}",
+    "tags": [
+      "congress"
+    ],
+    "x_entity": "Congress",
+    "x_api_function": "congress_details_sync",
+    "coverage": "hand_service",
+    "notes": "annotated congress_details_sync in congress, core/url_routes_generated"
+  },
+  {
+    "method": "GET",
+    "path": "/congressional-record",
+    "tags": [
+      "congressional-record"
+    ],
+    "x_entity": "CongressionalRecord",
+    "x_api_function": "congressional_record_list_sync",
+    "coverage": "hand_service",
+    "notes": "annotated congressional_record_list_sync in core/search, core/url_routes_generated"
+  },
+  {
+    "method": "GET",
+    "path": "/crsreport",
+    "tags": [
+      "crsreport"
+    ],
+    "x_entity": "CRSReport",
+    "x_api_function": "crsreport_sync",
+    "coverage": "hand_service",
+    "notes": "annotated crsreport_sync in core/search, core/url_routes_generated"
+  },
+  {
+    "method": "GET",
+    "path": "/crsreport/{reportNumber}",
+    "tags": [
+      "crsreport"
+    ],
+    "x_entity": "CRSReport",
+    "x_api_function": "crsreport_details_sync",
+    "coverage": "hand_service",
+    "notes": "annotated crsreport_details_sync in core/url_routes_generated, crsreport"
+  },
+  {
+    "method": "GET",
+    "path": "/daily-congressional-record",
+    "tags": [
+      "daily-congressional-record"
+    ],
+    "x_entity": "DailyCongressionalRecord",
+    "x_api_function": "daily_congressional_record_list_sync",
+    "coverage": "hand_service",
+    "notes": "hand.search on daily_congressional_record"
+  },
+  {
+    "method": "GET",
+    "path": "/daily-congressional-record/{volumeNumber}",
+    "tags": [
+      "daily-congressional-record"
+    ],
+    "x_entity": null,
+    "x_api_function": null,
+    "coverage": "hand_service",
+    "notes": "hand.get_volume on daily_congressional_record"
+  },
+  {
+    "method": "GET",
+    "path": "/daily-congressional-record/{volumeNumber}/{issueNumber}",
+    "tags": [
+      "daily-congressional-record"
+    ],
+    "x_entity": null,
+    "x_api_function": null,
+    "coverage": "hand_service",
+    "notes": "hand.get_issue on daily_congressional_record"
+  },
+  {
+    "method": "GET",
+    "path": "/daily-congressional-record/{volumeNumber}/{issueNumber}/articles",
+    "tags": [
+      "daily-congressional-record"
+    ],
+    "x_entity": null,
+    "x_api_function": null,
+    "coverage": "hand_service",
+    "notes": "hand.get_issue on daily_congressional_record"
+  },
+  {
+    "method": "GET",
+    "path": "/hearing",
+    "tags": [
+      "hearing"
+    ],
+    "x_entity": "Hearing",
+    "x_api_function": "hearing_list_sync",
+    "coverage": "hand_service",
+    "notes": "annotated hearing_list_sync in core/search, core/url_routes_generated"
+  },
+  {
+    "method": "GET",
+    "path": "/hearing/{congress}",
+    "tags": [
+      "hearing"
+    ],
+    "x_entity": null,
+    "x_api_function": null,
+    "coverage": "hand_service",
+    "notes": "via hearing_list_by_congress_sync in core/search, core/url_routes_generated"
+  },
+  {
+    "method": "GET",
+    "path": "/hearing/{congress}/{chamber}",
+    "tags": [
+      "hearing"
+    ],
+    "x_entity": null,
+    "x_api_function": null,
+    "coverage": "hand_service",
+    "notes": "via hearing_list_by_congress_chamber_sync in core/search, core/url_routes_generated"
+  },
+  {
+    "method": "GET",
+    "path": "/hearing/{congress}/{chamber}/{jacketNumber}",
+    "tags": [
+      "hearing"
+    ],
+    "x_entity": "Hearing",
+    "x_api_function": "hearing_detail_sync",
+    "coverage": "hand_service",
+    "notes": "annotated hearing_detail_sync in core/url_routes_generated, hearing"
+  },
+  {
+    "method": "GET",
+    "path": "/house-communication",
+    "tags": [
+      "house-communication"
+    ],
+    "x_entity": "HouseCommunication",
+    "x_api_function": "house_communication_sync",
+    "coverage": "hand_service",
+    "notes": "annotated house_communication_sync in core/search, core/url_routes_generated"
+  },
+  {
+    "method": "GET",
+    "path": "/house-communication/{congress}",
+    "tags": [
+      "house-communication"
+    ],
+    "x_entity": null,
+    "x_api_function": null,
+    "coverage": "hand_service",
+    "notes": "via house_communication_congress_sync in core/search, core/url_routes_generated"
+  },
+  {
+    "method": "GET",
+    "path": "/house-communication/{congress}/{communicationType}",
+    "tags": [
+      "house-communication"
+    ],
+    "x_entity": null,
+    "x_api_function": null,
+    "coverage": "hand_service",
+    "notes": "via house_communication_list_sync in core/search, core/url_routes_generated"
+  },
+  {
+    "method": "GET",
+    "path": "/house-communication/{congress}/{communicationType}/{communicationNumber}",
+    "tags": [
+      "house-communication"
+    ],
+    "x_entity": "HouseCommunication",
+    "x_api_function": "house_communication_detail_sync",
+    "coverage": "hand_service",
+    "notes": "annotated house_communication_detail_sync in core/url_routes_generated, house_communication"
+  },
+  {
+    "method": "GET",
+    "path": "/house-requirement",
+    "tags": [
+      "house-requirement"
+    ],
+    "x_entity": "HouseRequirement",
+    "x_api_function": "house_requirement_sync",
+    "coverage": "hand_service",
+    "notes": "annotated house_requirement_sync in core/search, core/url_routes_generated"
+  },
+  {
+    "method": "GET",
+    "path": "/house-requirement/{requirementNumber}",
+    "tags": [
+      "house-requirement"
+    ],
+    "x_entity": "HouseRequirement",
+    "x_api_function": "house_requirement_detail_sync",
+    "coverage": "hand_service",
+    "notes": "hand.matching_communications on house_requirement"
+  },
+  {
+    "method": "GET",
+    "path": "/house-requirement/{requirementNumber}/matching-communications",
+    "tags": [
+      "house-requirement"
+    ],
+    "x_entity": null,
+    "x_api_function": null,
+    "coverage": "hand_service",
+    "notes": "hand.matching_communications on house_requirement"
+  },
+  {
+    "method": "GET",
+    "path": "/house-vote",
+    "tags": [
+      "house-vote"
+    ],
+    "x_entity": "HouseVote",
+    "x_api_function": "house_vote_list_sync",
+    "coverage": "hand_service",
+    "notes": "annotated house_vote_list_sync in core/search, core/url_routes_generated"
+  },
+  {
+    "method": "GET",
+    "path": "/house-vote/{congress}",
+    "tags": [
+      "house-vote"
+    ],
+    "x_entity": null,
+    "x_api_function": null,
+    "coverage": "hand_service",
+    "notes": "via house_vote_list_congress_sync in core/search, core/url_routes_generated"
+  },
+  {
+    "method": "GET",
+    "path": "/house-vote/{congress}/{session}",
+    "tags": [
+      "house-vote"
+    ],
+    "x_entity": null,
+    "x_api_function": null,
+    "coverage": "hand_service",
+    "notes": "hand.list_by_congress_session on house_vote"
+  },
+  {
+    "method": "GET",
+    "path": "/house-vote/{congress}/{session}/{voteNumber}",
+    "tags": [
+      "house-vote"
+    ],
+    "x_entity": "HouseVote",
+    "x_api_function": "house_vote_details_sync",
+    "coverage": "hand_service",
+    "notes": "hand.members on house_vote"
+  },
+  {
+    "method": "GET",
+    "path": "/house-vote/{congress}/{session}/{voteNumber}/members",
+    "tags": [
+      "house-vote"
+    ],
+    "x_entity": null,
+    "x_api_function": null,
+    "coverage": "hand_service",
+    "notes": "hand.members on house_vote"
+  },
+  {
+    "method": "GET",
+    "path": "/law/{congress}",
+    "tags": [
+      "bill"
+    ],
+    "x_entity": null,
+    "x_api_function": null,
+    "coverage": "hand_service",
+    "notes": "via law_list_by_congress_sync in bill, core/url_routes_generated"
+  },
+  {
+    "method": "GET",
+    "path": "/law/{congress}/{lawType}",
+    "tags": [
+      "bill"
+    ],
+    "x_entity": null,
+    "x_api_function": null,
+    "coverage": "hand_service",
+    "notes": "via law_list_by_congress_and_law_type_sync in bill, core/url_routes_generated"
+  },
+  {
+    "method": "GET",
+    "path": "/law/{congress}/{lawType}/{lawNumber}",
+    "tags": [
+      "bill"
+    ],
+    "x_entity": null,
+    "x_api_function": null,
+    "coverage": "hand_service",
+    "notes": "via law_list_by_congress_law_type_and_law_number_sync in bill, core/url_routes_generated"
+  },
+  {
+    "method": "GET",
+    "path": "/member",
+    "tags": [
+      "member"
+    ],
+    "x_entity": "Member",
+    "x_api_function": "member_list_sync",
+    "coverage": "hand_service",
+    "notes": "annotated member_list_sync in core/search, core/url_routes_generated, member"
+  },
+  {
+    "method": "GET",
+    "path": "/member/congress/{congress}",
+    "tags": [
+      "member"
+    ],
+    "x_entity": null,
+    "x_api_function": null,
+    "coverage": "hand_service",
+    "notes": "hand.list_by_congress on member"
+  },
+  {
+    "method": "GET",
+    "path": "/member/congress/{congress}/{stateCode}/{district}",
+    "tags": [
+      "member"
+    ],
+    "x_entity": null,
+    "x_api_function": null,
+    "coverage": "hand_service",
+    "notes": "via member_list_by_congress_state_district_sync in core/search, core/url_routes_generated, member"
+  },
+  {
+    "method": "GET",
+    "path": "/member/{bioguideId}",
+    "tags": [
+      "member"
+    ],
+    "x_entity": "Member",
+    "x_api_function": "member_details_sync",
+    "coverage": "hand_service",
+    "notes": "annotated member_details_sync in core/url_routes_generated, member"
+  },
+  {
+    "method": "GET",
+    "path": "/member/{bioguideId}/cosponsored-legislation",
+    "tags": [
+      "member"
+    ],
+    "x_entity": null,
+    "x_api_function": null,
+    "coverage": "hand_service",
+    "notes": "via member_cosponsorship_list_sync in core/url_routes_generated, extensions/members, member"
+  },
+  {
+    "method": "GET",
+    "path": "/member/{bioguideId}/sponsored-legislation",
+    "tags": [
+      "member"
+    ],
+    "x_entity": null,
+    "x_api_function": null,
+    "coverage": "hand_service",
+    "notes": "via member_sponsorship_list_sync in core/url_routes_generated, extensions/members, member"
+  },
+  {
+    "method": "GET",
+    "path": "/member/{stateCode}",
+    "tags": [
+      "member"
+    ],
+    "x_entity": null,
+    "x_api_function": null,
+    "coverage": "hand_service",
+    "notes": "via member_details_sync in core/url_routes_generated, member"
+  },
+  {
+    "method": "GET",
+    "path": "/member/{stateCode}/{district}",
+    "tags": [
+      "member"
+    ],
+    "x_entity": null,
+    "x_api_function": null,
+    "coverage": "hand_service",
+    "notes": "via member_list_by_state_and_district_sync in core/search, core/url_routes_generated, member"
+  },
+  {
+    "method": "GET",
+    "path": "/nomination",
+    "tags": [
+      "nomination"
+    ],
+    "x_entity": "Nomination",
+    "x_api_function": "nomination_list_sync",
+    "coverage": "hand_service",
+    "notes": "annotated nomination_list_sync in core/search, core/url_routes_generated"
+  },
+  {
+    "method": "GET",
+    "path": "/nomination/{congress}",
+    "tags": [
+      "nomination"
+    ],
+    "x_entity": null,
+    "x_api_function": null,
+    "coverage": "hand_service",
+    "notes": "via nomination_list_by_congress_sync in core/search, core/url_routes_generated"
+  },
+  {
+    "method": "GET",
+    "path": "/nomination/{congress}/{nominationNumber}",
+    "tags": [
+      "nomination"
+    ],
+    "x_entity": "Nomination",
+    "x_api_function": "nomination_detail_sync",
+    "coverage": "hand_service",
+    "notes": "annotated nomination_detail_sync in core/url_routes_generated, nomination"
+  },
+  {
+    "method": "GET",
+    "path": "/nomination/{congress}/{nominationNumber}/actions",
+    "tags": [
+      "nomination"
+    ],
+    "x_entity": null,
+    "x_api_function": null,
+    "coverage": "hand_service",
+    "notes": "via nomination_actions_sync in core/url_routes_generated, extensions/nominations, nomination"
+  },
+  {
+    "method": "GET",
+    "path": "/nomination/{congress}/{nominationNumber}/committees",
+    "tags": [
+      "nomination"
+    ],
+    "x_entity": null,
+    "x_api_function": null,
+    "coverage": "hand_service",
+    "notes": "via nomination_committees_sync in core/url_routes_generated, extensions/nominations, nomination"
+  },
+  {
+    "method": "GET",
+    "path": "/nomination/{congress}/{nominationNumber}/hearings",
+    "tags": [
+      "nomination"
+    ],
+    "x_entity": null,
+    "x_api_function": null,
+    "coverage": "hand_service",
+    "notes": "via nomination_hearings_sync in core/url_routes_generated, extensions/nominations, nomination"
+  },
+  {
+    "method": "GET",
+    "path": "/nomination/{congress}/{nominationNumber}/{ordinal}",
+    "tags": [
+      "nomination"
+    ],
+    "x_entity": null,
+    "x_api_function": null,
+    "coverage": "hand_service",
+    "notes": "hand.get_nominees on nomination"
+  },
+  {
+    "method": "GET",
+    "path": "/senate-communication",
+    "tags": [
+      "senate-communication"
+    ],
+    "x_entity": "SenateCommunication",
+    "x_api_function": "senate_communication_sync",
+    "coverage": "hand_service",
+    "notes": "annotated senate_communication_sync in core/search, core/url_routes_generated"
+  },
+  {
+    "method": "GET",
+    "path": "/senate-communication/{congress}",
+    "tags": [
+      "senate-communication"
+    ],
+    "x_entity": null,
+    "x_api_function": null,
+    "coverage": "hand_service",
+    "notes": "via senate_communication_congress_sync in core/search, core/url_routes_generated"
+  },
+  {
+    "method": "GET",
+    "path": "/senate-communication/{congress}/{communicationType}",
+    "tags": [
+      "senate-communication"
+    ],
+    "x_entity": null,
+    "x_api_function": null,
+    "coverage": "hand_service",
+    "notes": "via senate_communication_list_sync in core/search, core/url_routes_generated"
+  },
+  {
+    "method": "GET",
+    "path": "/senate-communication/{congress}/{communicationType}/{communicationNumber}",
+    "tags": [
+      "senate-communication"
+    ],
+    "x_entity": "SenateCommunication",
+    "x_api_function": "senate_communication_detail_sync",
+    "coverage": "hand_service",
+    "notes": "annotated senate_communication_detail_sync in core/url_routes_generated, senate_communication"
+  },
+  {
+    "method": "GET",
+    "path": "/summaries",
+    "tags": [
+      "summaries"
+    ],
+    "x_entity": "Summaries",
+    "x_api_function": "bill_summaries_all_sync",
+    "coverage": "hand_service",
+    "notes": "annotated bill_summaries_all_sync in core/search, core/url_routes_generated"
+  },
+  {
+    "method": "GET",
+    "path": "/summaries/{congress}",
+    "tags": [
+      "summaries"
+    ],
+    "x_entity": null,
+    "x_api_function": null,
+    "coverage": "hand_service",
+    "notes": "via bill_summaries_by_congress_sync in core/search, core/url_routes_generated"
+  },
+  {
+    "method": "GET",
+    "path": "/summaries/{congress}/{billType}",
+    "tags": [
+      "summaries"
+    ],
+    "x_entity": null,
+    "x_api_function": null,
+    "coverage": "hand_service",
+    "notes": "via bill_summaries_by_type_sync in core/search, core/url_routes_generated"
+  },
+  {
+    "method": "GET",
+    "path": "/treaty",
+    "tags": [
+      "treaty"
+    ],
+    "x_entity": "Treaty",
+    "x_api_function": "treaty_list_sync",
+    "coverage": "hand_service",
+    "notes": "annotated treaty_list_sync in core/search, core/url_routes_generated"
+  },
+  {
+    "method": "GET",
+    "path": "/treaty/{congress}",
+    "tags": [
+      "treaty"
+    ],
+    "x_entity": null,
+    "x_api_function": null,
+    "coverage": "hand_service",
+    "notes": "via treaty_list_by_congress_sync in core/search, core/url_routes_generated"
+  },
+  {
+    "method": "GET",
+    "path": "/treaty/{congress}/{treatyNumber}",
+    "tags": [
+      "treaty"
+    ],
+    "x_entity": "Treaty",
+    "x_api_function": "treaty_detail_sync",
+    "coverage": "hand_service",
+    "notes": "hand.get_actions on treaty"
+  },
+  {
+    "method": "GET",
+    "path": "/treaty/{congress}/{treatyNumber}/actions",
+    "tags": [
+      "treaty"
+    ],
+    "x_entity": null,
+    "x_api_function": null,
+    "coverage": "hand_service",
+    "notes": "hand.get_actions on treaty"
+  },
+  {
+    "method": "GET",
+    "path": "/treaty/{congress}/{treatyNumber}/committees",
+    "tags": [
+      "treaty"
+    ],
+    "x_entity": null,
+    "x_api_function": null,
+    "coverage": "hand_service",
+    "notes": "via treaty_committee_sync in core/url_routes_generated, extensions/treaties, treaty"
+  },
+  {
+    "method": "GET",
+    "path": "/treaty/{congress}/{treatyNumber}/{treatySuffix}",
+    "tags": [
+      "treaty"
+    ],
+    "x_entity": null,
+    "x_api_function": null,
+    "coverage": "hand_service",
+    "notes": "via treaty_details_sync in core/url_routes_generated, treaty"
+  },
+  {
+    "method": "GET",
+    "path": "/treaty/{congress}/{treatyNumber}/{treatySuffix}/actions",
+    "tags": [
+      "treaty"
+    ],
+    "x_entity": null,
+    "x_api_function": null,
+    "coverage": "hand_service",
+    "notes": "via treaty_actions_sync in core/url_routes_generated, extensions/treaties, treaty"
+  }
+]

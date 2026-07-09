@@ -1,0 +1,220 @@
+[project]
+name = "congressgov"
+version = "2.1.0"
+description = "Python SDK for the Congress.gov API — services, models, and generated HTTP client"
+readme = "README.md"
+license = "Apache-2.0"
+authors = [
+    {name = "ChristianMDevine", email = "ChristianMDevine@gmail.com"}
+]
+requires-python = ">=3.13,<4.0"
+classifiers = [
+    "Development Status :: 5 - Production/Stable",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: Apache Software License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.13",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+]
+keywords = ["congress", "congress.gov", "government", "api", "legislation"]
+dependencies = [
+    "attrs>=24.0.0",
+    "httpx>=0.28.1,<0.29.0",
+    "pydantic>=2.11.7,<3.0.0",
+    "python-dateutil>=2.9.0,<3.0.0",
+    "python-dotenv>=1.0.0,<2.0.0",
+]
+[project.optional-dependencies]
+cache = [
+    "redis>=6.4.0,<7.0.0",
+    "diskcache>=5.4.0,<6.0.0",
+    "sqlalchemy>=2.0.43,<3.0.0",
+]
+export = [
+    "pandas>=2.0.0,<3.0.0",
+    "openpyxl>=3.1.0,<4.0.0",
+    "pyarrow>=17.0.0,<19.0.0",
+]
+batch = [
+    "tqdm>=4.65.0,<5.0.0",
+    "psutil>=5.9.0,<6.0.0",
+]
+all = [
+    "redis>=6.4.0,<7.0.0",
+    "diskcache>=5.4.0,<6.0.0",
+    "sqlalchemy>=2.0.43,<3.0.0",
+    "pandas>=2.0.0,<3.0.0",
+    "openpyxl>=3.1.0,<4.0.0",
+    "pyarrow>=17.0.0,<19.0.0",
+    "tqdm>=4.65.0,<5.0.0",
+    "psutil>=5.9.0,<6.0.0",
+    "networkx>=3.2.0,<4.0.0; python_version != '3.14.1'",
+]
+dev = [
+    "mypy>=1.13.0",
+    "ruff>=0.9.0",
+    "pytest>=8.0.0",
+    "deptry>=0.23.0",
+]
+viz = [
+    "matplotlib>=3.7.0,<4.0.0",
+    "seaborn>=0.13.0,<1.0.0",
+]
+graph = [
+    "networkx>=3.2.0,<4.0.0; python_version != '3.14.1'",
+    "scipy>=1.11.0,<2.0.0",
+]
+codegen = [
+    "openapi-python-client>=0.25.3,<0.26.0",
+    "jinja2>=3.1.0",
+    "click>=8.1.0",
+    "pyyaml>=6.0",
+    "isort>=5.12.0",
+]
+
+[project.urls]
+Homepage = "https://github.com/CMD0112/congressgov-python"
+Repository = "https://github.com/CMD0112/congressgov-python"
+Documentation = "https://github.com/CMD0112/congressgov-python#documentation"
+
+[project.scripts]
+congressgov-store = "congressgov.services.core.workspace.__main__:main"
+
+[tool.poetry]
+package-mode = true
+packages = [
+    { include = "congressgov", from = "src" },
+    { include = "codegen", format = "sdist" },
+]
+
+[tool.pytest.ini_options]
+# Repo root: ``codegen`` package; ``src``: ``congressgov`` (also installed editable).
+pythonpath = ["src", "."]
+
+[tool.poetry.group.cache]
+optional = true
+
+[tool.poetry.group.cache.dependencies]
+redis = "^6.4.0"
+diskcache = "^5.4.0"
+sqlalchemy = "^2.0.43"
+
+[tool.poetry.group.export]
+optional = true
+
+[tool.poetry.group.export.dependencies]
+pandas = "^2.0.0"
+openpyxl = "^3.1.0"
+pyarrow = "^18.1.0"
+
+[tool.poetry.group.batch]
+optional = true
+
+[tool.poetry.group.batch.dependencies]
+tqdm = "^4.65.0"
+psutil = "^5.9.0"
+
+[tool.poetry.group.dev]
+optional = true
+
+[tool.poetry.group.dev.dependencies]
+mypy = "^1.13.0"
+ruff = "^0.9.0"
+pytest = "^8.0.0"
+deptry = "^0.23.0"
+ipykernel = "^7.2.0"
+
+[tool.poetry.group.viz]
+optional = true
+
+[tool.poetry.group.viz.dependencies]
+matplotlib = "^3.7.0"
+seaborn = "^0.13.0"
+
+[tool.poetry.group.graph]
+optional = true
+
+[tool.poetry.group.graph.dependencies]
+networkx = { version = "^3.2.0", python = "!=3.14.1" }
+scipy = "^1.11.0"
+
+[tool.poetry.group.codegen]
+optional = true
+
+[tool.poetry.group.codegen.dependencies]
+openapi-python-client = "^0.25.3"
+jinja2 = "^3.1.0"
+click = "^8.1.0"
+pyyaml = "^6.0"
+isort = "^5.12.0"
+
+[tool.codegen]
+spec = "codegen/config/openapi_spec.yaml"
+config = "codegen/config/generator_config.yaml"
+incremental = true
+
+[build-system]
+requires = ["poetry-core>=2.0.0"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.mypy]
+python_version = "3.13"
+exclude = ["src/congressgov/services/extensions/_template.py"]
+warn_return_any = true
+warn_unused_configs = true
+disallow_untyped_defs = false
+check_untyped_defs = true
+warn_redundant_casts = true
+warn_unused_ignores = true
+warn_no_return = true
+strict_optional = true
+show_error_codes = true
+show_column_numbers = true
+
+[[tool.mypy.overrides]]
+module = "congressgov.services.*"
+disallow_untyped_defs = true
+
+[[tool.mypy.overrides]]
+module = "congressgov._client.*"
+ignore_missing_imports = true
+
+[tool.ruff]
+line-length = 120
+target-version = "py313"
+extend-exclude = [
+    "src/congressgov/services/extensions/_template.py",
+    "*.ipynb",
+    "src/congressgov/_client",
+]
+
+[tool.ruff.lint]
+select = ["E4", "E7", "E9", "F"]
+ignore = ["E402"]
+
+[tool.ruff.lint.per-file-ignores]
+"src/congressgov/models/**" = ["F821"]
+"src/congressgov/services/extensions/url_follow.py" = ["F811"]
+"src/congressgov/services/extensions/async/url_follow.py" = ["F811"]
+"src/congressgov/services/export/database_exporter.py" = ["E721"]
+"src/congressgov/services/caching/backends/file.py" = ["E722"]
+"src/congressgov/services/caching/backends/redis.py" = ["E722"]
+"src/congressgov/services/core/search.py" = ["E722"]
+
+[tool.deptry]
+extend_exclude = ["codegen/data", "examples"]
+known_first_party = ["congressgov", "codegen"]
+pep621_dev_dependency_groups = ["dev"]
+
+[tool.deptry.package_module_name_map]
+redis = ["redis"]
+python-dateutil = ["dateutil"]
+python-dotenv = ["dotenv"]
+pyyaml = ["yaml"]
+openapi-python-client = ["openapi_python_client"]
+
+[tool.deptry.per_rule_ignores]
+# scipy: optional runtime accelerator picked up implicitly by networkx's
+# spring_layout (never imported directly in this codebase).
+DEP002 = ["openapi-python-client", "scipy"]
+DEP003 = ["pydantic_core", "numpy"]

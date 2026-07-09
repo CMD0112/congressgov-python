@@ -1,0 +1,808 @@
+# Entity Mappings Configuration
+# Defines how API entities map to model classes and service configurations
+
+entities:
+  # === BILL ENTITIES ===
+  bill:
+    model_name: Bill
+    collection_name: Bills
+    service_name: Bill
+    items_field: bills
+    module_path: congressgov.models.entities.bill
+    service_path: congressgov.services.bill
+    extension_path: congressgov.services.extensions.bill
+
+    # Field mappings for shorthand queries
+    field_mappings:
+      type:
+        enum: LegislationType
+        shorthand: true
+        variations: [ "hr", "s", "hjres", "sjres", "hconres", "sconres", "hres", "sres" ]
+      originChamber:
+        enum: Chamber
+        shorthand: true
+        variations: [ "house", "h", "senate", "s" ]
+
+    # Expansion mappings for related data
+    expansion_mappings:
+      actions:
+        endpoint: /bill/{congress}/{billType}/{billNumber}/actions
+        api_function: bill_actions_sync
+        model: Actions
+      amendments:
+        endpoint: /bill/{congress}/{billType}/{billNumber}/amendments
+        api_function: bill_amendments_sync
+        model: Amendments
+      committees:
+        endpoint: /bill/{congress}/{billType}/{billNumber}/committees
+        api_function: bill_committees_sync
+        model: Committees
+      cosponsors:
+        endpoint: /bill/{congress}/{billType}/{billNumber}/cosponsors
+        api_function: bill_cosponsors_sync
+        model: Cosponsors
+      relatedBills:
+        endpoint: /bill/{congress}/{billType}/{billNumber}/relatedbills
+        api_function: bill_relatedbills_sync
+        model: Bills
+      subjects:
+        endpoint: /bill/{congress}/{billType}/{billNumber}/subjects
+        api_function: bill_subjects_sync
+        model: Subject
+      summaries:
+        endpoint: /bill/{congress}/{billType}/{billNumber}/summaries
+        api_function: bill_summaries_sync
+        model: Summaries
+      textVersions:
+        endpoint: /bill/{congress}/{billType}/{billNumber}/text
+        api_function: bill_text_sync
+        model: TextVersions
+      titles:
+        endpoint: /bill/{congress}/{billType}/{billNumber}/titles
+        api_function: bill_titles_sync
+        model: Titles
+
+    # Parameter mappings for API calls
+    parameter_mappings:
+      congress: congress
+      bill_type: [ "bill_type", "type" ]
+      bill_number: [ "bill_number", "number" ]
+
+    service_codegen:
+      parse_api_envelope: true
+      universal_search_entity: bill
+      validation_functions:
+        - validate_congress
+        - validate_bill_type
+      registry_models:
+        - Actions
+        - Amendments
+        - Committees
+        - Cosponsors
+        - Subject
+        - Summaries
+        - TextVersions
+        - Titles
+
+    # Extension methods
+    extension_methods:
+    - name: enacted
+      filter: { isEnacted: true }
+      description: "Get bills that have been enacted into law"
+    - name: house_bills
+      filter: { originChamber: "House" }
+      description: "Get bills originating from the House"
+    - name: senate_bills
+      filter: { originChamber: "Senate" }
+      description: "Get bills originating from the Senate"
+    - name: by_type
+      param: bill_type
+      filter_field: type
+      description: "Filter bills by type (hr, s, etc.)"
+    - name: by_congress
+      param: congress
+      filter_field: congress
+      description: "Filter bills by Congress number"
+
+  # === AMENDMENT ENTITIES ===
+  amendment:
+    model_name: Amendment
+    collection_name: Amendments
+    service_name: Amendment
+    items_field: amendments
+    module_path: congressgov.models.entities.amendment
+    service_path: congressgov.services.amendment
+    extension_path: congressgov.services.extensions.amendments
+
+    field_mappings:
+      type:
+        enum: AmendmentType
+        shorthand: true
+        variations: [ "hamdt", "samdt" ]
+
+    expansion_mappings:
+      actions:
+        endpoint: /amendment/{congress}/{amendmentType}/{amendmentNumber}/actions
+        api_function: amendment_actions_sync
+        model: Actions
+      amendments:
+        endpoint: /amendment/{congress}/{amendmentType}/{amendmentNumber}/amendments
+        api_function: amendment_amendments_sync
+        model: Amendments
+      cosponsors:
+        endpoint: /amendment/{congress}/{amendmentType}/{amendmentNumber}/cosponsors
+        api_function: amendment_cosponsors_sync
+        model: Cosponsors
+      textVersions:
+        endpoint: /amendment/{congress}/{amendmentType}/{amendmentNumber}/text
+        api_function: amendment_text_sync
+        model: TextVersions
+
+    parameter_mappings:
+      congress: congress
+      amendment_type: [ "amendment_type", "type" ]
+      amendment_number: [ "amendment_number", "number" ]
+
+    service_codegen:
+      parse_api_envelope: true
+      universal_search_entity: amendment
+      validation_functions:
+        - validate_congress
+        - validate_amendment_type
+      registry_models:
+        - Actions
+        - Cosponsors
+        - TextVersions
+
+    extension_methods:
+    - name: house_amendments
+      filter: { type: "hamdt" }
+      description: "Get House amendments"
+    - name: senate_amendments
+      filter: { type: "samdt" }
+      description: "Get Senate amendments"
+
+  # === MEMBER ENTITIES ===
+  member:
+    model_name: Member
+    collection_name: Members
+    service_name: Member
+    items_field: members
+    module_path: congressgov.models.entities.member
+    service_path: congressgov.services.member
+    extension_path: congressgov.services.extensions.members
+
+    field_mappings:
+      state:
+        enum: StateCode
+        shorthand: true
+      party:
+        enum: PartyCode
+        shorthand: true
+      chamber:
+        enum: Chamber
+        shorthand: true
+
+    expansion_mappings:
+      sponsoredLegislation:
+        endpoint: /member/{bioguideId}/sponsored-legislation
+        api_function: member_sponsorship_list_sync
+        model: SponsoredLegislation
+      cosponsoredLegislation:
+        endpoint: /member/{bioguideId}/cosponsored-legislation
+        api_function: member_cosponsorship_list_sync
+        model: CosponsoredLegislation
+
+    parameter_mappings:
+      bioguide_id: ["bioguideId", "bioguide_id"]
+      state: state
+      district: district
+
+    service_codegen:
+      parse_api_envelope: true
+      universal_search_entity: member
+      validation_functions:
+        - validate_bioguide_id
+
+    extension_methods:
+    - name: by_state
+      param: state
+      filter_field: state
+      description: "Filter members by state"
+    - name: by_party
+      param: party
+      filter_field: party
+      description: "Filter members by party"
+    - name: by_chamber
+      param: chamber
+      filter_field: chamber
+      description: "Filter members by chamber"
+    - name: senators
+      filter: { chamber: "Senate" }
+      description: "Get all senators"
+    - name: representatives
+      filter: { chamber: "House" }
+      description: "Get all representatives"
+
+  # === COMMITTEE ENTITIES ===
+  committee:
+    model_name: Committee
+    collection_name: Committees
+    service_name: Committee
+    items_field: committees
+    module_path: congressgov.models.committees.committee
+    service_path: congressgov.services.committee
+    extension_path: congressgov.services.extensions.committees
+
+    field_mappings:
+      chamber:
+        enum: Chamber
+        shorthand: true
+
+    expansion_mappings:
+      bills:
+        endpoint: /committee/{chamber}/{committeeCode}/bills
+        api_function: committee_bills_list_sync
+        model: Bills
+      reports:
+        endpoint: /committee/{chamber}/{committeeCode}/reports
+        api_function: committee_reports_by_committee_sync
+        model: CommitteeReports
+      houseCommunications:
+        endpoint: /committee/{chamber}/{committeeCode}/house-communication
+        api_function: house_communications_by_committee_sync
+        model: HouseCommunications
+      senateCommunications:
+        endpoint: /committee/{chamber}/{committeeCode}/senate-communication
+        api_function: senate_communications_by_committee_sync
+        model: SenateCommunications
+      nominations:
+        endpoint: /committee/{chamber}/{committeeCode}/nominations
+        api_function: nomination_by_committee_sync
+        model: Nominations
+
+    service_codegen:
+      parse_api_envelope: true
+      universal_search_entity: committee
+      validation_functions:
+        - validate_chamber
+        - validate_committee_code
+      registry_models:
+        - CommitteeReports
+        - HouseCommunications
+        - SenateCommunications
+        - Bills
+        - Nominations
+
+    parameter_mappings:
+      chamber: chamber
+      committee_code: committee_code
+
+    extension_methods:
+    - name: by_chamber
+      param: chamber
+      filter_field: chamber
+      description: "Filter committees by chamber"
+    - name: house_committees
+      filter: { chamber: "House" }
+      description: "Get House committees"
+    - name: senate_committees
+      filter: { chamber: "Senate" }
+      description: "Get Senate committees"
+
+  # === HEARING ENTITIES (tier-2) ===
+  hearing:
+    model_name: Hearing
+    collection_name: Hearings
+    service_name: Hearing
+    items_field: hearings
+    module_path: congressgov.models.documents.hearing
+    service_path: congressgov.services.hearing
+    extension_path: congressgov.services.extensions.hearings
+
+    field_mappings:
+      chamber:
+        enum: Chamber
+        shorthand: true
+
+    parameter_mappings:
+      congress: congress
+      chamber: chamber
+      jacket_number: [ "jacket_number", "jacketNumber" ]
+
+    service_codegen:
+      parse_api_envelope: true
+      universal_search_entity: hearing
+      validation_functions:
+        - validate_congress
+        - validate_chamber
+
+  # === NOMINATION ENTITIES (tier-2) ===
+  nomination:
+    model_name: Nomination
+    collection_name: Nominations
+    service_name: Nomination
+    items_field: nominations
+    module_path: congressgov.models.nominations.nomination
+    service_path: congressgov.services.nomination
+    extension_path: congressgov.services.extensions.nominations
+
+    expansion_mappings:
+      actions:
+        endpoint: /nomination/{congress}/{nominationNumber}/actions
+        api_function: nomination_actions_sync
+        model: Actions
+      committees:
+        endpoint: /nomination/{congress}/{nominationNumber}/committees
+        api_function: nomination_committees_sync
+        model: Committees
+      hearings:
+        endpoint: /nomination/{congress}/{nominationNumber}/hearings
+        api_function: nomination_hearings_sync
+        model: Hearings
+
+    parameter_mappings:
+      congress: congress
+      nomination_number: [ "nomination_number", "nominationNumber", "number" ]
+
+    service_codegen:
+      parse_api_envelope: true
+      universal_search_entity: nomination
+      validation_functions:
+        - validate_congress
+      registry_models:
+        - Actions
+        - Committees
+        - Hearings
+
+  # === TREATY ENTITIES (tier-2) ===
+  treaty:
+    model_name: Treaty
+    collection_name: Treaties
+    service_name: Treaty
+    items_field: treaties
+    module_path: congressgov.models.entities.treaty
+    service_path: congressgov.services.treaty
+    extension_path: congressgov.services.extensions.treaties
+
+    expansion_mappings:
+      actions:
+        endpoint: /treaty/{congress}/{treatyNumber}/actions
+        api_function: treaty_actions_sync
+        model: Actions
+      committee:
+        endpoint: /treaty/{congress}/{treatyNumber}/committees
+        api_function: treaty_committee_sync
+        model: Committees
+
+    parameter_mappings:
+      congress: congress
+      treaty_number: [ "treaty_number", "treatyNumber", "number" ]
+
+    service_codegen:
+      parse_api_envelope: true
+      universal_search_entity: treaty
+      validation_functions:
+        - validate_congress
+      registry_models:
+        - Actions
+        - Committees
+
+  # === HOUSE VOTE ENTITIES (tier-3) ===
+  house_vote:
+    model_name: HouseVote
+    collection_name: HouseVotes
+    service_name: HouseVote
+    items_field: houseRollCallVotes
+    module_path: congressgov.models.communications.house_vote
+    service_path: congressgov.services.house_vote
+    extension_path: congressgov.services.extensions.house_votes
+
+    parameter_mappings:
+      congress: congress
+      session: session
+      vote_number: [ "vote_number", "voteNumber" ]
+
+    service_codegen:
+      parse_api_envelope: true
+      universal_search_entity: house-vote
+      validation_functions:
+        - validate_congress
+
+  # === SUMMARIES ENTITIES (tier-3b, search-only) ===
+  summaries:
+    model_name: Summaries
+    collection_name: Summaries
+    service_name: Summaries
+    items_field: summaries
+    module_path: congressgov.models.entities.bill
+    service_path: congressgov.services.summaries
+    extension_path: congressgov.services.extensions.summaries
+
+    parameter_mappings:
+      offset: offset
+      limit: limit
+      congress: congress
+
+    service_codegen:
+      universal_search_entity: summary
+
+  # === CRS REPORT ENTITIES (tier-3b) ===
+  crs_report:
+    model_name: CRSReport
+    collection_name: CRSReports
+    service_name: CRSReport
+    items_field: crsReports
+    module_path: congressgov.models.documents.crs_reports
+    service_path: congressgov.services.crsreport
+
+    parameter_mappings:
+      report_number: [ "report_number", "reportNumber" ]
+
+    service_codegen:
+      parse_api_envelope: true
+      universal_search_entity: crs-report
+
+  # === HOUSE COMMUNICATION ENTITIES (tier-3b) ===
+  house_communication:
+    model_name: HouseCommunication
+    collection_name: HouseCommunications
+    service_name: HouseCommunication
+    items_field: houseCommunications
+    module_path: congressgov.models.communications.house_communication
+    service_path: congressgov.services.house_communication
+    extension_path: congressgov.services.extensions.house_communications
+
+    parameter_mappings:
+      congress: congress
+      communication_type: [ "communication_type", "communicationType" ]
+      communication_number: [ "communication_number", "communicationNumber" ]
+
+    service_codegen:
+      parse_api_envelope: true
+      universal_search_entity: house-communication
+      validation_functions:
+        - validate_congress
+
+  # === SENATE COMMUNICATION ENTITIES (tier-3b) ===
+  senate_communication:
+    model_name: SenateCommunication
+    collection_name: SenateCommunications
+    service_name: SenateCommunication
+    items_field: senateCommunications
+    module_path: congressgov.models.communications.senate_communication
+    service_path: congressgov.services.senate_communication
+    extension_path: congressgov.services.extensions.senate_communications
+
+    parameter_mappings:
+      congress: congress
+      communication_type: [ "communication_type", "communicationType" ]
+      communication_number: [ "communication_number", "communicationNumber" ]
+
+    service_codegen:
+      parse_api_envelope: true
+      universal_search_entity: senate-communication
+      validation_functions:
+        - validate_congress
+
+  # === COMMITTEE MEETING ENTITIES (tier-4) ===
+  committee_meeting:
+    model_name: CommitteeMeeting
+    collection_name: CommitteeMeetings
+    service_name: CommitteeMeeting
+    items_field: committeeMeetings
+    module_path: congressgov.models.meetings.meeting
+    service_path: congressgov.services.committee_meeting
+    extension_path: congressgov.services.extensions.committee_meetings
+
+    field_mappings:
+      chamber:
+        enum: Chamber
+        shorthand: true
+
+    parameter_mappings:
+      congress: congress
+      chamber: chamber
+      event_id: [ "event_id", "eventId" ]
+
+    service_codegen:
+      parse_api_envelope: true
+      universal_search_entity: committee-meeting
+      validation_functions:
+        - validate_congress
+        - validate_chamber
+
+  # === COMMITTEE REPORT ENTITIES (tier-4) ===
+  committee_report:
+    model_name: CommitteeReport
+    collection_name: CommitteeReports
+    service_name: CommitteeReport
+    items_field: committeeReports
+    module_path: congressgov.models.documents.committee_report
+    service_path: congressgov.services.committee_report
+    extension_path: congressgov.services.extensions.committee_reports
+
+    expansion_mappings:
+      text:
+        endpoint: /committee-report/{congress}/{reportType}/{reportNumber}/text
+        api_function: committee_report_id_text_sync
+        model: CommitteeReportTexts
+
+    parameter_mappings:
+      congress: congress
+      report_type: [ "report_type", "reportType", "type" ]
+      report_number: [ "report_number", "reportNumber", "number" ]
+
+    service_codegen:
+      parse_api_envelope: true
+      universal_search_entity: committee-report
+      validation_functions:
+        - validate_congress
+      registry_models:
+        - CommitteeReportTexts
+
+  # === COMMITTEE PRINT ENTITIES (tier-4) ===
+  committee_print:
+    model_name: CommitteePrint
+    collection_name: CommitteePrints
+    service_name: CommitteePrint
+    items_field: committeePrints
+    module_path: congressgov.models.documents.committee_print
+    service_path: congressgov.services.committee_print
+    extension_path: congressgov.services.extensions.committee_prints
+
+    expansion_mappings:
+      text:
+        endpoint: /committee-print/{congress}/{chamber}/{jacketNumber}/text
+        api_function: committee_print_text_sync
+        model: CommitteePrintTexts
+
+    field_mappings:
+      chamber:
+        enum: Chamber
+        shorthand: true
+
+    parameter_mappings:
+      congress: congress
+      chamber: chamber
+      jacket_number: [ "jacket_number", "jacketNumber" ]
+
+    service_codegen:
+      parse_api_envelope: true
+      universal_search_entity: committee-print
+      validation_functions:
+        - validate_congress
+        - validate_chamber
+      registry_models:
+        - CommitteePrintTexts
+
+  # === CONGRESS ENTITIES (tier-5) ===
+  congress:
+    model_name: Congress
+    collection_name: Congresses
+    service_name: Congress
+    items_field: congresses
+    module_path: congressgov.models.entities.congress
+    service_path: congressgov.services.congress
+
+    parameter_mappings:
+      congress: congress
+
+    service_codegen:
+      parse_api_envelope: true
+      validation_functions:
+        - validate_congress
+
+  # === HOUSE REQUIREMENT ENTITIES (tier-5) ===
+  house_requirement:
+    model_name: HouseRequirement
+    collection_name: HouseRequirements
+    service_name: HouseRequirement
+    items_field: houseRequirements
+    module_path: congressgov.models.communications.house_requirement
+    service_path: congressgov.services.house_requirement
+
+    parameter_mappings:
+      requirement_number: [ "requirement_number", "requirementNumber" ]
+
+    service_codegen:
+      parse_api_envelope: true
+      universal_search_entity: house-requirement
+
+  # === CONGRESSIONAL RECORD ENTITIES (tier-5, search-only) ===
+  congressional_record:
+    model_name: CongressionalRecord
+    collection_name: DailyCongressionalRecord
+    service_name: CongressionalRecord
+    items_field: Results
+    module_path: congressgov.models.documents.congressional_record
+    service_path: congressgov.services.congressional_record
+
+    service_codegen:
+      universal_search_entity: congressional-record
+
+  # === DAILY CONGRESSIONAL RECORD ENTITIES (tier-6) ===
+  daily_congressional_record:
+    model_name: DailyCongressionalRecord
+    collection_name: DailyCongressionalRecord
+    service_name: DailyCongressionalRecord
+    items_field: Results
+    module_path: congressgov.models.documents.congressional_record
+    service_path: congressgov.services.daily_congressional_record
+
+    service_codegen:
+      parse_api_envelope: true
+
+  # === BOUND CONGRESSIONAL RECORD ENTITIES (tier-5, search-only) ===
+  bound_congressional_record:
+    model_name: BoundCongressionalRecord
+    collection_name: BoundCongressionalRecords
+    service_name: BoundCongressionalRecord
+    items_field: boundCongressionalRecord
+    module_path: congressgov.models.documents.bound_congressional_record
+    service_path: congressgov.services.bound_congressional_record
+
+    service_codegen:
+      universal_search_entity: bound-congressional-record
+
+# === MODEL CATEGORIES ===
+model_categories:
+  entities:
+  - bill
+  - amendment
+  - member
+  - treaty
+  - congress
+  - sponsor
+  - cosponsor
+
+  actions:
+  - action
+  - vote
+  - calendar
+
+  committees:
+  - committee
+
+  communications:
+  - house_communication
+  - senate_communication
+  - house_requirement
+  - house_vote
+
+  documents:
+  - hearing
+  - committee_report
+  - committee_print
+  - crs_report
+  - congressional_record
+  - daily_congressional_record
+  - bound_congressional_record
+
+  meetings:
+  - committee_meeting
+
+  nominations:
+  - nomination
+
+  core:
+  - title
+  - law
+  - subject
+  - summary
+  - cbo_cost_estimate
+  - note
+
+  base:
+  - model
+  - pagination
+  - api_envelope
+  - count_ref
+  - url
+  - policy_area
+  - references
+
+# === API FUNCTION MAPPINGS ===
+api_function_mappings:
+  bill:
+    list_all: bill_list_all_sync
+    list_by_congress: bill_list_by_congress_sync
+    list_by_type: bill_list_by_type_sync
+    details: bill_details_sync
+    actions: bill_actions_sync
+    amendments: bill_amendments_sync
+    committees: bill_committees_sync
+    cosponsors: bill_cosponsors_sync
+    related_bills: bill_relatedbills_sync
+    subjects: bill_subjects_sync
+    summaries: bill_summaries_sync
+    text: bill_text_sync
+    titles: bill_titles_sync
+
+  amendment:
+    list: amendment_list_sync
+    details: amendment_details_sync
+    actions: amendment_actions_sync
+    amendments: amendment_amendments_sync
+    cosponsors: amendment_cosponsors_sync
+    text: amendment_text_sync
+
+  member:
+    list: member_list_sync
+    details: member_details_sync
+    sponsored: member_sponsorship_list_sync
+    cosponsored: member_cosponsorship_list_sync
+
+  committee:
+    list: committee_list_sync
+    details: committee_details_sync
+    bills: committee_bills_list_sync
+    meetings: committee_meeting_list_sync
+    reports: committee_reports_sync
+
+  hearing:
+    list: hearing_list_sync
+    details: hearing_detail_sync
+
+  nomination:
+    list: nomination_list_sync
+    details: nomination_detail_sync
+    actions: nomination_actions_sync
+    committees: nomination_committees_sync
+    hearings: nomination_hearings_sync
+
+  treaty:
+    list: treaty_list_sync
+    details: treaty_detail_sync
+    actions: treaty_actions_sync
+    committee: treaty_committee_sync
+
+  house_vote:
+    list: house_vote_list_sync
+    details: house_vote_details_sync
+
+  summaries:
+    list: bill_summaries_all_sync
+
+  crs_report:
+    list: crsreport_sync
+    details: crsreport_details_sync
+
+  house_communication:
+    list: house_communication_sync
+    details: house_communication_detail_sync
+
+  senate_communication:
+    list: senate_communication_sync
+    details: senate_communication_detail_sync
+
+  committee_meeting:
+    list: committee_meeting_list_sync
+    details: committee_meeting_detail_sync
+
+  committee_report:
+    list: committee_reports_sync
+    details: committee_report_details_sync
+
+  committee_print:
+    list: committee_print_list_sync
+    details: committee_print_detail_sync
+
+  congress:
+    list: congress_list_sync
+    details: congress_details_sync
+
+  house_requirement:
+    list: house_requirement_sync
+    details: house_requirement_detail_sync
+
+  congressional_record:
+    list: congressional_record_list_sync
+
+  daily_congressional_record:
+    list: daily_congressional_record_list_sync
+
+  bound_congressional_record:
+    list: bound_congressional_record_list_sync
+
+

@@ -1,0 +1,153 @@
+# GENERATED: Async middleware review sidecar (regenerate with poetry run generate-middleware)
+# Hand-maintained congressgov/services/async_api/{{ entity_path }}.py stays protected.
+
+from __future__ import annotations
+{% if service_hooks.get('parse_api_envelope') %}
+import json
+{% endif %}
+from typing import Any, Optional
+from congressgov.services.core.async_api_service import AsyncApiService
+from congressgov.services.core.model_registry import ModelRegistry
+{% if service_hooks.get('validation_functions') %}
+from congressgov.services.core.validation import {{ service_hooks.validation_functions|join(', ') }}
+{% endif %}
+from congressgov._client.api.{{ entity_path }} import (
+{% for func in api_functions %}
+    {{ func }},
+{% endfor %}
+)
+
+from congressgov.models.base.model import ApiEnvelope
+
+{{ model_name }}Model = ModelRegistry.get_model("{{ model_name }}")
+{% if collection_name %}{{ collection_name }}Model = ModelRegistry.get_model("{{ collection_name }}")
+{% endif %}
+{% for extra_model in registry_models %}
+{{ extra_model }}Model = ModelRegistry.get_model("{{ extra_model }}")
+{% endfor %}
+
+{% if async_mappings_dict_name and expansion_mappings %}
+{{ async_mappings_dict_name }} = {{ mappings_dict_name }}
+{% endif %}
+
+__all__ = ['{{ async_service_name }}'{% if async_mappings_dict_name and expansion_mappings %}, '{{ async_mappings_dict_name }}'{% endif %}]
+
+
+class {{ async_service_name }}(AsyncApiService):
+    """Async {{ entity_name }} service (generated sidecar; compare with hand async_api/{{ entity_path }}.py)."""
+
+    def __init__(self, client: Any = None):
+        self.client = client
+        self._last_result = None
+
+{% if primary_endpoint %}
+    async def get(
+        self,
+        *,
+        client: Any = None,
+        {{ primary_endpoint_params }},
+        format_: Optional[str] = None,
+    ) -> {{ model_name }}Model:
+        {% if service_hooks.get('validation_functions') %}
+        {% for fn in service_hooks.validation_functions %}
+        {{ fn }}({{ primary_endpoint_params_list[loop.index0] if loop.index0 < primary_endpoint_params_list|length else 'value' }})
+        {% endfor %}
+        {% endif %}
+        resolved_client = await AsyncApiService._resolve_client(self, client)
+        {% if service_hooks.get('parse_api_envelope') %}
+        response = await {{ primary_endpoint_api_function }}(
+            client=resolved_client,
+            {% for param in primary_endpoint_params_list %}
+            {{ param }}={{ param }},
+            {% endfor %}
+            format_=format_,
+        )
+        response_json = json.loads(response.content)
+        api_envelope = ApiEnvelope.model_validate(response_json)
+        result = {{ model_name }}Model.model_validate(api_envelope.data)
+        result.client = resolved_client
+        self._last_result = result
+        return result
+        {% else %}
+        response = await {{ primary_endpoint_api_function }}(
+            client=resolved_client,
+            {% for param in primary_endpoint_params_list %}
+            {{ param }}={{ param }},
+            {% endfor %}
+            format_=format_,
+        )
+        if response.parsed:
+            entity_data = response.parsed
+            if isinstance(entity_data, dict):
+                entity_data = entity_data.get("{{ entity_name|lower }}", entity_data)
+            result = {{ model_name }}Model.model_validate(entity_data)
+            result.client = resolved_client
+            self._last_result = result
+            return result
+        raise ValueError(f"No data returned for {{ entity_name|lower }}")
+        {% endif %}
+
+{% endif %}
+{% if search_endpoint %}
+    async def search(
+        self,
+        *,
+        client: Any = None{% if search_endpoint_params_list %},
+        {{ search_endpoint_params }}{% endif %},
+        limit: Optional[int] = None,
+        offset: Optional[int] = None,
+        format_: Optional[str] = None,
+    ) -> {{ collection_name or (model_name + 's') }}Model:
+        {% if service_hooks.get('universal_search_entity') %}
+        from congressgov.services.core.search import search_async as universal_search
+
+        return await universal_search(
+            '{{ service_hooks.universal_search_entity }}',
+            self,
+            client=client,
+            {% for param in search_endpoint_params_list %}
+            {{ param }}={{ param }},
+            {% endfor %}
+            format_=format_,
+            offset=offset,
+            limit=limit,
+        )
+        {% elif service_hooks.get('parse_api_envelope') %}
+        resolved_client = await AsyncApiService._resolve_client(self, client)
+        response = await {{ search_endpoint_api_function }}(
+            client=resolved_client,
+            {% for param in search_endpoint_params_list %}
+            {{ param }}={{ param }},
+            {% endfor %}
+            format_=format_,
+            offset=offset,
+            limit=limit,
+        )
+        response_json = json.loads(response.content)
+        api_envelope = ApiEnvelope.model_validate(response_json)
+        return {{ collection_name or (model_name + 's') }}Model.model_validate(api_envelope.data)
+        {% else %}
+        resolved_client = await AsyncApiService._resolve_client(self, client)
+        response = await {{ search_endpoint_api_function }}(
+            client=resolved_client,
+            {% for param in search_endpoint_params_list %}
+            {{ param }}={{ param }},
+            {% endfor %}
+            format_=format_,
+            offset=offset,
+            limit=limit,
+        )
+        if response.parsed:
+            search_data = response.parsed
+            if isinstance(search_data, dict):
+                collection_data = search_data.get("{{ entity_name|lower }}s", search_data)
+            else:
+                collection_data = search_data
+            result = {{ collection_name or (model_name + 's') }}Model.model_validate(collection_data)
+            result.client = resolved_client
+            self._last_result = result
+            return result
+        raise ValueError(f"No search results returned for {{ entity_name|lower }}s")
+        {% endif %}
+
+{% endif %}

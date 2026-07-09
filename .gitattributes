@@ -1,0 +1,15 @@
+# Normalize line endings to LF in the repository regardless of the
+# checkout platform, so diffs stay clean across Windows/macOS/Linux.
+* text=auto eol=lf
+
+# Diff notebooks by content, not raw JSON (requires nbdime/nbstripout
+# style tooling to be genuinely useful, but avoids treating them as binary).
+*.ipynb text eol=lf
+
+# Explicitly binary
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.ico binary
+*.whl binary

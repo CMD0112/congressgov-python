@@ -1,0 +1,34 @@
+"""Contains endpoint functions for accessing the API (compat re-exports)."""
+# isort: skip_file
+
+from .get_daily_congressional_record_volume_number_issue_number_articles import sync_detailed as daily_congressional_record_list_by_article_sync
+from .get_daily_congressional_record_volume_number_issue_number import sync_detailed as daily_congressional_record_list_by_volume_and_issue_sync
+from .get_daily_congressional_record_volume_number import sync_detailed as daily_congressional_record_list_by_volume_sync
+from .get_daily_congressional_record import sync_detailed as daily_congressional_record_list_sync
+
+from .get_daily_congressional_record_volume_number_issue_number_articles import asyncio_detailed as daily_congressional_record_list_by_article_async
+from .get_daily_congressional_record_volume_number_issue_number import asyncio_detailed as daily_congressional_record_list_by_volume_and_issue_async
+from .get_daily_congressional_record_volume_number import asyncio_detailed as daily_congressional_record_list_by_volume_async
+from .get_daily_congressional_record import asyncio_detailed as daily_congressional_record_list_async
+
+# Backward compatibility aliases (without _sync suffix)
+daily_congressional_record_list_by_article = daily_congressional_record_list_by_article_sync
+daily_congressional_record_list_by_volume_and_issue = daily_congressional_record_list_by_volume_and_issue_sync
+daily_congressional_record_list_by_volume = daily_congressional_record_list_by_volume_sync
+daily_congressional_record_list = daily_congressional_record_list_sync
+
+__all__ = [
+    "daily_congressional_record_list_by_article_sync",
+    "daily_congressional_record_list_by_volume_and_issue_sync",
+    "daily_congressional_record_list_by_volume_sync",
+    "daily_congressional_record_list_sync",
+    "daily_congressional_record_list_by_article_async",
+    "daily_congressional_record_list_by_volume_and_issue_async",
+    "daily_congressional_record_list_by_volume_async",
+    "daily_congressional_record_list_async",
+    "daily_congressional_record_list_by_article",
+    "daily_congressional_record_list_by_volume_and_issue",
+    "daily_congressional_record_list_by_volume",
+    "daily_congressional_record_list",
+]
+

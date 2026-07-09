@@ -1,0 +1,34 @@
+"""Contains endpoint functions for accessing the API (compat re-exports)."""
+# isort: skip_file
+
+from .get_bound_congressional_record_year_month_day import sync_detailed as bound_congressional_record_list_by_year_and_month_and_day_sync
+from .get_bound_congressional_record_year_month import sync_detailed as bound_congressional_record_list_by_year_and_month_sync
+from .get_bound_congressional_record_year import sync_detailed as bound_congressional_record_list_by_year_sync
+from .get_bound_congressional_record import sync_detailed as bound_congressional_record_list_sync
+
+from .get_bound_congressional_record_year_month_day import asyncio_detailed as bound_congressional_record_list_by_year_and_month_and_day_async
+from .get_bound_congressional_record_year_month import asyncio_detailed as bound_congressional_record_list_by_year_and_month_async
+from .get_bound_congressional_record_year import asyncio_detailed as bound_congressional_record_list_by_year_async
+from .get_bound_congressional_record import asyncio_detailed as bound_congressional_record_list_async
+
+# Backward compatibility aliases (without _sync suffix)
+bound_congressional_record_list_by_year_and_month_and_day = bound_congressional_record_list_by_year_and_month_and_day_sync
+bound_congressional_record_list_by_year_and_month = bound_congressional_record_list_by_year_and_month_sync
+bound_congressional_record_list_by_year = bound_congressional_record_list_by_year_sync
+bound_congressional_record_list = bound_congressional_record_list_sync
+
+__all__ = [
+    "bound_congressional_record_list_by_year_and_month_and_day_sync",
+    "bound_congressional_record_list_by_year_and_month_sync",
+    "bound_congressional_record_list_by_year_sync",
+    "bound_congressional_record_list_sync",
+    "bound_congressional_record_list_by_year_and_month_and_day_async",
+    "bound_congressional_record_list_by_year_and_month_async",
+    "bound_congressional_record_list_by_year_async",
+    "bound_congressional_record_list_async",
+    "bound_congressional_record_list_by_year_and_month_and_day",
+    "bound_congressional_record_list_by_year_and_month",
+    "bound_congressional_record_list_by_year",
+    "bound_congressional_record_list",
+]
+
